@@ -1,2 +1,3 @@
 # hubot-adventure
-Interactive fiction action for your Hubot
+
+_Interactive fiction engine for your Hubot_
