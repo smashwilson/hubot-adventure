@@ -1,0 +1,38 @@
+{
+  "name": "hubot-adventure",
+  "version": "0.0.1",
+  "description": "Chat-programmed, chat-driven interactive fiction engine for your Hubot",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "npm run lint && mocha",
+    "lint": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smashwilson/hubot-adventure.git"
+  },
+  "keywords": [
+    "hubot",
+    "interactive",
+    "fiction"
+  ],
+  "author": "Ash Wilson <smashwilson@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/smashwilson/hubot-adventure/issues"
+  },
+  "homepage": "https://github.com/smashwilson/hubot-adventure#readme",
+  "devDependencies": {
+    "chai": "4.1.2",
+    "chai-as-promised": "7.1.1",
+    "hubot-test-helper": "1.8.1",
+    "mocha": "4.0.1",
+    "standard": "10.0.3"
+  },
+  "dependencies": {
+    "pegjs": "^0.10.0"
+  }
+}
