@@ -20,5 +20,16 @@ describe('Gnomish expressions', function () {
             (block (exprlist))))
       `)
     })
+
+    it('parses an if expression with an else clause', function () {
+      const node = parse('if {false} then {12} else {42}')
+      assertSexp(node.sexp(), `
+        (exprlist
+          (if
+            (block (exprlist (var false)))
+            (block (exprlist (12)))
+            (block (exprlist (42)))))
+      `)
+    })
   })
 })
