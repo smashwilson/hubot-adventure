@@ -17,6 +17,11 @@ class Visitor {
     this.visit(node.getElse())
   }
 
+  visitWhile (node) {
+    this.visit(node.getCondition())
+    this.visit(node.getAction())
+  }
+
   visitBlock (node) {
     for (const arg of node.getArgs()) {
       this.visit(arg)

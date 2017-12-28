@@ -1,7 +1,11 @@
 // PEG grammer for the Gnomish language
 
 {
-  const {ExprListNode, IfNode, IntNode, RealNode, StringNode, BlockNode, ArgNode, VarNode} = require('./ast')
+  const {
+    ExprListNode,
+    IfNode, WhileNode,
+    IntNode, RealNode, StringNode, BlockNode, ArgNode, VarNode
+  } = require('./ast')
 }
 
 // Expressions ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -12,7 +16,12 @@ exprlist
 
 expr "expression"
   = if
+  / while
   / literal
+
+while
+  = 'while' _ condition:block _ 'do' _ action:block
+    { return new WhileNode({condition, action}) }
 
 if
   = 'if' _ condition:block _ 'then' _ thenb:block elseb:( _ 'else' _ e:block { return e } )?

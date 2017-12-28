@@ -32,4 +32,16 @@ describe('Gnomish expressions', function () {
       `)
     })
   })
+
+  describe('while', function () {
+    it('parses a while loop', function () {
+      const node = parse('while {true} do {something}')
+      assertSexp(node.sexp(), `
+        (exprlist
+          (while
+            (block (exprlist (var true)))
+            (block (exprlist (var something)))))
+      `)
+    })
+  })
 })

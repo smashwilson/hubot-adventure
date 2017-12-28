@@ -27,6 +27,14 @@ class SexpVisitor extends Visitor {
     this.result += ')'
   }
 
+  visitWhile (node) {
+    this.result += '(while '
+    this.visit(node.getCondition())
+    this.result += ' '
+    this.visit(node.getAction())
+    this.result += ')'
+  }
+
   visitBlock (node) {
     this.result += '(block'
     for (const arg of node.getArgs()) {

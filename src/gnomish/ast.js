@@ -30,6 +30,21 @@ class IfNode {
   }
 }
 
+class WhileNode {
+  constructor ({condition, action}) {
+    this.condition = condition
+    this.action = action
+  }
+
+  getCondition () { return this.condition }
+
+  getAction () { return this.action }
+
+  visitBy (visitor) {
+    return visitor.visitWhile(this)
+  }
+}
+
 class BlockNode {
   constructor ({args, body}) {
     this.args = args || []
@@ -110,6 +125,7 @@ class VarNode {
 module.exports = {
   ExprListNode,
   IfNode,
+  WhileNode,
   BlockNode,
   ArgNode,
   IntNode,
