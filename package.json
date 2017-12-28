@@ -7,7 +7,9 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "npm run lint && mocha",
+    "prepublish": "npm run peg",
+    "test": "npm run lint && npm run peg && mocha --recursive",
+    "peg": "pegjs src/gnomish/gnomish.pegjs",
     "lint": "standard"
   },
   "repository": {
