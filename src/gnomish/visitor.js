@@ -52,6 +52,12 @@ class Visitor {
   visitString (node) {}
 
   visitVar (node) {}
+
+  visitType (node) {
+    for (const param of node.getParams()) {
+      this.visit(param)
+    }
+  }
 }
 
 module.exports = {Visitor}

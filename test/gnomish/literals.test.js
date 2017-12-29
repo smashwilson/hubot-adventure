@@ -78,7 +78,7 @@ describe('Gnomish literals', function () {
 
     it('parses an empty block that accepts variables', function () {
       const root = parse('{ x: Int, y: Int | }')
-      assert.equal(root.sexp(), '(exprlist (block (arg x : (var Int)) (arg y : (var Int)) (exprlist)))')
+      assert.equal(root.sexp(), '(exprlist (block (arg x : (type Int)) (arg y : (type Int)) (exprlist)))')
     })
   })
 })

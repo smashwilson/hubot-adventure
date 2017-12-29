@@ -96,6 +96,17 @@ class SexpVisitor extends Visitor {
   visitVar (node) {
     this.result += `(var ${node.name})`
   }
+
+  visitType (node) {
+    this.result += `(type ${node.getName()}`
+    for (const param of node.getParams()) {
+      this.result += ' '
+      this.visit(param)
+    }
+    if (node.isOptional()) this.result += '?'
+    if (node.isRepeatable()) this.result += '*'
+    this.result += ')'
+  }
 }
 
 module.exports = {SexpVisitor}

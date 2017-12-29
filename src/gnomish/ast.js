@@ -155,6 +155,27 @@ class VarNode {
   }
 }
 
+class TypeNode {
+  constructor ({name, params, optional, repeatable}) {
+    this.name = name
+    this.params = params || []
+    this.optional = optional !== null
+    this.repeatable = repeatable !== null
+  }
+
+  getName () { return this.name }
+
+  getParams () { return this.params }
+
+  isOptional () { return this.optional }
+
+  isRepeatable () { return this.repeatable }
+
+  visitBy (visitor) {
+    return visitor.visitType(this)
+  }
+}
+
 module.exports = {
   ExprListNode,
   IfNode,
@@ -166,5 +187,6 @@ module.exports = {
   IntNode,
   RealNode,
   StringNode,
-  VarNode
+  VarNode,
+  TypeNode
 }

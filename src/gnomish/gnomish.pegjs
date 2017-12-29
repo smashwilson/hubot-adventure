@@ -4,7 +4,7 @@
   const {
     ExprListNode,
     IfNode, WhileNode, AssignNode, CallNode,
-    IntNode, RealNode, StringNode, BlockNode, ArgNode, VarNode
+    IntNode, RealNode, StringNode, BlockNode, ArgNode, VarNode, TypeNode
   } = require('./ast')
 
   function leftAssocCall (first, rest) {
@@ -98,29 +98,37 @@ methodargs "method arguments"
   = '(' args:( first:expr rest:( _ ',' _ arg:expr { return arg } )* { return [first, ...rest] } )? ')'
     { return args }
 
-// Operators //////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Identifiers ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 identifier
   = $ ( [a-zA-Z'_] [0-9a-zA-Z'_]* )
 
-powlike
+powlike "exponentiation operator"
   = $ ( identifier? '^' )
 
-multlike
+multlike "multiplicative operator"
   = $ ( identifier? ( '*' / '/' / '%' ) )
 
-addlike
+addlike "additive operator"
   = $ ( identifier? ( '+' / '-' ) )
 
-andlike
+andlike "logical and"
   = $ ( identifier? '&' )
 
-orlike
+orlike "logical or"
   = $ ( identifier? '|' )
 
 // Note that a single "=" on its own is reserved for assignment.
-complike
+complike "comparison operator"
   = $ ( identifier? ( '<' / '>' ) / identifier '=' )
+
+typeexpr "type expression"
+  = name:identifier params:typeparams? optional:'?'? repeatable:'*'?
+    { return new TypeNode({name, params, optional, repeatable}) }
+
+typeparams "type parameters"
+  = '(' _ first:typeexpr rest:( _ ',' _ param:typeexpr { return param } )* ')'
+    { return [first, ...rest] }
 
 // Literals ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -151,7 +159,7 @@ blockargs "block arguments"
     { return [first, ...rest] }
 
 blockarg "block argument"
-  = name:identifier type:(_ ':' _ t:expr { return t })? def:(_ '=' _ d:expr { return d })?
+  = name:identifier type:(_ ':' _ t:typeexpr { return t })? def:(_ '=' _ d:expr { return d })?
     { return new ArgNode({name, type, def}) }
 
 // Whitespace /////////////////////////////////////////////////////////////////////////////////////////////////////////
