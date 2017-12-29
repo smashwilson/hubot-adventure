@@ -52,6 +52,8 @@ class CallNode {
     this.args = args
   }
 
+  getName () { return this.name }
+
   getReceiver () { return this.receiver }
 
   getArgs () { return this.args }
