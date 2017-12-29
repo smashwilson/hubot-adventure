@@ -7,8 +7,16 @@
     IntNode, RealNode, StringNode, BlockNode, ArgNode, VarNode
   } = require('./ast')
 
-  function leftAssoc (first, rest) {
-    //
+  function leftAssocCall (first, rest) {
+    let call = {receiver: first, name: null, arg: null}
+    for (const each of rest) {
+      call.name = each.op
+      call.args = [each.arg]
+      const node = new CallNode(call)
+
+      call = {receiver: node, name: null, arg: null}
+    }
+    return call.receiver
   }
 }
 
@@ -18,44 +26,58 @@ exprlist
   = first:expr rest:( _ ( ';' / '\n' ) _ each:expr _ { return each } )*
     { return new ExprListNode([first, ...rest]) }
 
-// Lowest precedence: if, while
+// Non-associative
 expr "expression"
   = if
   / while
-  / e1
+  / assignment
 
-// ||. Left-associative
-e1
-  = first:e2 _ op:orlike _ arg:e1
-  / e2
+// Lowest precedence: assignment. Right-associative.
+assignment
+  = first:opcomp _ '=' _ value:assignment
+  / opcomp
 
-// &&. Left-associative
-e2
-  = e3 _ op:andlike _ arg:e2
-  / e3
+// "==", "<", ">". Non-associative.
+opcomp "comparison operator application"
+  = receiver:opor op:complike arg:opor
+    { return new CallNode({receiver, name: op, args: [arg]}) }
+  / opor
 
-// +, -. Left-associative.
-e3
-  = e4 ( _ addlike _ e4 )+
-  / e4
+// "||". Left-associative.
+opor "logical or operator application"
+  = first:opand rest:( _ op:orlike _ arg:opand { return {op, arg} } )*
+    { return leftAssocCall(first, rest) }
 
-// *, /, %. Left-associative.
-e4 "term"
-  = e5 ( _ multlike _ e5 )+
-  / e5
+// "&&". Left-associative.
+opand "logical and operator application"
+  = first:opadd rest:( _ op:andlike _ arg:opadd { return {op, arg} } )*
+    { return leftAssocCall(first, rest) }
 
-// ^. Right-associative.
-e5 "factor"
-  = e6 ( _ op:powlike _ arg:e5 )+
-  / e6
+// "+", "-". Left-associative.
+opadd "addition-like operator application"
+  = first:opmult rest:( _ op:addlike _ arg:opmult { return {op, arg} } )*
+    { return leftAssocCall(first, rest) }
 
-// Highest precedence: foo.bar() or bar(). Left-associative.
-e6
-  = primary ( '.' methodcall )+
-  / methodcall ( '.' methodcall )*
-  / primary
+// "*", "/", "%". Left-associative.
+opmult "multiplication-like operator application"
+  = first:oppow rest:( _ op:multlike _ arg:oppow { return {op, arg} } )*
+    { return leftAssocCall(first, rest) }
 
-primary "primary"
+// "^". Right-associative.
+oppow "exponentiation-like operator application"
+  = receiver:methodcall _ op:powlike _ arg:oppow
+    { return new CallNode({receiver: first, name: op, args: [arg]}) }
+  / methodcall
+
+// "<receiver>.method()" or "method()". Unary.
+methodcall "method invocation"
+  = receiver:atom '.' name:identifier args:methodargs
+    { return new CallNode({receiver, name, args}) }
+  / name:identifier args:methodargs
+    { return new CallNode({name, args}) }
+  / atom
+
+atom "literal or parenthesized subexpression"
   = real
   / int
   / string
@@ -71,13 +93,14 @@ if
   = 'if' _ condition:block _ 'then' _ thenb:block elseb:( _ 'else' _ e:block { return e } )?
     { return new IfNode({condition, thenb, elseb}) }
 
-methodcall "method call"
-  = identifier '(' ( expr ( _ ',' _ expr )* )? ')'
+methodargs "method arguments"
+  = '(' args:( first:expr rest:( _ ',' _ arg:expr { return arg } )* { return [first, ...rest] } )? ')'
+    { return args }
 
 // Operators //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 identifier
-  = $ ( [a-zA-Z] [0-9a-zA-Z_]* )
+  = $ ( [a-zA-Z'_] [0-9a-zA-Z'_]* )
 
 powlike
   = $ ( identifier? '^' )
@@ -93,6 +116,10 @@ andlike
 
 orlike
   = $ ( identifier? '|' )
+
+// Note that a single "=" on its own is reserved for assignment.
+complike
+  = $ ( identifier? ( '<' / '>' ) / identifier '=' )
 
 // Literals ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
