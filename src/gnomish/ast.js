@@ -49,7 +49,7 @@ class CallNode {
   constructor ({receiver, name, args}) {
     this.name = name
     this.receiver = receiver
-    this.args = args
+    this.args = args || []
   }
 
   getName () { return this.name }
