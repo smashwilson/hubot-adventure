@@ -3,9 +3,13 @@
 {
   const {
     ExprListNode,
-    IfNode, WhileNode,
+    IfNode, WhileNode, CallNode,
     IntNode, RealNode, StringNode, BlockNode, ArgNode, VarNode
   } = require('./ast')
+
+  function leftAssoc (first, rest) {
+    //
+  }
 }
 
 // Expressions ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -14,10 +18,50 @@ exprlist
   = first:expr rest:( _ ( ';' / '\n' ) _ each:expr _ { return each } )*
     { return new ExprListNode([first, ...rest]) }
 
+// Lowest precedence: if, while
 expr "expression"
   = if
   / while
-  / literal
+  / e1
+
+// ||. Left-associative
+e1
+  = first:e2 _ op:orlike _ arg:e1
+  / e2
+
+// &&. Left-associative
+e2
+  = e3 _ op:andlike _ arg:e2
+  / e3
+
+// +, -. Left-associative.
+e3
+  = e4 ( _ addlike _ e4 )+
+  / e4
+
+// *, /, %. Left-associative.
+e4 "term"
+  = e5 ( _ multlike _ e5 )+
+  / e5
+
+// ^. Right-associative.
+e5 "factor"
+  = e6 ( _ op:powlike _ arg:e5 )+
+  / e6
+
+// Highest precedence: foo.bar() or bar(). Left-associative.
+e6
+  = primary ( '.' methodcall )+
+  / methodcall ( '.' methodcall )*
+  / primary
+
+primary "primary"
+  = real
+  / int
+  / string
+  / var
+  / block
+  / '(' expr ')'
 
 while
   = 'while' _ condition:block _ 'do' _ action:block
@@ -27,14 +71,30 @@ if
   = 'if' _ condition:block _ 'then' _ thenb:block elseb:( _ 'else' _ e:block { return e } )?
     { return new IfNode({condition, thenb, elseb}) }
 
-// Literals ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+methodcall "method call"
+  = identifier '(' ( expr ( _ ',' _ expr )* )? ')'
 
-literal
-  = real
-  / int
-  / string
-  / var
-  / block
+// Operators //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+identifier
+  = $ ( [a-zA-Z] [0-9a-zA-Z_]* )
+
+powlike
+  = $ ( identifier? '^' )
+
+multlike
+  = $ ( identifier? ( '*' / '/' / '%' ) )
+
+addlike
+  = $ ( identifier? ( '+' / '-' ) )
+
+andlike
+  = $ ( identifier? '&' )
+
+orlike
+  = $ ( identifier? '|' )
+
+// Literals ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 real
   = minus:'-'? whole:[0-9]+ '.' fraction:[0-9]+
@@ -51,9 +111,6 @@ string
 var
   = name:identifier
     { return new VarNode({name}) }
-
-identifier
-  = $ ( [a-zA-Z] [0-9a-zA-Z_]* )
 
 // Blocks
 
