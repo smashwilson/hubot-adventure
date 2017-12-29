@@ -53,5 +53,21 @@ describe('Gnomish expressions', function () {
           (call (var receiver) methodname (3) ("x") (var true)))
       `)
     })
+
+    it('parses a method call with no arguments', function () {
+      const node = parse('receiver.methodname()')
+      assertSexp(node.sexp(), `
+        (exprlist
+          (call (var receiver) methodname))
+      `)
+    })
+
+    it('parses a method call with an implicit receiver', function () {
+      const node = parse('methodname(3, 4)')
+      assertSexp(node.sexp(), `
+        (exprlist
+          (call <implicit> methodname (3) (4)))
+      `)
+    })
   })
 })
