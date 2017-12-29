@@ -63,6 +63,14 @@ describe('Gnomish expressions', function () {
     })
   })
 
+  describe('comparison operators', function () {
+    it('parses comparison operator application')
+
+    it('is non-associative')
+
+    it('has lower precedence than assignment')
+  })
+
   describe('method calls', function () {
     it('parses a method call with an explicit receiver', function () {
       const node = parse('receiver.methodname(3, "x", true)')
