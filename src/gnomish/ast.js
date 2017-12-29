@@ -45,6 +45,22 @@ class WhileNode {
   }
 }
 
+class CallNode {
+  constructor ({receiver, name, args}) {
+    this.name = name
+    this.receiver = receiver
+    this.args = args
+  }
+
+  getReceiver () { return this.receiver }
+
+  getArgs () { return this.args }
+
+  visitBy (visitor) {
+    return visitor.visitCall(this)
+  }
+}
+
 class BlockNode {
   constructor ({args, body}) {
     this.args = args || []
@@ -126,6 +142,7 @@ module.exports = {
   ExprListNode,
   IfNode,
   WhileNode,
+  CallNode,
   BlockNode,
   ArgNode,
   IntNode,
