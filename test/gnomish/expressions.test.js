@@ -45,6 +45,24 @@ describe('Gnomish expressions', function () {
     })
   })
 
+  describe('assignment', function () {
+    it('parses assignments to variables', function () {
+      const node = parse('foo = 3')
+      assertSexp(node.sexp(), `
+        (exprlist
+          (assign foo (3)))
+      `)
+    })
+
+    it('is right-associative', function () {
+      const node = parse('foo = bar = 42')
+      assertSexp(node.sexp(), `
+        (exprlist
+          (assign foo (assign bar (42))))
+      `)
+    })
+  })
+
   describe('method calls', function () {
     it('parses a method call with an explicit receiver', function () {
       const node = parse('receiver.methodname(3, "x", true)')

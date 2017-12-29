@@ -35,6 +35,12 @@ class SexpVisitor extends Visitor {
     this.result += ')'
   }
 
+  visitAssign (node) {
+    this.result += `(assign ${node.getName()} `
+    super.visitAssign(node)
+    this.result += ')'
+  }
+
   visitBlock (node) {
     this.result += '(block'
     for (const arg of node.getArgs()) {

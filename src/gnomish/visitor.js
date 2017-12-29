@@ -22,6 +22,10 @@ class Visitor {
     this.visit(node.getAction())
   }
 
+  visitAssign (node) {
+    this.visit(node.getValue())
+  }
+
   visitBlock (node) {
     for (const arg of node.getArgs()) {
       this.visit(arg)

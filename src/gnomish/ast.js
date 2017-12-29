@@ -45,6 +45,21 @@ class WhileNode {
   }
 }
 
+class AssignNode {
+  constructor ({name, value}) {
+    this.name = name
+    this.value = value
+  }
+
+  getName () { return this.name }
+
+  getValue () { return this.value }
+
+  visitBy (visitor) {
+    return visitor.visitAssign(this)
+  }
+}
+
 class CallNode {
   constructor ({receiver, name, args}) {
     this.name = name
@@ -144,6 +159,7 @@ module.exports = {
   ExprListNode,
   IfNode,
   WhileNode,
+  AssignNode,
   CallNode,
   BlockNode,
   ArgNode,

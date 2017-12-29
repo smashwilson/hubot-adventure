@@ -3,7 +3,7 @@
 {
   const {
     ExprListNode,
-    IfNode, WhileNode, CallNode,
+    IfNode, WhileNode, AssignNode, CallNode,
     IntNode, RealNode, StringNode, BlockNode, ArgNode, VarNode
   } = require('./ast')
 
@@ -34,7 +34,8 @@ expr "expression"
 
 // Lowest precedence: assignment. Right-associative.
 assignment
-  = first:opcomp _ '=' _ value:assignment
+  = name:identifier _ '=' _ value:expr
+    { return new AssignNode({name, value}) }
   / opcomp
 
 // "==", "<", ">". Non-associative.
