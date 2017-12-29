@@ -9,7 +9,7 @@
   "scripts": {
     "prepublish": "npm run peg",
     "test": "npm run lint && npm run peg && mocha --recursive",
-    "test:trace": "npm run lint && npm run peg:trace && GNOMISH_TRACE=1 mocha --recursive",
+    "test:trace": "npm run lint && npm run peg:trace && GNOMISH_TRACE=on mocha --recursive",
     "peg": "pegjs src/gnomish/gnomish.pegjs",
     "peg:trace": "pegjs --trace src/gnomish/gnomish.pegjs",
     "lint": "standard"
