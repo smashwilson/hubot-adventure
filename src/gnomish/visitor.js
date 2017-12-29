@@ -34,6 +34,13 @@ class Visitor {
     if (node.getDefault()) this.visit(node.getDefault())
   }
 
+  visitCall (node) {
+    if (node.getReceiver()) this.visit(node.getReceiver())
+    for (const arg of node.getArgs()) {
+      this.visit(arg)
+    }
+  }
+
   visitInt (node) {}
 
   visitReal (node) {}

@@ -59,6 +59,21 @@ class SexpVisitor extends Visitor {
     this.result += ')'
   }
 
+  visitCall (node) {
+    this.result += `(call `
+    if (node.getReceiver()) {
+      this.visit(node.getReceiver())
+    } else {
+      this.result += '<implicit>'
+    }
+    this.result += ` ${node.getName()}`
+    for (const arg of node.getArgs()) {
+      this.result += ' '
+      this.visit(arg)
+    }
+    this.result += ')'
+  }
+
   visitInt (node) {
     this.result += `(${node.value})`
   }
