@@ -3,7 +3,7 @@
 {
   const {
     ExprListNode,
-    IfNode, WhileNode, AssignNode, CallNode,
+    IfNode, WhileNode, AssignNode, LetNode, CallNode,
     IntNode, RealNode, StringNode, BlockNode, ArgNode, VarNode, TypeNode
   } = require('./ast')
 
@@ -30,6 +30,7 @@ exprlist
 expr "expression"
   = if
   / while
+  / let
   / assignment
 
 // Lowest precedence: assignment. Right-associative.
@@ -86,13 +87,17 @@ atom "literal or parenthesized subexpression"
   / block
   / '(' expr ')'
 
+if
+  = 'if' _ condition:block _ 'then' _ thenb:block elseb:( _ 'else' _ e:block { return e } )?
+    { return new IfNode({condition, thenb, elseb}) }
+
 while
   = 'while' _ condition:block _ 'do' _ action:block
     { return new WhileNode({condition, action}) }
 
-if
-  = 'if' _ condition:block _ 'then' _ thenb:block elseb:( _ 'else' _ e:block { return e } )?
-    { return new IfNode({condition, thenb, elseb}) }
+let
+  = 'let' _ name:identifier type:( _ ':' _  t:typeexpr { return t } )? _ '=' _ value:expr
+    { return new LetNode({name, type, value}) }
 
 methodargs "method arguments"
   = '(' args:( first:expr rest:( _ ',' _ arg:expr { return arg } )* { return [first, ...rest] } )? ')'

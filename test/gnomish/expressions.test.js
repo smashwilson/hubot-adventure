@@ -45,6 +45,24 @@ describe('Gnomish expressions', function () {
     })
   })
 
+  describe('let', function () {
+    it('parses a let expression', function () {
+      const node = parse('let x: Int = 42')
+      assertSexp(node.sexp(), `
+        (exprlist
+          (let x : (type Int) = (42)))
+      `)
+    })
+
+    it('parses a let expression with an inferred type', function () {
+      const node = parse('let x = 37')
+      assertSexp(node.sexp(), `
+        (exprlist
+          (let x : <inferred> = (37)))
+      `)
+    })
+  })
+
   describe('assignment', function () {
     it('parses assignments to variables', function () {
       const node = parse('foo = 3')

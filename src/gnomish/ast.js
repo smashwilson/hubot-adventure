@@ -60,6 +60,24 @@ class AssignNode {
   }
 }
 
+class LetNode {
+  constructor ({name, type, value}) {
+    this.name = name
+    this.type = type
+    this.value = value
+  }
+
+  getName () { return this.name }
+
+  getType () { return this.type }
+
+  getValue () { return this.value }
+
+  visitBy (visitor) {
+    return visitor.visitLet(this)
+  }
+}
+
 class CallNode {
   constructor ({receiver, name, args}) {
     this.name = name
@@ -181,6 +199,7 @@ module.exports = {
   IfNode,
   WhileNode,
   AssignNode,
+  LetNode,
   CallNode,
   BlockNode,
   ArgNode,

@@ -41,6 +41,18 @@ class SexpVisitor extends Visitor {
     this.result += ')'
   }
 
+  visitLet (node) {
+    this.result += `(let ${node.getName()} : `
+    if (node.getType()) {
+      this.visit(node.getType())
+    } else {
+      this.result += '<inferred>'
+    }
+    this.result += ' = '
+    this.visit(node.getValue())
+    this.result += ')'
+  }
+
   visitBlock (node) {
     this.result += '(block'
     for (const arg of node.getArgs()) {

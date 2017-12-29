@@ -26,6 +26,11 @@ class Visitor {
     this.visit(node.getValue())
   }
 
+  visitLet (node) {
+    this.visit(node.getType())
+    this.visit(node.getValue())
+  }
+
   visitBlock (node) {
     for (const arg of node.getArgs()) {
       this.visit(arg)
