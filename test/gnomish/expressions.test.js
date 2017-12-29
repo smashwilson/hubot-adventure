@@ -4,18 +4,25 @@ const {assert} = require('chai')
 const {parse} = require('../../src/gnomish')
 const Tracer = require('pegjs-backtrace')
 
-function assertSexp (text, expected) {
+function assertSexp (text, expected, shouldParse = true) {
   const tracer = new Tracer(text, {
     showTrace: process.env.GNOMISH_TRACE === 'on'
   })
+  let actual = ''
   try {
-    const actual = parse(text, {tracer}).sexp()
-    const normalize = str => str.trim().replace(/\s+/g, ' ')
-    assert.equal(normalize(actual), normalize(expected))
+    actual = parse(text, {tracer}).sexp()
+    if (!shouldParse) {
+      assert.fail(null, null, `Should not parse ${text}`)
+    }
   } catch (e) {
-    console.error(tracer.getBacktraceString())
-    assert.fail(null, null, `Unable to parse expression: ${e.message}`)
+    if (shouldParse) {
+      console.error(tracer.getBacktraceString())
+      assert.fail(null, null, `Unable to parse expression: ${e.message}`)
+    }
   }
+
+  const normalize = str => str.trim().replace(/\s+/g, ' ')
+  assert.equal(normalize(actual), normalize(expected))
 }
 
 describe('Gnomish expressions', function () {
@@ -84,6 +91,60 @@ describe('Gnomish expressions', function () {
     })
   })
 
+  describe('logical or', function () {
+    it('parses logical or application', function () {
+      assertSexp('true || false', `
+        (exprlist
+          (call (var true) || (var false)))
+      `)
+    })
+
+    it('is left-associative', function () {
+      assertSexp('a || b || c', `
+        (exprlist
+          (call
+            (call (var a) || (var b)) ||
+            (var c)))
+      `)
+    })
+
+    it('has higher precedence than comparison', function () {
+      assertSexp('a == 4 || b == 7', `
+        (exprlist
+          (call
+            (call (var a) == (4)) ||
+            (call (var b) == (7))))
+      `)
+    })
+
+    it('has lower precedence than logical and', function () {
+      assertSexp('a && b || c', `
+        (exprlist
+          (call
+            (call (var a) && (var b)) ||
+            (var c)))
+      `)
+    })
+  })
+
+  describe('logical and', function () {
+    it('parses logical and application', function () {
+      assertSexp('a && b', `
+        (exprlist
+          (call (var a) && (var b)))
+      `)
+    })
+
+    it('is left-associative', function () {
+      assertSexp('a && b && c', `
+        (exprlist
+          (call
+            (call (var a) && (var b)) &&
+            (var c)))
+      `)
+    })
+  })
+
   describe('comparison operators', function () {
     it('parses comparison operator application', function () {
       assertSexp('a == b', `
@@ -92,9 +153,17 @@ describe('Gnomish expressions', function () {
       `)
     })
 
-    it('is non-associative')
+    it('is non-associative', function () {
+      assertSexp('a == b < c', '', false)
+    })
 
-    it('has lower precedence than assignment')
+    it('has lower precedence than assignment', function () {
+      assertSexp('x = y == 1', `
+        (exprlist
+          (assign x
+            (call (var y) == (1))))
+      `)
+    })
   })
 
   describe('method calls', function () {
