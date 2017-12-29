@@ -35,13 +35,13 @@ expr "expression"
 
 // Lowest precedence: assignment. Right-associative.
 assignment
-  = name:identifier _ '=' _ value:expr
+  = name:identifier _ '=' !'=' _ value:expr
     { return new AssignNode({name, value}) }
   / opcomp
 
 // "==", "<", ">". Non-associative.
 opcomp "comparison operator application"
-  = receiver:opor op:complike arg:opor
+  = receiver:opor _ op:complike _ arg:opor
     { return new CallNode({receiver, name: op, args: [arg]}) }
   / opor
 
@@ -108,24 +108,27 @@ methodargs "method arguments"
 identifier
   = $ ( [a-zA-Z'_] [0-9a-zA-Z'_]* )
 
+opstem "operator stem"
+  = [*/%&|<>=+^-] [0-9a-zA-Z'_]*
+
 powlike "exponentiation operator"
-  = $ ( identifier? '^' )
+  = $ ( opstem? '^' )
 
 multlike "multiplicative operator"
-  = $ ( identifier? ( '*' / '/' / '%' ) )
+  = $ ( opstem? ( '*' / '/' / '%' ) )
 
 addlike "additive operator"
-  = $ ( identifier? ( '+' / '-' ) )
+  = $ ( opstem? ( '+' / '-' ) )
 
 andlike "logical and"
-  = $ ( identifier? '&' )
+  = $ ( opstem? '&' )
 
 orlike "logical or"
-  = $ ( identifier? '|' )
+  = $ ( opstem? '|' )
 
-// Note that a single "=" on its own is reserved for assignment.
+// Note that a single "=" on its own is reserved for assignment and "let".
 complike "comparison operator"
-  = $ ( identifier? ( '<' / '>' ) / identifier '=' )
+  = $ ( opstem? ( '<' / '>' ) / opstem '=' )
 
 typeexpr "type expression"
   = name:identifier params:typeparams? optional:'?'? repeatable:'*'?
