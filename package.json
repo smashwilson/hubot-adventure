@@ -9,7 +9,7 @@
   "scripts": {
     "prepare": "npm run peg",
     "test": "npm run lint && npm run peg && mocha --recursive",
-    "test:trace": "npm run lint && npm run peg:trace && GNOMISH_TRACE=on mocha --recursive",
+    "test:trace": "npm run lint && npm run peg:trace && cross-env GNOMISH_TRACE=on mocha --recursive",
     "peg": "pegjs src/gnomish/gnomish.pegjs",
     "peg:trace": "pegjs --trace src/gnomish/gnomish.pegjs",
     "lint": "standard"
@@ -32,6 +32,7 @@
   "devDependencies": {
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
+    "cross-env": "^5.1.3",
     "hubot-test-helper": "1.8.1",
     "mocha": "4.0.1",
     "pegjs-backtrace": "^0.1.1",
