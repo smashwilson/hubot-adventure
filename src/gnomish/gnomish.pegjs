@@ -37,6 +37,12 @@ expr "expression"
 assignment
   = name:identifier _ '=' !'=' _ value:expr
     { return new AssignNode({name, value}) }
+  / opcomp
+
+// "==", "<", ">". Non-associative.
+opcomp "comparison operator application"
+  = receiver:opor _ op:complike _ arg:opor
+    { return new CallNode({receiver, name: op, args: [arg]}) }
   / opor
 
 // "||". Left-associative.
@@ -46,14 +52,8 @@ opor "logical or operator application"
 
 // "&&". Left-associative.
 opand "logical and operator application"
-  = first:opcomp rest:( _ op:andlike _ arg:opcomp { return {op, arg} } )*
+  = first:opadd rest:( _ op:andlike _ arg:opadd { return {op, arg} } )*
     { return leftAssocCall(first, rest) }
-
-// "==", "<", ">". Non-associative.
-opcomp "comparison operator application"
-  = receiver:opadd _ op:complike _ arg:opadd
-    { return new CallNode({receiver, name: op, args: [arg]}) }
-  / opadd
 
 // "+", "-". Left-associative.
 opadd "addition-like operator application"

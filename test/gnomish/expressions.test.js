@@ -89,6 +89,43 @@ describe('Gnomish expressions', function () {
           (assign foo (assign bar (42))))
       `)
     })
+
+    it('plays well with if, while, and let expressions', function () {
+      assertSexp('x = if {true} then {1} else {2}', `
+        (exprlist
+          (assign x
+            (if
+              (block (exprlist (var true)))
+              (block (exprlist (1)))
+              (block (exprlist (2))))))
+      `)
+      assertSexp('y = while {q = false} do {3}', `
+        (exprlist
+          (assign y
+            (while
+              (block (exprlist (assign q (var false))))
+              (block (exprlist (3))))))
+      `)
+      assertSexp('z = let q = let n = 400', `
+        (exprlist
+          (assign z
+            (let q : <inferred> =
+              (let n : <inferred> = (400)))))
+      `)
+    })
+  })
+
+  describe('comparison operators', function () {
+    it('parses comparison operator application', function () {
+      assertSexp('a == b', `
+        (exprlist
+          (call (var a) == (var b)))
+      `)
+    })
+
+    it('is non-associative', function () {
+      assertSexp('a == b < c', '', false)
+    })
   })
 
   describe('logical or', function () {
@@ -108,21 +145,12 @@ describe('Gnomish expressions', function () {
       `)
     })
 
-    it('has higher precedence than comparison', function () {
-      assertSexp('a == 4 || b == 7', `
+    it('has higher precedence than comparison operators', function () {
+      assertSexp('x || y == true', `
         (exprlist
           (call
-            (call (var a) == (4)) ||
-            (call (var b) == (7))))
-      `)
-    })
-
-    it('has lower precedence than logical and', function () {
-      assertSexp('a && b || c', `
-        (exprlist
-          (call
-            (call (var a) && (var b)) ||
-            (var c)))
+            (call (var x) || (var y)) ==
+            (var true)))
       `)
     })
   })
@@ -143,25 +171,88 @@ describe('Gnomish expressions', function () {
             (var c)))
       `)
     })
+
+    it('has higher precedence than logical or', function () {
+      assertSexp('a && b || c', `
+        (exprlist
+          (call
+            (call (var a) && (var b)) ||
+            (var c)))
+      `)
+    })
   })
 
-  describe('comparison operators', function () {
-    it('parses comparison operator application', function () {
-      assertSexp('a == b', `
+  describe('additive operators', function () {
+    it('parses additive operators', function () {
+      assertSexp('3 + 4', `
         (exprlist
-          (call (var a) == (var b)))
+          (call (3) + (4)))
       `)
     })
 
-    it('is non-associative', function () {
-      assertSexp('a == b < c', '', false)
+    it('is left-associative', function () {
+      assertSexp('12 + 14 - 2', `
+        (exprlist
+          (call (call (12) + (14)) - (2)))
+      `)
     })
 
-    it('has lower precedence than assignment', function () {
-      assertSexp('x = y == 1', `
+    it('has higher precedence than logical and', function () {
+      assertSexp('10 + 20 && 30 +append+ 40', `
         (exprlist
-          (assign x
-            (call (var y) == (1))))
+          (call
+            (call (10) + (20)) &&
+            (call (30) +append+ (40))))
+      `)
+    })
+  })
+
+  describe('multiplicative operators', function () {
+    it('parses multiplicative operator application', function () {
+      assertSexp('6 * 4', `
+        (exprlist
+          (call (6) * (4)))
+      `)
+    })
+
+    it('is left-associative', function () {
+      assertSexp('3 * 4 /int/ 2', `
+        (exprlist
+          (call
+            (call (3) * (4)) /int/
+            (2)))
+      `)
+    })
+
+    it('has higher precedence than additive operators', function () {
+      assertSexp('1 + 2 * 3', `
+        (exprlist
+          (call
+            (1) +
+            (call (2) * (3))))
+      `)
+    })
+  })
+
+  describe('exponentiation', function () {
+    it('parses exponentiation operators', function () {
+      assertSexp('2 ^ 5', `
+        (exprlist
+          (call (2) ^ (5)))
+      `)
+    })
+
+    it('is right-associative', function () {
+      assertSexp('2 ^ 3 ^ 4', `
+        (exprlist
+          (call (2) ^ (call (3) ^ (4))))
+      `)
+    })
+
+    it('has higher precedence than multiplicative operators', function () {
+      assertSexp('x ^ 2 * 4', `
+        (exprlist
+          (call (call (var x) ^ (2)) * (4)))
       `)
     })
   })
