@@ -109,26 +109,26 @@ identifier
   = $ ( [a-zA-Z'_] [0-9a-zA-Z'_]* )
 
 opstem "operator stem"
-  = [*/%&|<>=+^-] [0-9a-zA-Z'_]*
+  = [0-9a-zA-Z'_*/%+&|<>=^-]*
 
 powlike "exponentiation operator"
-  = $ ( opstem? '^' )
+  = $ ( '^' opstem? )
 
 multlike "multiplicative operator"
-  = $ ( opstem? ( '*' / '/' / '%' ) )
+  = $ ( ( '*' / '/' / '%' ) opstem? )
 
 addlike "additive operator"
-  = $ ( opstem? ( '+' / '-' ) )
+  = $ ( ( '+' / '-' ) opstem? )
 
 andlike "logical and"
-  = $ ( opstem? '&' )
+  = $ ( '&' opstem? )
 
 orlike "logical or"
-  = $ ( opstem? '|' )
+  = $ ( '|' opstem? )
 
 // Note that a single "=" on its own is reserved for assignment and "let".
 complike "comparison operator"
-  = $ ( opstem? ( '<' / '>' ) / opstem '=' )
+  = $ ( ( '<' / '>' ) opstem? / '=' opstem )
 
 typeexpr "type expression"
   = name:identifier params:typeparams? optional:'?'? repeatable:'*'?
