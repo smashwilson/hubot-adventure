@@ -68,7 +68,7 @@ opmult "multiplication-like operator application"
 // "^". Right-associative.
 oppow "exponentiation-like operator application"
   = receiver:methodcall _ op:powlike _ arg:oppow
-    { return new CallNode({receiver: first, name: op, args: [arg]}) }
+    { return new CallNode({receiver, name: op, args: [arg]}) }
   / methodcall
 
 // "<receiver>.method()" or "method()". Unary.
