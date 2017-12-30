@@ -131,8 +131,8 @@ complike "comparison operator"
   = $ ( ( '<' / '>' ) opstem? / '=' opstem )
 
 typeexpr "type expression"
-  = name:identifier params:typeparams? optional:'?'? repeatable:'*'?
-    { return new TypeNode({name, params, optional, repeatable}) }
+  = name:identifier params:typeparams? optional:'?'?
+    { return new TypeNode({name, params, optional}) }
 
 typeparams "type parameters"
   = '(' _ first:typeexpr rest:( _ ',' _ param:typeexpr { return param } )* ')'
@@ -167,8 +167,8 @@ blockargs "block arguments"
     { return [first, ...rest] }
 
 blockarg "block argument"
-  = name:identifier type:(_ ':' _ t:typeexpr { return t })? def:(_ '=' _ d:expr { return d })?
-    { return new ArgNode({name, type, def}) }
+  = name:identifier type:(_ ':' _ t:typeexpr { return t })? repeatable:'*'? def:(_ '=' _ d:expr { return d })?
+    { return new ArgNode({name, type, repeatable, def}) }
 
 // Whitespace /////////////////////////////////////////////////////////////////////////////////////////////////////////
 

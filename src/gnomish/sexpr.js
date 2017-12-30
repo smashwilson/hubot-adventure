@@ -70,6 +70,7 @@ class SexpVisitor extends Visitor {
       this.result += ' : '
       this.visit(node.getType())
     }
+    if (node.isRepeatable()) this.result += '*'
     if (node.getDefault()) {
       this.result += ' = '
       this.visit(node.getDefault())
@@ -116,7 +117,6 @@ class SexpVisitor extends Visitor {
       this.visit(param)
     }
     if (node.isOptional()) this.result += '?'
-    if (node.isRepeatable()) this.result += '*'
     this.result += ')'
   }
 }

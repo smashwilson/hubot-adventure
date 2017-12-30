@@ -116,9 +116,10 @@ class BlockNode {
 }
 
 class ArgNode {
-  constructor ({name, type, def}) {
+  constructor ({name, type, repeatable, def}) {
     this.name = name
     this.type = type
+    this.repeatable = repeatable !== null
     this.def = def
   }
 
@@ -127,6 +128,8 @@ class ArgNode {
   getType () { return this.type }
 
   getDefault () { return this.def }
+
+  isRepeatable () { return this.repeatable }
 
   visitBy (visitor) {
     return visitor.visitArg(this)
@@ -174,11 +177,10 @@ class VarNode {
 }
 
 class TypeNode {
-  constructor ({name, params, optional, repeatable}) {
+  constructor ({name, params, optional}) {
     this.name = name
     this.params = params || []
     this.optional = optional !== null
-    this.repeatable = repeatable !== null
   }
 
   getName () { return this.name }
@@ -186,8 +188,6 @@ class TypeNode {
   getParams () { return this.params }
 
   isOptional () { return this.optional }
-
-  isRepeatable () { return this.repeatable }
 
   visitBy (visitor) {
     return visitor.visitType(this)
