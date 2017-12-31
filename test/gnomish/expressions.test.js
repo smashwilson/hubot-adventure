@@ -26,6 +26,23 @@ function assertSexp (text, expected, shouldParse = true) {
 }
 
 describe('Gnomish expressions', function () {
+  describe('all together', function () {
+    // This is a place to accumulate any parsing oddities that we notice organically.
+    it('parses a quadratic equation', function () {
+      assertSexp('let y = 4*x^2 + 2*x - 7', `
+        (exprlist
+          (let y : <inferred> =
+            (call
+              (call
+                (call (4) * (call (var x) ^ (2)))
+                +
+                (call (2) * (var x)))
+              -
+              (7))))
+      `)
+    })
+  })
+
   describe('if', function () {
     it('parses an if expression with only a then clause', function () {
       assertSexp('if {true} then {42}', `
