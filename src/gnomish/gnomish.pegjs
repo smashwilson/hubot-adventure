@@ -109,7 +109,7 @@ identifier
   = $ ( [a-zA-Z'_] [0-9a-zA-Z'_]* )
 
 opstem "operator stem"
-  = [0-9a-zA-Z'_*/%+&|<>=^-]*
+  = [*/%+&|<>=^-]*
 
 powlike "exponentiation operator"
   = $ ( '^' opstem? )
