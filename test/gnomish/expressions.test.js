@@ -198,11 +198,11 @@ describe('Gnomish expressions', function () {
     })
 
     it('has higher precedence than logical and', function () {
-      assertSexp('10 + 20 && 30 +append+ 40', `
+      assertSexp('10 + 20 && 30 ++ 40', `
         (exprlist
           (call
             (call (10) + (20)) &&
-            (call (30) +append+ (40))))
+            (call (30) ++ (40))))
       `)
     })
   })
@@ -216,10 +216,10 @@ describe('Gnomish expressions', function () {
     })
 
     it('is left-associative', function () {
-      assertSexp('3 * 4 /int/ 2', `
+      assertSexp('3 * 4 // 2', `
         (exprlist
           (call
-            (call (3) * (4)) /int/
+            (call (3) * (4)) //
             (2)))
       `)
     })
