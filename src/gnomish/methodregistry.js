@@ -1,7 +1,8 @@
 class Signature {
-  constructor (argTypes, callback) {
+  constructor (argTypes, callback, retType) {
     this.argTypes = argTypes
     this.callback = callback
+    this.retType = retType
   }
 
   matches (callArgTypes) {
@@ -12,6 +13,10 @@ class Signature {
   getCallback () {
     return this.callback
   }
+
+  getReturnType () {
+    return this.retType
+  }
 }
 
 class MethodRegistry {
@@ -19,7 +24,7 @@ class MethodRegistry {
     this.byReceiverType = new Map()
   }
 
-  register (callback, receiverType, selector, argTypes) {
+  register (receiverType, selector, argTypes, retType, callback) {
     let bySelector = this.byReceiverType.get(receiverType)
     if (!bySelector) {
       bySelector = new Map()
@@ -31,7 +36,7 @@ class MethodRegistry {
       bySelector.set(selector, signatures)
     }
 
-    const addedSignature = new Signature(argTypes, callback)
+    const addedSignature = new Signature(argTypes, callback, retType)
     signatures.push(addedSignature)
   }
 
@@ -66,7 +71,7 @@ class MethodRegistry {
       throw e
     }
 
-    return matches[0].getCallback()
+    return matches[0]
   }
 }
 
