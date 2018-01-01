@@ -1,5 +1,41 @@
-class ExprListNode {
+class Node {
+  constructor () {
+    this.type = null
+  }
+
+  setType (type) {
+    this.type = type
+  }
+
+  getType () {
+    if (!this.type) {
+      throw new Error(`${this.constructor.name} has not been assigned a type yet`)
+    }
+    return this.type
+  }
+}
+
+class SlotNode extends Node {
+  constructor () {
+    super()
+    this.slot = null
+  }
+
+  setSlot (slot) {
+    this.slot = slot
+  }
+
+  getSlot () {
+    if (!this.slot) {
+      throw new Error(`${this.constructor.name} has not been assigned a slot index yet`)
+    }
+    return this.slot
+  }
+}
+
+class ExprListNode extends Node {
   constructor (exprs) {
+    super()
     this.exprs = exprs
   }
 
@@ -12,8 +48,9 @@ class ExprListNode {
   }
 }
 
-class IfNode {
+class IfNode extends Node {
   constructor ({condition, thenb, elseb}) {
+    super()
     this.condition = condition
     this.thenb = thenb
     this.elseb = elseb || new BlockNode({})
@@ -30,8 +67,9 @@ class IfNode {
   }
 }
 
-class WhileNode {
+class WhileNode extends Node {
   constructor ({condition, action}) {
+    super()
     this.condition = condition
     this.action = action
   }
@@ -45,8 +83,9 @@ class WhileNode {
   }
 }
 
-class AssignNode {
+class AssignNode extends SlotNode {
   constructor ({name, value}) {
+    super()
     this.name = name
     this.value = value
   }
@@ -60,8 +99,9 @@ class AssignNode {
   }
 }
 
-class LetNode {
+class LetNode extends SlotNode {
   constructor ({name, type, value}) {
+    super()
     this.name = name
     this.type = type
     this.value = value
@@ -78,8 +118,9 @@ class LetNode {
   }
 }
 
-class CallNode {
+class CallNode extends Node {
   constructor ({receiver, name, args}) {
+    super()
     this.name = name
     this.receiver = receiver
     this.args = args || []
@@ -96,8 +137,9 @@ class CallNode {
   }
 }
 
-class BlockNode {
+class BlockNode extends Node {
   constructor ({args, body}) {
+    super()
     this.args = args || []
     this.body = body || new ExprListNode([])
   }
@@ -115,8 +157,9 @@ class BlockNode {
   }
 }
 
-class ArgNode {
+class ArgNode extends SlotNode {
   constructor ({name, type, repeatable, def}) {
+    super()
     this.name = name
     this.type = type
     this.repeatable = repeatable !== null
@@ -136,8 +179,9 @@ class ArgNode {
   }
 }
 
-class IntNode {
+class IntNode extends Node {
   constructor ({minus, digits}) {
+    super()
     this.value = parseInt((minus || '') + digits.join(''), 10)
   }
 
@@ -146,8 +190,9 @@ class IntNode {
   }
 }
 
-class RealNode {
+class RealNode extends Node {
   constructor ({minus, whole, fraction}) {
+    super()
     this.value = parseFloat((minus || '') + whole.join('') + '.' + fraction.join(''))
   }
 
@@ -156,8 +201,9 @@ class RealNode {
   }
 }
 
-class StringNode {
+class StringNode extends Node {
   constructor ({chars}) {
+    super()
     this.value = chars.join('')
   }
 
@@ -166,8 +212,9 @@ class StringNode {
   }
 }
 
-class VarNode {
+class VarNode extends SlotNode {
   constructor ({name}) {
+    super()
     this.name = name
   }
 
@@ -176,8 +223,9 @@ class VarNode {
   }
 }
 
-class TypeNode {
+class TypeNode extends Node {
   constructor ({name, params, optional}) {
+    super()
     this.name = name
     this.params = params || []
     this.optional = optional !== null
