@@ -33,6 +33,29 @@ class SymbolTable {
 }
 
 class Entry {
+  constructor (type) {
+    this.type = type
+  }
+
+  getType () { return this.type }
 }
 
-module.exports = {SymbolTable, Entry}
+class SlotEntry extends Entry {
+  constructor (type, slot) {
+    super(type)
+    this.slot = slot
+  }
+
+  getSlot () { return this.slot }
+}
+
+class StaticEntry extends Entry {
+  constructor (type, value) {
+    super(type)
+    this.value = value
+  }
+
+  getValue () { return this.value }
+}
+
+module.exports = {SymbolTable, Entry, StaticEntry}
