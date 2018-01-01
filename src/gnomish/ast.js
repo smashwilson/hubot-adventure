@@ -43,6 +43,11 @@ class ExprListNode extends Node {
     return this.exprs
   }
 
+  getLastExpr () {
+    if (this.exprs.length === 0) return null
+    return this.exprs[this.exprs.length - 1]
+  }
+
   visitBy (visitor) {
     return visitor.visitExprList(this)
   }
