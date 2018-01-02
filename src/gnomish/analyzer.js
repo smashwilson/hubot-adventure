@@ -11,7 +11,6 @@ const {Visitor} = require('./visitor')
 class Analyzer extends Visitor {
   constructor (symbolTable, methodRegistry) {
     super()
-    this.nextSlot = 0
     this.symbolTable = symbolTable
     this.methodRegistry = methodRegistry
   }
@@ -21,8 +20,30 @@ class Analyzer extends Visitor {
     node.setType(node.getLastExpr().getType())
   }
 
+  visitBlock (node) {
+    super.visitBlock(node)
+
+    const blockBase = this.symbolTable.at('Block').getValue()
+    node.setType(blockBase.withArgs([
+      node.getBody().getLastExpr().getType(),
+      ...node.getArgs().map(arg => arg.getType())
+    ]))
+  }
+
+  visitArg (node) {
+    super.visitArg(node)
+  }
+
   visitInt (node) {
     node.setType(this.symbolTable.at('Int').getValue())
+  }
+
+  visitReal (node) {
+    node.setType(this.symbolTable.at('Real').getValue())
+  }
+
+  visitString (node) {
+    node.setType(this.symbolTable.at('String').getValue())
   }
 }
 

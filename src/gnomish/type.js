@@ -4,6 +4,10 @@ class Type {
     this.args = args
   }
 
+  withArgs (args) {
+    return new Type(this.name, args)
+  }
+
   getName () { return this.name }
 
   getArgs () { return this.args }

@@ -16,7 +16,7 @@ describe('Analyzer', function () {
     tReal = new Type('Real')
     tString = new Type('String')
     tType = new Type('Type')
-    tBlock = new Type('Block', [tString])
+    tBlock = new Type('Block')
 
     st = new SymbolTable()
     st.put('Int', new StaticEntry(tType, tInt))
@@ -38,10 +38,26 @@ describe('Analyzer', function () {
       assert.strictEqual(root.node.getType(), tInt)
     })
 
-    it('assigns Real to RealNodes')
+    it('assigns Real to RealNodes', function () {
+      const root = parse('12.34')
+      analyzer.visit(root.node)
 
-    it('assigns String to StringNodes')
+      assert.strictEqual(root.node.getType(), tReal)
+    })
 
-    it('assigns Type to TypeNodes')
+    it('assigns String to StringNodes', function () {
+      const root = parse('"wat"')
+      analyzer.visit(root.node)
+
+      assert.strictEqual(root.node.getType(), tString)
+    })
+
+    it('assigns Blocks a type based on its return and argument types', function () {
+      const root = parse('{ x: Int, y: Real | 3; "hurf durf" }')
+      analyzer.visit(root.node)
+
+      const blockNode = root.node.getLastExpr()
+      assert.equal(blockNode.getType().toString(), 'Block(String, Int, Real)')
+    })
   })
 })
