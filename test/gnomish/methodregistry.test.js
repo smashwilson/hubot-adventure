@@ -2,12 +2,12 @@
 
 const {assert} = require('chai')
 const {MethodRegistry} = require('../../src/gnomish/methodregistry')
-const {Type} = require('../../src/gnomish/type')
+const {makeType} = require('../../src/gnomish/type')
 
 describe('MethodRegistry', function () {
-  const tInt = new Type('Int')
-  const tReal = new Type('Real')
-  const tString = new Type('String')
+  const tInt = makeType('Int')
+  const tReal = makeType('Real')
+  const tString = makeType('String')
 
   const right = () => {}
   const wrong = () => {}

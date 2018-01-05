@@ -1,14 +1,15 @@
 /* eslint-env mocha */
 
 const {assert} = require('chai')
-const {SymbolTable, Entry} = require('../../src/gnomish/symboltable')
+const {SymbolTable, SlotEntry} = require('../../src/gnomish/symboltable')
+const {makeType} = require('../../src/gnomish/type')
 
 describe('SymbolTable', function () {
   describe('variable names', function () {
     it('stores and retrieves identifier information', function () {
       const st = new SymbolTable()
 
-      const e = new Entry()
+      const e = new SlotEntry(makeType('Int'), 0)
       st.put('foo', e)
       assert.strictEqual(st.at('foo'), e)
     })
@@ -21,10 +22,12 @@ describe('SymbolTable', function () {
 
   describe('scope heirarchy', function () {
     it('creates a child table', function () {
-      const e0 = new Entry()
-      const e1 = new Entry()
-      const e2 = new Entry()
-      const e3 = new Entry()
+      const tInt = makeType('Int')
+
+      const e0 = new SlotEntry(tInt, 0)
+      const e1 = new SlotEntry(tInt, 1)
+      const e2 = new SlotEntry(tInt, 2)
+      const e3 = new SlotEntry(tInt, 3)
 
       const parent = new SymbolTable()
 

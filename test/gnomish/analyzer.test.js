@@ -3,20 +3,19 @@
 const {assert} = require('chai')
 const {parse} = require('../../src/gnomish')
 const {Analyzer} = require('../../src/gnomish/analyzer')
-const {Type} = require('../../src/gnomish/type')
+const {makeType} = require('../../src/gnomish/type')
 const {SymbolTable, SlotEntry, StaticEntry} = require('../../src/gnomish/symboltable')
 const {MethodRegistry} = require('../../src/gnomish/methodregistry')
 
 describe('Analyzer', function () {
   let st, mr, analyzer
-  let tInt, tReal, tString, tType, tBlock
+  let tInt, tReal, tString, tType
 
   beforeEach(function () {
-    tInt = new Type('Int')
-    tReal = new Type('Real')
-    tString = new Type('String')
-    tType = new Type('Type')
-    tBlock = new Type('Block')
+    tInt = makeType('Int')
+    tReal = makeType('Real')
+    tString = makeType('String')
+    tType = makeType('Type')
 
     st = new SymbolTable()
     st.put('Int', new StaticEntry(tType, tInt))
