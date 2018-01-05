@@ -4,6 +4,13 @@ class SymbolTable {
     this.parent = parent
   }
 
+  has (name) {
+    if (this.symbols.has(name)) return true
+    if (!this.parent) return false
+
+    return this.parent.has(name)
+  }
+
   at (name) {
     let v = this.symbols.get(name)
     if (v === undefined) {
