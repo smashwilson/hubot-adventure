@@ -223,6 +223,8 @@ class VarNode extends SlotNode {
     this.name = name
   }
 
+  getName () { return this.name }
+
   visitBy (visitor) {
     return visitor.visitVar(this)
   }

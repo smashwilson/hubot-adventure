@@ -4,7 +4,7 @@ const {assert} = require('chai')
 const {parse} = require('../../src/gnomish')
 const {Analyzer} = require('../../src/gnomish/analyzer')
 const {Type} = require('../../src/gnomish/type')
-const {SymbolTable, StaticEntry} = require('../../src/gnomish/symboltable')
+const {SymbolTable, SlotEntry, StaticEntry} = require('../../src/gnomish/symboltable')
 const {MethodRegistry} = require('../../src/gnomish/methodregistry')
 
 describe('Analyzer', function () {
@@ -23,7 +23,6 @@ describe('Analyzer', function () {
     st.put('Real', new StaticEntry(tType, tReal))
     st.put('String', new StaticEntry(tType, tString))
     st.put('Type', new StaticEntry(tType, tType))
-    st.put('Block', new StaticEntry(tType, tBlock))
 
     mr = new MethodRegistry()
 
@@ -52,12 +51,13 @@ describe('Analyzer', function () {
       assert.strictEqual(root.node.getType(), tString)
     })
 
-    it('assigns Blocks a type based on its return and argument types', function () {
-      const root = parse('{ x: Int, y: Real | 3; "hurf durf" }')
+    it('assigns a type from the symbol table to a VarNode', function () {
+      st.put('variable', new SlotEntry(tString, 0))
+
+      const root = parse('variable')
       analyzer.visit(root.node)
 
-      const blockNode = root.node.getLastExpr()
-      assert.equal(blockNode.getType().toString(), 'Block(String, Int, Real)')
+      assert.strictEqual(root.node.getType(), tString)
     })
   })
 })

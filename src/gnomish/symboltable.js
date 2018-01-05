@@ -58,4 +58,4 @@ class StaticEntry extends Entry {
   getValue () { return this.value }
 }
 
-module.exports = {SymbolTable, Entry, StaticEntry}
+module.exports = {SymbolTable, SlotEntry, StaticEntry}

@@ -45,6 +45,10 @@ class Analyzer extends Visitor {
   visitString (node) {
     node.setType(this.symbolTable.at('String').getValue())
   }
+
+  visitVar (node) {
+    node.setType(this.symbolTable.at(node.getName()).getType())
+  }
 }
 
 module.exports = {Analyzer}
