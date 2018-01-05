@@ -45,6 +45,8 @@ class Entry {
   }
 
   getType () { return this.type }
+
+  isStatic () { return false }
 }
 
 class SlotEntry extends Entry {
@@ -63,6 +65,8 @@ class StaticEntry extends Entry {
   }
 
   getValue () { return this.value }
+
+  isStatic () { return true }
 }
 
 module.exports = {SymbolTable, SlotEntry, StaticEntry}
