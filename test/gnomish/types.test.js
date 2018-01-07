@@ -71,16 +71,31 @@ describe('Type', function () {
       const t = makeType("'D")
       assert.strictEqual(t.resolve(st), t)
     })
+
+    it('resolves type parameters of compound types shallowly', function () {
+      const tInt = makeType('Int')
+      st.put("'A", new StaticEntry(tType, tInt))
+      st.put("'B", new StaticEntry(tType, tInt))
+
+      const tB = makeType("'B")
+      const t0 = makeType("'A", [tB])
+
+      const r = t0.resolve(st)
+      assert.isTrue(r.isCompound())
+      assert.strictEqual(r.getBase(), tInt)
+      assert.lengthOf(r.getParams(), 1)
+      assert.strictEqual(r.getParams()[0], tB)
+    })
   })
 
   describe('unify', function () {
     function unifyBothWays (t0, t1, block) {
       st = st.push()
-      block(unify(t0, t1))
+      block(unify(st, t0, t1))
       st = st.pop()
 
       st = st.push()
-      block(unify(t1, t0))
+      block(unify(st, t1, t0))
       st = st.pop()
     }
 
@@ -100,7 +115,29 @@ describe('Type', function () {
       unifyBothWays(t0, t1, u => assert.isFalse(u.wasSuccessful()))
     })
 
-    it('produces SymbolTable bindings for new type parameter assignments', function () {
+    it('uses an existing binding to unify a type parameter', function () {
+      const t0 = makeType('Int')
+      const t1 = makeType("'A")
+
+      st.put("'A", new StaticEntry(tType, t0))
+
+      unifyBothWays(t0, t1, u => {
+        assert.isTrue(u.wasSuccessful())
+        assert.strictEqual(u.getType(), t0)
+        assert.lengthOf(u.bindings, 0)
+      })
+    })
+
+    it('uses an existing binding to fail to unify a type parameter', function () {
+      const t0 = makeType('Int')
+      const t1 = makeType("'A")
+
+      st.put("'A", new StaticEntry(tType, makeType('Nope')))
+
+      unifyBothWays(t0, t1, u => assert.isFalse(u.wasSuccessful()))
+    })
+
+    it('produces bindings for a new type parameter assignment', function () {
       const t0 = makeType('Int')
       const t1 = makeType("'A")
 
@@ -117,5 +154,49 @@ describe('Type', function () {
         assert.strictEqual(entry.getValue(), t0)
       })
     })
+
+    it('binds one symbol to an unbound one', function () {
+      const t0 = makeType("'A")
+      const t1 = makeType("'B")
+
+      const u = unify(st, t0, t1)
+      assert.isTrue(u.wasSuccessful())
+      assert.strictEqual(u.getType(), t0)
+
+      assert.isFalse(st.has("'B"))
+      u.apply(st)
+      assert.strictEqual(st.at("'B").getValue(), t0)
+    })
+
+    it('unifies compound types that match recursively', function () {
+      const tInt = makeType('Int')
+      const tString = makeType('String')
+
+      const t0 = makeType('Block', [tInt, tString])
+      unifyBothWays(t0, t0, u => {
+        assert.isTrue(u.wasSuccessful())
+        assert.strictEqual(u.getType(), t0)
+      })
+    })
+
+    it('fails to unify compound types that do not match', function () {
+      const tInt = makeType('Int')
+      const tString = makeType('String')
+      const tReal = makeType('Real')
+
+      const t0 = makeType('Block', [tInt, tString])
+      const t1 = makeType(t0.getBase(), [tString, tInt])
+      const t2 = makeType(t0.getBase(), [tString, tInt])
+      const t3 = makeType(t0.getBase(), [tString, tInt, tReal])
+      const t4 = makeType('Other', [tInt, tString])
+
+      for (const t of [t1, t2, t3, t4]) {
+        unifyBothWays(t0, t, u => assert.isFalse(u.wasSuccessful()))
+      }
+    })
+
+    it('produces SymbolTable bindings for new recursive type parameter assignments')
+
+    it('uses earlier SymbolTable bindings to match later type parameters')
   })
 })

@@ -73,24 +73,6 @@ class TypeParameter {
     }
   }
 
-  unifyWithRaw (symtable, other) {
-    if (symtable.has(this.name)) {
-      const entry = symtable.at(this.name)
-      if (!entry.isStatic()) {
-        throw new Error(
-          `Identifier ${this.name} is not known at compile time, so it can't be in a type expression`)
-      }
-      console.log(entry.getType())
-      if (entry.getType() !== symtable.at('Type').getValue()) {
-        throw new Error(
-          `Identifier ${this.name} is not a Type, so it can't be in a type expression`)
-      }
-      return entry.getValue().unifyWithRaw(symtable, other)
-    } else {
-      return Unification.successful(other, [[this.name, other]])
-    }
-  }
-
   isSimple () { return false }
 
   isParameter () { return true }
@@ -112,6 +94,15 @@ class CompoundType {
 
   getParams () { return this.params }
 
+  resolve (symbolTable) {
+    const rBase = this.base.resolve(symbolTable)
+    if (rBase !== this.base) {
+      return new CompoundType(rBase, this.params.slice())
+    } else {
+      return this
+    }
+  }
+
   isSimple () { return false }
 
   isParameter () { return false }
@@ -124,7 +115,12 @@ class CompoundType {
 }
 
 function makeType (name, params = []) {
-  const base = name.startsWith("'") ? new TypeParameter(name) : new Type(name)
+  let base
+  if (typeof name === 'string') {
+    base = name.startsWith("'") ? new TypeParameter(name) : new Type(name)
+  } else {
+    base = name
+  }
   if (params.length > 0) {
     return new CompoundType(base, params)
   } else {
@@ -132,22 +128,56 @@ function makeType (name, params = []) {
   }
 }
 
-function unify (lType, rType) {
+function unify (symbolTable, lType, rType) {
+  const st = symbolTable.push()
+  const tType = st.at('Type').getValue()
+
   function exact (a, b) {
     if (a === b) return Unification.successful(a, [])
     return Unification.unsuccessful()
   }
 
   function assignParameter (param, value) {
+    st.put(param.getName(), new StaticEntry(tType, value))
     return Unification.successful(value, [[param.getName(), value]])
   }
 
-  if (lType.isSimple() && rType.isSimple()) return exact(lType, rType)
+  function pass (lType, rType) {
+    const lRes = lType.resolve(st)
+    const rRes = rType.resolve(st)
 
-  if (lType.isParameter() && !rType.isParameter()) return assignParameter(lType, rType)
-  if (!lType.isParameter() && rType.isParameter()) return assignParameter(rType, lType)
+    if (lRes.isParameter() && !rRes.isParameter()) return assignParameter(lRes, rRes)
+    if (rRes.isParameter()) return assignParameter(rRes, lRes)
 
-  return Unification.unsuccessful()
+    if (lRes.isCompound() && rRes.isCompound()) {
+      const lParams = lRes.getParams()
+      const rParams = rRes.getParams()
+
+      if (lParams.length !== rParams.length) return Unification.unsuccessful()
+
+      const uBase = pass(lRes.getBase(), rRes.getBase())
+      if (!uBase.wasSuccessful()) return Unification.unsuccessful()
+
+      const uParams = []
+      const uBindings = []
+      for (let i = 0; i < lParams.length; i++) {
+        const uParam = pass(lParams[i], rParams[i])
+        if (!uParam.wasSuccessful()) return Unification.unsuccessful()
+
+        uBindings.push(...uParam.bindings)
+        uParams.push(uParam)
+      }
+
+      const nType = uBindings.length === 0 ? lRes : new CompoundType(uBase.getType(), uParams.map(p => p.getType()))
+      return Unification.successful(nType, uBindings)
+    }
+
+    if (lRes.isSimple() && rRes.isSimple()) return exact(lRes, rRes)
+
+    return Unification.unsuccessful()
+  }
+
+  return pass(lType, rType)
 }
 
 module.exports = {makeType, unify}
