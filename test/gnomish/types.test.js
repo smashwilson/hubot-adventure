@@ -5,12 +5,17 @@ const {makeType, unify} = require('../../src/gnomish/type')
 const {SymbolTable, StaticEntry, SlotEntry} = require('../../src/gnomish/symboltable')
 
 describe('Type', function () {
-  let st, tType
+  let st, tType, tInt, tString, tReal, tBool
 
   beforeEach(function () {
     st = new SymbolTable()
     tType = makeType('Type')
     st.put('Type', new StaticEntry(tType, tType))
+
+    tInt = makeType('Int')
+    tString = makeType('String')
+    tReal = makeType('Real')
+    tBool = makeType('Bool')
   })
 
   describe('makeType', function () {
@@ -31,7 +36,7 @@ describe('Type', function () {
     })
 
     it('constructs a compound type', function () {
-      const c = makeType('Block', [makeType('Int'), makeType("'A"), makeType('Bool')])
+      const c = makeType('Block', [tInt, makeType("'A"), tBool])
       assert.isFalse(c.isSimple())
       assert.isFalse(c.isParameter())
       assert.isTrue(c.isCompound())
@@ -73,7 +78,6 @@ describe('Type', function () {
     })
 
     it('resolves type parameters of compound types shallowly', function () {
-      const tInt = makeType('Int')
       st.put("'A", new StaticEntry(tType, tInt))
       st.put("'B", new StaticEntry(tType, tInt))
 
@@ -169,9 +173,6 @@ describe('Type', function () {
     })
 
     it('unifies compound types that match recursively', function () {
-      const tInt = makeType('Int')
-      const tString = makeType('String')
-
       const t0 = makeType('Block', [tInt, tString])
       unifyBothWays(t0, t0, u => {
         assert.isTrue(u.wasSuccessful())
@@ -195,8 +196,59 @@ describe('Type', function () {
       }
     })
 
-    it('produces SymbolTable bindings for new recursive type parameter assignments')
+    it('produces bindings for new recursive type parameter assignments', function () {
+      const t0 = makeType('Block', [makeType("'A")])
+      const t1 = makeType(t0.getBase(), [tReal])
+      unifyBothWays(t0, t1, u => {
+        assert.isTrue(u.wasSuccessful())
+        const ut = u.getType()
+        assert.strictEqual(ut.getBase(), t0.getBase())
+        assert.lengthOf(ut.getParams(), 1)
+        assert.strictEqual(ut.getParams()[0], tReal)
 
-    it('uses earlier SymbolTable bindings to match later type parameters')
+        assert.isFalse(st.has("'A"))
+        u.apply(st)
+        assert.strictEqual(st.at("'A").getValue(), tReal)
+      })
+    })
+
+    it('uses earlier bindings to match later type parameters', function () {
+      const t0 = makeType('Block', [makeType("'A"), tBool, makeType("'A")])
+
+      const t1 = makeType(t0.getBase(), [tInt, tBool, tInt])
+      unifyBothWays(t0, t1, u => {
+        assert.isTrue(u.wasSuccessful())
+        const ut = u.getType()
+        assert.strictEqual(ut.getBase(), t0.getBase())
+        assert.lengthOf(ut.getParams(), 3)
+        assert.strictEqual(ut.getParams()[0], tInt)
+        assert.strictEqual(ut.getParams()[1], tBool)
+        assert.strictEqual(ut.getParams()[2], tInt)
+
+        assert.isFalse(st.has("'A"))
+        u.apply(st)
+        assert.strictEqual(st.at("'A").getValue(), tInt)
+      })
+
+      const t2 = makeType(t0.getBase(), [tString, tBool, tString])
+      unifyBothWays(t0, t2, u => {
+        assert.isTrue(u.wasSuccessful())
+        const ut = u.getType()
+        assert.strictEqual(ut.getBase(), t0.getBase())
+        assert.lengthOf(ut.getParams(), 3)
+        assert.strictEqual(ut.getParams()[0], tString)
+        assert.strictEqual(ut.getParams()[1], tBool)
+        assert.strictEqual(ut.getParams()[2], tString)
+
+        assert.isFalse(st.has("'A"))
+        u.apply(st)
+        assert.strictEqual(st.at("'A").getValue(), tString)
+      })
+
+      const t3 = makeType(t0.getBase(), [tInt, tBool, tString])
+      unifyBothWays(t0, t3, u => {
+        assert.isFalse(u.wasSuccessful())
+      })
+    })
   })
 })
