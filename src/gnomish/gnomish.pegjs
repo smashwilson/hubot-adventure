@@ -123,8 +123,9 @@ addlike "additive operator"
 andlike "logical and"
   = $ ( '&' opstem? )
 
+// Note that a single "|" is reserved for block argument terminations
 orlike "logical or"
-  = $ ( '|' opstem? )
+  = $ ( '|' opstem )
 
 // Note that a single "=" on its own is reserved for assignment and "let".
 complike "comparison operator"
