@@ -76,7 +76,6 @@ describe('Analyzer', function () {
 
       it('infers a type based on a default value', function () {
         const root = parse('{ x = "yes" | x }')
-        console.log(root.sexp())
         analyzer.visit(root.node)
 
         const blockNode = root.node.getLastExpr()
