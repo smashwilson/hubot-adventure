@@ -2,6 +2,7 @@
 
 const {assert} = require('chai')
 const {parse} = require('../../src/gnomish')
+const {assertSexp} = require('./helper')
 
 function onlyExpr (node) {
   assert.lengthOf(node.exprs, 1)
@@ -76,9 +77,54 @@ describe('Gnomish literals', function () {
       assert.equal(root.sexp(), '(exprlist (block (exprlist)))')
     })
 
-    it('parses an empty block that accepts variables', function () {
-      const root = parse('{ x: Int, y: Int | }')
-      assert.equal(root.sexp(), '(exprlist (block (arg x : (type Int)) (arg y : (type Int)) (exprlist)))')
+    it('parses a block that accepts variables with type annotations', function () {
+      const root = parse('{ x: Int, y: Int | y }')
+      assert.equal(root.sexp(), '(exprlist (block (arg x : (type Int)) (arg y : (type Int)) (exprlist (var y))))')
+    })
+
+    it('parses a block that accepts a variable with a default value', function () {
+      assertSexp('{ x = 42 | x }', `
+        (exprlist
+          (block (arg x = (42)) (exprlist (var x))))
+      `)
+    })
+
+    it('parses a block that accepts a variable with a type and a default value', function () {
+      assertSexp('{ x: Int = 42 | x }', `
+        (exprlist
+          (block (arg x : (type Int) = (42)) (exprlist (var x))))
+      `)
+    })
+
+    it('parses a block containing an expression', function () {
+      assertSexp('{ 3 + 4 }', `
+        (exprlist
+          (block (exprlist (call (3) + (4)))))
+      `)
+    })
+
+    it('parses a block containing several expressions', function () {
+      assertSexp(`
+        {
+          3 + 4
+          "hello" + " world"
+        }
+      `, `
+        (exprlist
+          (block
+            (exprlist
+              (call (3) + (4))
+              (call ("hello") + ("world")))))
+      `)
+    })
+
+    it('parses a block with an empty variable list and an initial assignment', function () {
+      assertSexp('{| x = 7 }', `
+        (exprlist
+          (block
+            (exprlist
+              (assign x (7)))))
+      `)
     })
   })
 })
