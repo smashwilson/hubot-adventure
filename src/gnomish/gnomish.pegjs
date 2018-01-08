@@ -179,4 +179,4 @@ _ "optional whitespace"
   = [ \t]*
 
 exprsep "expression separator"
-  = ( _ [\r\n] _ )+
+  = ( _ ( [\r\n] / ';' ) _ )+
