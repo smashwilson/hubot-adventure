@@ -224,11 +224,30 @@ describe('Analyzer', function () {
     })
 
     describe('LetNode', function () {
-      it('introduces a new binding with an explicit type')
+      it('introduces a new binding with an explicit type', function () {
+        assert.isFalse(st.has('b'))
+        const root = parse('let b : Int = 0').analyze(st, mr)
+        assert.strictEqual(root.node.getType(), tInt)
+        assert.strictEqual(st.at('b').getType(), tInt)
+      })
 
-      it('introduces a new binding with an inferred type')
+      it('introduces a new binding with an inferred type', function () {
+        assert.isFalse(st.has('num'))
+        const root = parse('let num = 4.7').analyze(st, mr)
+        assert.strictEqual(root.node.getType(), tReal)
+        assert.strictEqual(st.at('num').getType(), tReal)
+      })
 
-      it('ensures that an explict type matches an inferred type')
+      it('replaces an existing binding', function () {
+        st.put('r', new SlotEntry(tInt, 0))
+        parse('let r = true').analyze(st, mr)
+        assert.strictEqual(st.at('r').getType(), tBool)
+      })
+
+      it('ensures that an explict type matches an inferred type', function () {
+        const failure = parse('let wat : Int = "no"')
+        assert.throws(() => failure.analyze(st, mr), /Types "Int" and "String" do not match/)
+      })
     })
 
     describe('CallNode', function () {

@@ -64,8 +64,16 @@ class Analyzer extends Visitor {
   }
 
   visitLet (node) {
-    this.visit(node.getType())
-    this.visit(node.getValue())
+    super.visitLet(node)
+
+    if (node.getTypeNode()) {
+      const u = this.unifyTypes(this.typeFromNode(node.getTypeNode()), node.getValue().getType())
+      node.setType(u.getType())
+    } else {
+      node.setType(node.getValue().getType())
+    }
+
+    this.symbolTable.put(node.getName(), new SlotEntry(node.getType(), 0))
   }
 
   visitBlock (node) {

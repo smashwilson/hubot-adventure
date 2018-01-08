@@ -27,7 +27,7 @@ class Visitor {
   }
 
   visitLet (node) {
-    this.visit(node.getTypeNode())
+    if (node.getTypeNode()) this.visit(node.getTypeNode())
     this.visit(node.getValue())
   }
 
