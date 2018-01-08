@@ -18,11 +18,15 @@ function tracedParse (text, shouldParse = true) {
       console.error(tracer.getBacktraceString())
       assert.fail(null, null, `Unable to parse expression: ${e.message}`)
     }
+    return null
   }
 }
 
 function assertSexp (text, expected, shouldParse = true) {
-  const actual = tracedParse(text, shouldParse)
+  const root = tracedParse(text, shouldParse)
+  if (!root && !shouldParse) return
+
+  const actual = root.sexp()
   const normalize = str => str.trim().replace(/\s+/g, ' ')
   assert.equal(normalize(actual), normalize(expected))
 }
