@@ -2,7 +2,6 @@
 
 const {assert} = require('chai')
 const {parse} = require('./helper')
-const {Analyzer} = require('../../src/gnomish/analyzer')
 const {makeType} = require('../../src/gnomish/type')
 const {SymbolTable, SlotEntry, StaticEntry} = require('../../src/gnomish/symboltable')
 const {MethodRegistry} = require('../../src/gnomish/methodregistry')
