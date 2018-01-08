@@ -190,11 +190,37 @@ describe('Analyzer', function () {
     })
 
     describe('AssignNode', function () {
-      it('ensures that the binding is already present')
+      it('ensures that the binding is already present', function () {
+        st.put('x', new SlotEntry(tInt, 0))
 
-      it("ensures that the binding's type is consistent with the assigned expression")
+        parse('x = 4').analyze(st, mr)
 
-      it('derives a type matching the assigned value')
+        const failure = parse('y = 7')
+        assert.throws(() => failure.analyze(st, mr), /Identifier "y" not found/)
+      })
+
+      it("ensures that the binding's type is consistent with the assigned expression", function () {
+        const blockType = makeType(tBlock, [tInt, makeType(tOption, [tString])])
+        st.put('x', new SlotEntry(blockType, 0))
+
+        parse("x = { y : Option('A) | 7 }").analyze(st, mr)
+        parse("x = { q : 'Z | 12 }").analyze(st, mr)
+
+        const failure0 = parse('x = { n : Int | 12 }')
+        assert.throws(() => failure0.analyze(st, mr),
+          /Types "Block\(Int, Option\(String\)\)" and "Block\(Int, Int\)" do not match/)
+
+        const failure1 = parse('x = { n : Option(Real) | 12 }')
+        assert.throws(() => failure1.analyze(st, mr),
+          /Types "Block\(Int, Option\(String\)\)" and "Block\(Int, Option\(Real\)\)" do not match/)
+      })
+
+      it('derives a type matching the assigned value', function () {
+        st.put('result', new SlotEntry(tString, 0))
+
+        const root = parse('result = "boo"').analyze(st, mr)
+        assert.strictEqual(root.node.getType(), tString)
+      })
     })
 
     describe('LetNode', function () {
