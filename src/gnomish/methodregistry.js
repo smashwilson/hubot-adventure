@@ -54,7 +54,7 @@ class MethodRegistry {
     if (matches.length === 0) {
       const argMessage = argTypes.length === 0
         ? 'without arguments'
-        : `with argument types ${argTypes.map(t => to.toString()).join(', ')}`
+        : `with argument types ${argTypes.map(t => t.toString()).join(', ')}`
 
       throw new Error(`Type ${receiverType.toString()} has no method "${selector}" ${argMessage}`)
     }
@@ -62,7 +62,7 @@ class MethodRegistry {
     if (matches.length > 1) {
       const argMessage = argTypes.length === 0
         ? 'without arguments'
-        : `with argument types ${argTypes.map(t => to.toString()).join(', ')}`
+        : `with argument types ${argTypes.map(t => t.toString()).join(', ')}`
 
       const e = new Error(
         `Type ${receiverType.toString()} has ${matches.length} methods called "${selector}" ${argMessage}`
