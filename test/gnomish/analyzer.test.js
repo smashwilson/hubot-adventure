@@ -8,7 +8,7 @@ const {SymbolTable, SlotEntry, StaticEntry} = require('../../src/gnomish/symbolt
 const {MethodRegistry} = require('../../src/gnomish/methodregistry')
 
 describe('Analyzer', function () {
-  let st, mr, analyzer
+  let st, mr
   let tInt, tReal, tString, tBool, tBlock, tOption, tType
 
   beforeEach(function () {
@@ -33,70 +33,55 @@ describe('Analyzer', function () {
     st.put('false', new StaticEntry(tBool, false))
 
     mr = new MethodRegistry()
-
-    analyzer = new Analyzer(st, mr)
   })
 
   describe('typechecking', function () {
     it('assigns Int to IntNodes', function () {
-      const root = parse('3')
-      analyzer.visit(root.node)
-
+      const root = parse('3').analyze(st, mr)
       assert.strictEqual(root.node.getType(), tInt)
     })
 
     it('assigns Real to RealNodes', function () {
-      const root = parse('12.34')
-      analyzer.visit(root.node)
-
+      const root = parse('12.34').analyze(st, mr)
       assert.strictEqual(root.node.getType(), tReal)
     })
 
     it('assigns String to StringNodes', function () {
-      const root = parse('"wat"')
-      analyzer.visit(root.node)
-
+      const root = parse('"wat"').analyze(st, mr)
       assert.strictEqual(root.node.getType(), tString)
     })
 
     it('assigns a type from the symbol table to a VarNode', function () {
       st.put('variable', new SlotEntry(tString, 0))
 
-      const root = parse('variable')
-      analyzer.visit(root.node)
-
+      const root = parse('variable').analyze(st, mr)
       assert.strictEqual(root.node.getType(), tString)
     })
 
     describe('ArgNode', function () {
       it('assigns a type from a type annotation', function () {
-        const root = parse('{ x: Int | x }')
-        analyzer.visit(root.node)
+        const root = parse('{ x: Int | x }').analyze(st, mr)
 
         const blockNode = root.node.getLastExpr()
         const argNode = blockNode.getArgs()[0]
-
         assert.strictEqual(argNode.getType(), tInt)
       })
 
       it('infers a type based on a default value', function () {
-        const root = parse('{ x = "yes" | x }')
-        analyzer.visit(root.node)
+        const root = parse('{ x = "yes" | x }').analyze(st, mr)
 
         const blockNode = root.node.getLastExpr()
         const argNode = blockNode.getArgs()[0]
-
         assert.strictEqual(argNode.getType(), tString)
       })
 
       it('fails when a type annotation and default value are inconsistent', function () {
         const root = parse('{ x : Bool = "yes" | 7 }')
-        assert.throws(() => analyzer.visit(root.node), /Types "Bool" and "String" do not match/)
+        assert.throws(() => root.analyze(st, mr), /Types "Bool" and "String" do not match/)
       })
 
       it('may be an unbound type parameter', function () {
-        const root = parse("{ x : 'A | x }")
-        analyzer.visit(root.node)
+        const root = parse("{ x : 'A | x }").analyze(st, mr)
 
         const blockNode = root.node.getLastExpr()
         const argNode = blockNode.getArgs()[0]
@@ -114,8 +99,7 @@ describe('Analyzer', function () {
             3
             "sup"
           }
-        `)
-        analyzer.visit(root.node)
+        `).analyze(st, mr)
 
         const blockType = root.node.getLastExpr().getType()
         assert.isTrue(blockType.isCompound())
@@ -127,8 +111,7 @@ describe('Analyzer', function () {
       it('parameterizes its type with its return value, then argument types', function () {
         const root = parse(`
           { x : Int, y = "foo" | "yep" ; true }
-        `)
-        analyzer.visit(root.node)
+        `).analyze(st, mr)
 
         const blockType = root.node.getLastExpr().getType()
         assert.isTrue(blockType.isCompound())
@@ -140,8 +123,7 @@ describe('Analyzer', function () {
       })
 
       it('may have an unbound argument parameter', function () {
-        const root = parse("{ x : 'A | 3 }")
-        analyzer.visit(root.node)
+        const root = parse("{ x : 'A | 3 }").analyze(st, mr)
 
         const blockType = root.node.getLastExpr().getType()
         assert.isTrue(blockType.isCompound())
@@ -153,8 +135,7 @@ describe('Analyzer', function () {
       })
 
       it('may have a return type expressed in type parameters', function () {
-        const root = parse("{ x : 'A | x }")
-        analyzer.visit(root.node)
+        const root = parse("{ x : 'A | x }").analyze(st, mr)
 
         const blockType = root.node.getLastExpr().getType()
         assert.isTrue(blockType.isCompound())
@@ -168,25 +149,22 @@ describe('Analyzer', function () {
 
     describe('IfNode', function () {
       it('ensures that the condition clause of an IfNode evaluates to a Bool', function () {
-        const success = parse('if {true} then {"no"} else {"uh"}')
-        analyzer.visit(success.node)
+        parse('if {true} then {"no"} else {"uh"}').analyze(st, mr)
 
         const failure = parse('if {6} then {3} else {"no"}')
-        assert.throws(() => analyzer.visit(failure.node), /Types "Block\(Bool\)" and "Block\(Int\)" do not match/)
+        assert.throws(() => failure.analyze(st, mr), /Types "Block\(Bool\)" and "Block\(Int\)" do not match/)
       })
 
       it('ensures that the "then" and "else" branches of an IfNode are consistent', function () {
-        const success = parse('if {true} then {3} else {4}')
-        analyzer.visit(success.node)
+        const success = parse('if {true} then {3} else {4}').analyze(st, mr)
         assert.strictEqual(success.node.getType(), tInt)
 
         const failure = parse('if {true} then {3} else {"no"}')
-        assert.throws(() => analyzer.visit(failure.node), /Types "Block\(Int\)" and "Block\(String\)" do not match/)
+        assert.throws(() => failure.analyze(st, mr), /Types "Block\(Int\)" and "Block\(String\)" do not match/)
       })
 
       it('derives an Option type if there is no "else" clause', function () {
-        const root = parse('if {true} then {1.2}')
-        analyzer.visit(root.node)
+        const root = parse('if {true} then {1.2}').analyze(st, mr)
 
         const ifType = root.node.getType()
         assert.isTrue(ifType.isCompound())
@@ -194,6 +172,32 @@ describe('Analyzer', function () {
         assert.lengthOf(ifType.getParams(), 1)
         assert.strictEqual(ifType.getParams()[0], tReal)
       })
+    })
+
+    describe('WhileNode', function () {
+      it('ensures that the condition clause evaluates to a Bool')
+
+      it('derives a type matching the return type of the action clause')
+    })
+
+    describe('AssignNode', function () {
+      it('ensures that the binding is already present')
+
+      it("ensures that the binding's type is consistent with the assigned expression")
+
+      it('derives a type matching the assigned value')
+    })
+
+    describe('LetNode', function () {
+      it('introduces a new binding with an explicit type')
+
+      it('introduces a new binding with an inferred type')
+
+      it('ensures that an explict type matches an inferred type')
+    })
+
+    describe('CallNode', function () {
+      it('assigns the return type of the discovered method')
     })
   })
 })
