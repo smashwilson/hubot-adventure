@@ -250,7 +250,13 @@ describe('Analyzer', function () {
     })
 
     describe('CallNode', function () {
-      it('assigns the return type of the discovered method')
+      it('assigns the return type of the discovered method', function () {
+        mr.register(tInt, '+', [tInt], tInt, () => {})
+        mr.register(tString, 'replace', [tInt, tString, tString], tInt, () => {})
+
+        const root = parse('"boo".replace(3 + 4, "from", "to")').analyze(st, mr)
+        assert.strictEqual(root.node.getType(), tInt)
+      })
     })
   })
 })

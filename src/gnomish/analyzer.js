@@ -105,6 +105,17 @@ class Analyzer extends Visitor {
     this.symbolTable.put(node.getName(), new SlotEntry(node.getType(), 0))
   }
 
+  visitCall (node) {
+    super.visitCall(node)
+
+    const signature = this.methodRegistry.lookup(
+      node.getReceiver().getType(),
+      node.getName(),
+      node.getArgs().map(a => a.getType())
+    )
+    node.setType(signature.getReturnType())
+  }
+
   visitInt (node) {
     node.setType(this.symbolTable.at('Int').getValue())
   }
