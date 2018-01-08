@@ -17,6 +17,7 @@ class Analyzer extends Visitor {
     this.methodRegistry = methodRegistry
 
     this.tType = this.symbolTable.at('Type').getValue()
+    this.tBlock = this.symbolTable.at('Block').getValue()
   }
 
   visitExprList (node) {
@@ -48,10 +49,10 @@ class Analyzer extends Visitor {
     super.visitBlock(node)
 
     const blockBase = this.symbolTable.at('Block').getValue()
-    node.setType(blockBase, [
+    node.setType(makeType(blockBase, [
       node.getBody().getLastExpr().getType(),
       ...node.getArgs().map(arg => arg.getType())
-    ])
+    ]))
   }
 
   visitArg (node) {
@@ -109,6 +110,15 @@ class Analyzer extends Visitor {
         `Identifier "${name}" does not name a type, so it may not appear in a type expression`)
     }
     return entry.getValue()
+  }
+
+  unifyTypes (lhs, rhs) {
+    const u = unify(this.symbolTable, lhs, rhs)
+    if (!u.wasSuccessful()) {
+      throw new Error(
+        `Types "${lhs.toString()}" and "${rhs.toString()}" do not match`)
+    }
+    return u
   }
 }
 

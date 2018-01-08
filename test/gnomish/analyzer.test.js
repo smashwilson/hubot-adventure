@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 const {assert} = require('chai')
-const {parse} = require('../../src/gnomish')
+const {parse} = require('./helper')
 const {Analyzer} = require('../../src/gnomish/analyzer')
 const {makeType} = require('../../src/gnomish/type')
 const {SymbolTable, SlotEntry, StaticEntry} = require('../../src/gnomish/symboltable')
@@ -26,6 +26,9 @@ describe('Analyzer', function () {
     st.put('Bool', new StaticEntry(tType, tBool))
     st.put('Block', new StaticEntry(tType, tBlock))
     st.put('Type', new StaticEntry(tType, tType))
+
+    st.put('true', new StaticEntry(tBool, true))
+    st.put('false', new StaticEntry(tBool, false))
 
     mr = new MethodRegistry()
 
@@ -102,10 +105,69 @@ describe('Analyzer', function () {
       })
     })
 
+    describe('BlockNode', function () {
+      it('infers the return type from the final expression', function () {
+        const root = parse(`
+          {
+            3
+            "sup"
+          }
+        `)
+        analyzer.visit(root.node)
+
+        const blockType = root.node.getLastExpr().getType()
+        assert.isTrue(blockType.isCompound())
+        assert.strictEqual(blockType.getBase(), tBlock)
+        assert.lengthOf(blockType.getParams(), 1)
+        assert.strictEqual(blockType.getParams()[0], tString)
+      })
+
+      it('parameterizes its type with its return value, then argument types', function () {
+        const root = parse(`
+          { x : Int, y = "foo" | "yep" ; true }
+        `)
+        analyzer.visit(root.node)
+
+        const blockType = root.node.getLastExpr().getType()
+        assert.isTrue(blockType.isCompound())
+        assert.strictEqual(blockType.getBase(), tBlock)
+        assert.lengthOf(blockType.getParams(), 3)
+        assert.strictEqual(blockType.getParams()[0], tBool)
+        assert.strictEqual(blockType.getParams()[1], tInt)
+        assert.strictEqual(blockType.getParams()[2], tString)
+      })
+
+      it('may have an unbound argument parameter', function () {
+        const root = parse("{ x : 'A | 3 }")
+        analyzer.visit(root.node)
+
+        const blockType = root.node.getLastExpr().getType()
+        assert.isTrue(blockType.isCompound())
+        assert.strictEqual(blockType.getBase(), tBlock)
+        assert.lengthOf(blockType.getParams(), 2)
+        assert.strictEqual(blockType.getParams()[0], tInt)
+        assert.isTrue(blockType.getParams()[1].isParameter())
+        assert.equal(blockType.getParams()[1].getName(), "'A")
+      })
+
+      it('may have a return type expressed in type parameters', function () {
+        const root = parse("{ x : 'A | x }")
+        analyzer.visit(root.node)
+
+        const blockType = root.node.getLastExpr().getType()
+        assert.isTrue(blockType.isCompound())
+        assert.strictEqual(blockType.getBase(), tBlock)
+        assert.lengthOf(blockType.getParams(), 2)
+        assert.isTrue(blockType.getParams()[0].isParameter())
+        assert.equal(blockType.getParams()[0].getName(), "'A")
+        assert.strictEqual(blockType.getParams()[1], blockType.getParams()[0])
+      })
+    })
+
     describe('IfNode', function () {
       it('ensures that the condition clause of an IfNode evaluates to a Bool', function () {
         const success = parse('if {true} then {"no"} else {"uh"}')
-        analyzer.visit(success)
+        analyzer.visit(success.node)
 
         const failure = parse('if {6} then {3} else {"no"}')
         assert.throws(() => analyzer.visit(failure.node), /Types "Int" and "Bool" do not match/)
