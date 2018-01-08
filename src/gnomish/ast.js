@@ -58,7 +58,7 @@ class IfNode extends Node {
     super()
     this.condition = condition
     this.thenb = thenb
-    this.elseb = elseb || new BlockNode({})
+    this.elseb = elseb
   }
 
   getCondition () { return this.condition }

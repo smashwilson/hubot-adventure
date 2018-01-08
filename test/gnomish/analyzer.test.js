@@ -9,7 +9,7 @@ const {MethodRegistry} = require('../../src/gnomish/methodregistry')
 
 describe('Analyzer', function () {
   let st, mr, analyzer
-  let tInt, tReal, tString, tBool, tBlock, tType
+  let tInt, tReal, tString, tBool, tBlock, tOption, tType
 
   beforeEach(function () {
     tInt = makeType('Int')
@@ -17,6 +17,7 @@ describe('Analyzer', function () {
     tString = makeType('String')
     tBool = makeType('Bool')
     tBlock = makeType('Block')
+    tOption = makeType('Option')
     tType = makeType('Type')
 
     st = new SymbolTable()
@@ -25,6 +26,7 @@ describe('Analyzer', function () {
     st.put('String', new StaticEntry(tType, tString))
     st.put('Bool', new StaticEntry(tType, tBool))
     st.put('Block', new StaticEntry(tType, tBlock))
+    st.put('Option', new StaticEntry(tType, tOption))
     st.put('Type', new StaticEntry(tType, tType))
 
     st.put('true', new StaticEntry(tBool, true))
@@ -180,6 +182,17 @@ describe('Analyzer', function () {
 
         const failure = parse('if {true} then {3} else {"no"}')
         assert.throws(() => analyzer.visit(failure.node), /Types "Block\(Int\)" and "Block\(String\)" do not match/)
+      })
+
+      it('derives an Option type if there is no "else" clause', function () {
+        const root = parse('if {true} then {1.2}')
+        analyzer.visit(root.node)
+
+        const ifType = root.node.getType()
+        assert.isTrue(ifType.isCompound())
+        assert.strictEqual(ifType.getBase(), tOption)
+        assert.lengthOf(ifType.getParams(), 1)
+        assert.strictEqual(ifType.getParams()[0], tReal)
       })
     })
   })
