@@ -18,6 +18,9 @@ class Analyzer extends Visitor {
 
     this.tType = this.symbolTable.at('Type').getValue()
     this.tBlock = this.symbolTable.at('Block').getValue()
+
+    const tBool = this.symbolTable.at('Bool').getValue()
+    this.condType = makeType(this.tBlock, [tBool])
   }
 
   visitExprList (node) {
@@ -26,9 +29,16 @@ class Analyzer extends Visitor {
   }
 
   visitIf (node) {
-    this.visit(node.getCondition())
-    this.visit(node.getThen())
-    this.visit(node.getElse())
+    super.visitIf(node)
+
+    this.unifyTypes(this.condType, node.getCondition().getType())
+
+    const thType = node.getThen().getType()
+    const elseType = node.getElse().getType()
+    const ru = this.unifyTypes(thType, elseType)
+
+    // Block return type
+    node.setType(ru.getType().getParams()[0])
   }
 
   visitWhile (node) {

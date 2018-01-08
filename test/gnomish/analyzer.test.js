@@ -170,7 +170,7 @@ describe('Analyzer', function () {
         analyzer.visit(success.node)
 
         const failure = parse('if {6} then {3} else {"no"}')
-        assert.throws(() => analyzer.visit(failure.node), /Types "Int" and "Bool" do not match/)
+        assert.throws(() => analyzer.visit(failure.node), /Types "Block\(Bool\)" and "Block\(Int\)" do not match/)
       })
 
       it('ensures that the "then" and "else" branches of an IfNode are consistent', function () {
@@ -179,7 +179,7 @@ describe('Analyzer', function () {
         assert.strictEqual(success.node.getType(), tInt)
 
         const failure = parse('if {true} then {3} else {"no"}')
-        assert.throws(() => analyzer.visit(failure.node), /Types "Int" and "String" do not match/)
+        assert.throws(() => analyzer.visit(failure.node), /Types "Block\(Int\)" and "Block\(String\)" do not match/)
       })
     })
   })
