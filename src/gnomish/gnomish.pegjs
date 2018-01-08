@@ -166,6 +166,8 @@ block
 blockargs "block arguments"
   = first:blockarg rest:(_ ',' _ arg:blockarg { return arg } )* _ '|'
     { return [first, ...rest] }
+  / '|'
+    { return [] }
 
 blockarg "block argument"
   = name:identifier type:(_ ':' _ t:typeexpr { return t })? repeatable:'*'? def:(_ '=' _ d:expr { return d })?
