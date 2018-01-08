@@ -1,4 +1,6 @@
 const {Visitor} = require('./visitor')
+const {makeType, unify} = require('./type')
+const {SlotEntry} = require('./symboltable')
 
 // Static analysis phase, to be performed immediately after parsing an AST, but before interpreting it. Responsible for:
 //
@@ -13,6 +15,8 @@ class Analyzer extends Visitor {
     super()
     this.symbolTable = symbolTable
     this.methodRegistry = methodRegistry
+
+    this.tType = this.symbolTable.at('Type').getValue()
   }
 
   visitExprList (node) {
@@ -20,18 +24,53 @@ class Analyzer extends Visitor {
     node.setType(node.getLastExpr().getType())
   }
 
+  visitIf (node) {
+    this.visit(node.getCondition())
+    this.visit(node.getThen())
+    this.visit(node.getElse())
+  }
+
+  visitWhile (node) {
+    this.visit(node.getCondition())
+    this.visit(node.getAction())
+  }
+
+  visitAssign (node) {
+    this.visit(node.getValue())
+  }
+
+  visitLet (node) {
+    this.visit(node.getType())
+    this.visit(node.getValue())
+  }
+
   visitBlock (node) {
     super.visitBlock(node)
 
     const blockBase = this.symbolTable.at('Block').getValue()
-    node.setType(blockBase.withArgs([
+    node.setType(blockBase, [
       node.getBody().getLastExpr().getType(),
       ...node.getArgs().map(arg => arg.getType())
-    ]))
+    ])
   }
 
   visitArg (node) {
     super.visitArg(node)
+
+    let annotatedType = node.getTypeNode() && this.typeFromNode(node.getTypeNode())
+    let defType = node.getDefault() && node.getDefault().getType()
+
+    if (annotatedType && defType) {
+      const u = unify(this.symbolTable, annotatedType, defType)
+      if (!u.wasSuccessful()) {
+        throw new Error(`Types "${annotatedType.toString()}" and "${defType.toString()}" do not match`)
+      }
+      u.apply(this.symbolTable)
+      node.setType(u.getType())
+    } else {
+      node.setType(annotatedType || defType)
+    }
+    this.symbolTable.put(node.getName(), new SlotEntry(node.getType(), 0))
   }
 
   visitInt (node) {
@@ -48,6 +87,25 @@ class Analyzer extends Visitor {
 
   visitVar (node) {
     node.setType(this.symbolTable.at(node.getName()).getType())
+  }
+
+  typeFromNode (node) {
+    const entry = this.symbolTable.at(node.getName())
+    if (!entry.isStatic()) {
+      throw new Error(
+        `Identifier "${node.getName()}" is not available at compile time, so it may not appear in a type expression`)
+    }
+    if (entry.getType() !== this.tType) {
+      throw new Error(
+        `Identifier "${node.getName()}" does not name a type, so it may not appear in a type expression`)
+    }
+    const base = entry.getValue()
+
+    if (node.getParams().length === 0) {
+      return base
+    }
+
+    return makeType(base, node.getParams().map(p => this.typeFromNode(p)))
   }
 }
 
