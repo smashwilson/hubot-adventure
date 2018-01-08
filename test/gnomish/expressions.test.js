@@ -26,8 +26,7 @@ describe('Gnomish expressions', function () {
         (exprlist
           (if
             (block (exprlist (var true)))
-            (block (exprlist (42)))
-            (block (exprlist))))
+            (block (exprlist (42)))))
       `)
     })
 

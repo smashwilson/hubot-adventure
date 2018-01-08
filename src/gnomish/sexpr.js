@@ -22,8 +22,10 @@ class SexpVisitor extends Visitor {
     this.visit(node.getCondition())
     this.result += ' '
     this.visit(node.getThen())
-    this.result += ' '
-    this.visit(node.getElse())
+    if (node.getElse()) {
+      this.result += ' '
+      this.visit(node.getElse())
+    }
     this.result += ')'
   }
 
