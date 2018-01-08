@@ -23,7 +23,7 @@
 // Expressions ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exprlist
-  = first:expr rest:( _ ( ';' / '\n' ) _ each:expr _ { return each } )*
+  = exprsep? first:expr rest:( exprsep each:expr { return each } )* exprsep?
     { return new ExprListNode([first, ...rest]) }
 
 // Non-associative
@@ -174,4 +174,7 @@ blockarg "block argument"
 // Whitespace /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 _ "optional whitespace"
-  = [ \t\r\n]*
+  = [ \t]*
+
+exprsep "expression separator"
+  = ( _ [\r\n] _ )+
