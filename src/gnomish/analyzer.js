@@ -90,22 +90,25 @@ class Analyzer extends Visitor {
   }
 
   typeFromNode (node) {
-    const entry = this.symbolTable.at(node.getName())
+    const base = this.getTypeNamed(node.getName())
+    return makeType(base, node.getParams().map(p => this.typeFromNode(p)))
+  }
+
+  getTypeNamed (name) {
+    if (name.startsWith("'")) {
+      return makeType(name)
+    }
+
+    const entry = this.symbolTable.at(name)
     if (!entry.isStatic()) {
       throw new Error(
-        `Identifier "${node.getName()}" is not available at compile time, so it may not appear in a type expression`)
+        `Identifier "${name}" is not available at compile time, so it may not appear in a type expression`)
     }
     if (entry.getType() !== this.tType) {
       throw new Error(
-        `Identifier "${node.getName()}" does not name a type, so it may not appear in a type expression`)
+        `Identifier "${name}" does not name a type, so it may not appear in a type expression`)
     }
-    const base = entry.getValue()
-
-    if (node.getParams().length === 0) {
-      return base
-    }
-
-    return makeType(base, node.getParams().map(p => this.typeFromNode(p)))
+    return entry.getValue()
   }
 }
 

@@ -97,7 +97,7 @@ describe('Analyzer', function () {
         const argNode = blockNode.getArgs()[0]
         const argType = argNode.getType()
 
-        assert.isTrue(argType.isParam())
+        assert.isTrue(argType.isParameter())
         assert.equal(argType.getName(), "'A")
       })
     })
