@@ -43,8 +43,8 @@ class SexpVisitor extends Visitor {
 
   visitLet (node) {
     this.result += `(let ${node.getName()} : `
-    if (node.getType()) {
-      this.visit(node.getType())
+    if (node.getTypeNode()) {
+      this.visit(node.getTypeNode())
     } else {
       this.result += '<inferred>'
     }
@@ -66,9 +66,9 @@ class SexpVisitor extends Visitor {
 
   visitArg (node) {
     this.result += `(arg ${node.getName()}`
-    if (node.getType()) {
+    if (node.getTypeNode()) {
       this.result += ' : '
-      this.visit(node.getType())
+      this.visit(node.getTypeNode())
     }
     if (node.isRepeatable()) this.result += '*'
     if (node.getDefault()) {

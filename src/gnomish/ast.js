@@ -108,13 +108,13 @@ class LetNode extends SlotNode {
   constructor ({name, type, value}) {
     super()
     this.name = name
-    this.type = type
+    this.typeNode = type
     this.value = value
   }
 
   getName () { return this.name }
 
-  getType () { return this.type }
+  getTypeNode () { return this.typeNode }
 
   getValue () { return this.value }
 
@@ -166,14 +166,14 @@ class ArgNode extends SlotNode {
   constructor ({name, type, repeatable, def}) {
     super()
     this.name = name
-    this.type = type
+    this.typeNode = type
     this.repeatable = repeatable !== null
     this.def = def
   }
 
   getName () { return this.name }
 
-  getType () { return this.type }
+  getTypeNode () { return this.typeNode }
 
   getDefault () { return this.def }
 

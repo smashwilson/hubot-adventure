@@ -27,7 +27,7 @@ class Visitor {
   }
 
   visitLet (node) {
-    this.visit(node.getType())
+    this.visit(node.getTypeNode())
     this.visit(node.getValue())
   }
 
@@ -39,7 +39,7 @@ class Visitor {
   }
 
   visitArg (node) {
-    if (node.getType()) this.visit(node.getType())
+    if (node.getTypeNode()) this.visit(node.getTypeNode())
     if (node.getDefault()) this.visit(node.getDefault())
   }
 
