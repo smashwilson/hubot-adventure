@@ -114,7 +114,7 @@ describe('Gnomish literals', function () {
           (block
             (exprlist
               (call (3) + (4))
-              (call ("hello") + ("world")))))
+              (call ("hello") + (" world")))))
       `)
     })
 
