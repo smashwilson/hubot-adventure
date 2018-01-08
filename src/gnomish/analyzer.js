@@ -48,8 +48,11 @@ class Analyzer extends Visitor {
   }
 
   visitWhile (node) {
-    this.visit(node.getCondition())
-    this.visit(node.getAction())
+    super.visitWhile(node)
+
+    this.unifyTypes(this.condType, node.getCondition().getType())
+
+    node.setType(node.getAction().getType().getParams()[0])
   }
 
   visitAssign (node) {

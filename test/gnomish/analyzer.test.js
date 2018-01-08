@@ -175,9 +175,18 @@ describe('Analyzer', function () {
     })
 
     describe('WhileNode', function () {
-      it('ensures that the condition clause evaluates to a Bool')
+      it('ensures that the condition clause evaluates to a Bool', function () {
+        parse('while {true} do {3}').analyze(st, mr)
 
-      it('derives a type matching the return type of the action clause')
+        const failure = parse('while {"no"} do {"boom"}')
+        assert.throws(() => failure.analyze(st, mr), /Types "Block\(Bool\)" and "Block\(String\)" do not match/)
+      })
+
+      it('derives a type matching the return type of the action clause', function () {
+        const root = parse('while {true} do {4.0}').analyze(st, mr)
+
+        assert.strictEqual(root.node.getType(), tReal)
+      })
     })
 
     describe('AssignNode', function () {
