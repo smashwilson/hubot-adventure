@@ -9,7 +9,9 @@ describe('MethodRegistry', function () {
   const tInt = makeType('Int')
   const tReal = makeType('Real')
   const tString = makeType('String')
+  const tBool = makeType('Bool')
   const tOption = makeType('Option')
+  const tBlock = makeType('Block')
 
   const right = () => {}
   const wrong = () => {}
@@ -42,6 +44,21 @@ describe('MethodRegistry', function () {
       registry.register(makeType(tOption, [tA]), 'selector', [tInt, tString], tString, wrong)
 
       assert.strictEqual(registry.lookup(st, makeType(tOption, [tReal]), 'selector', [tInt, tReal]).getCallback(), right)
+    })
+
+    it('derives the signature return type from bound type variables', function () {
+      const tA = makeType("'A")
+      const tB = makeType("'B")
+
+      registry.register(makeType(tOption, [tA]), 'selector', [tInt, tB], makeType(tBlock, [tB, tA]), right)
+
+      const signature = registry.lookup(st, makeType(tOption, [tString]), 'selector', [tInt, tBool])
+      const retType = signature.getReturnType()
+      assert.isTrue(retType.isCompound())
+      assert.strictEqual(retType.getBase(), tBlock)
+      assert.lengthOf(retType.getParams(), 2)
+      assert.strictEqual(retType.getParams()[0], tBool)
+      assert.strictEqual(retType.getParams()[1], tString)
     })
   })
 

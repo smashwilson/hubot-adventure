@@ -8,7 +8,7 @@ class Signature {
     this.retType = retType
   }
 
-  matches (symbolTable, receiverType, callArgTypes) {
+  match (symbolTable, receiverType, callArgTypes) {
     const st = symbolTable.push()
 
     const typePairs = [
@@ -19,11 +19,16 @@ class Signature {
     for (const [lhs, rhs] of typePairs) {
       const u = unify(st, lhs, rhs)
       if (!u.wasSuccessful()) {
-        return false
+        return null
       }
       u.apply(st)
     }
-    return true
+
+    const boundRetType = this.retType.resolveRecursively(st)
+
+    return boundRetType === this.retType
+      ? this
+      : new Signature(this.receiverType, this.argTypes, this.callback, boundRetType)
   }
 
   getCallback () {
@@ -57,7 +62,9 @@ class MethodRegistry {
       throw new Error(`Type ${receiverType.toString()} has no method "${selector}"`)
     }
 
-    const matches = signatures.filter(signature => signature.matches(symbolTable, receiverType, argTypes))
+    const matches = signatures
+      .map(signature => signature.match(symbolTable, receiverType, argTypes))
+      .filter(Boolean)
     if (matches.length === 0) {
       const argMessage = argTypes.length === 0
         ? 'without arguments'

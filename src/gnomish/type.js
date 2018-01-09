@@ -38,6 +38,10 @@ class Type {
     return this
   }
 
+  resolveRecursively (symbolTable) {
+    return this
+  }
+
   isSimple () { return true }
 
   isParameter () { return false }
@@ -73,6 +77,10 @@ class TypeParameter {
     }
   }
 
+  resolveRecursively (symbolTable) {
+    return this.resolve(symbolTable)
+  }
+
   isSimple () { return false }
 
   isParameter () { return true }
@@ -101,6 +109,12 @@ class CompoundType {
     } else {
       return this
     }
+  }
+
+  resolveRecursively (symbolTable) {
+    const t = this.resolve(symbolTable)
+    t.params = this.params.map(p => p.resolveRecursively(symbolTable))
+    return t
   }
 
   isSimple () { return false }
