@@ -1,13 +1,29 @@
+const {unify} = require('./type')
+
 class Signature {
-  constructor (argTypes, callback, retType) {
+  constructor (receiverType, argTypes, callback, retType) {
+    this.receiverType = receiverType
     this.argTypes = argTypes
     this.callback = callback
     this.retType = retType
   }
 
-  matches (callArgTypes) {
-    return this.argTypes.length === callArgTypes.length &&
-      this.argTypes.every((argType, index) => argType === callArgTypes[index])
+  matches (symbolTable, receiverType, callArgTypes) {
+    const st = symbolTable.push()
+
+    const typePairs = [
+      [this.receiverType, receiverType],
+      ...this.argTypes.map((t, i) => [t, callArgTypes[i]])
+    ]
+
+    for (const [lhs, rhs] of typePairs) {
+      const u = unify(st, lhs, rhs)
+      if (!u.wasSuccessful()) {
+        return false
+      }
+      u.apply(st)
+    }
+    return true
   }
 
   getCallback () {
@@ -21,36 +37,27 @@ class Signature {
 
 class MethodRegistry {
   constructor () {
-    this.byReceiverType = new Map()
+    this.bySelector = new Map()
   }
 
   register (receiverType, selector, argTypes, retType, callback) {
-    let bySelector = this.byReceiverType.get(receiverType)
-    if (!bySelector) {
-      bySelector = new Map()
-      this.byReceiverType.set(receiverType, bySelector)
-    }
-    let signatures = bySelector.get(selector)
+    let signatures = this.bySelector.get(selector)
     if (!signatures) {
       signatures = []
-      bySelector.set(selector, signatures)
+      this.bySelector.set(selector, signatures)
     }
 
-    const addedSignature = new Signature(argTypes, callback, retType)
+    const addedSignature = new Signature(receiverType, argTypes, callback, retType)
     signatures.push(addedSignature)
   }
 
-  lookup (receiverType, selector, argTypes) {
-    const bySelector = this.byReceiverType.get(receiverType)
-    if (!bySelector) {
-      throw new Error(`Type ${receiverType.toString()} has no method "${selector}"`)
-    }
-    const signatures = bySelector.get(selector)
+  lookup (symbolTable, receiverType, selector, argTypes) {
+    const signatures = this.bySelector.get(selector)
     if (!signatures) {
       throw new Error(`Type ${receiverType.toString()} has no method "${selector}"`)
     }
 
-    const matches = signatures.filter(signature => signature.matches(argTypes))
+    const matches = signatures.filter(signature => signature.matches(symbolTable, receiverType, argTypes))
     if (matches.length === 0) {
       const argMessage = argTypes.length === 0
         ? 'without arguments'

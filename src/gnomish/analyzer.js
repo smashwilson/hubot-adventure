@@ -109,6 +109,7 @@ class Analyzer extends Visitor {
     super.visitCall(node)
 
     const signature = this.methodRegistry.lookup(
+      this.symbolTable,
       node.getReceiver().getType(),
       node.getName(),
       node.getArgs().map(a => a.getType())
