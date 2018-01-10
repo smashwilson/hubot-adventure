@@ -2,7 +2,7 @@
 
 const {assert} = require('chai')
 const {makeType, unify} = require('../../src/gnomish/type')
-const {SymbolTable, StaticEntry, SlotEntry} = require('../../src/gnomish/symboltable')
+const {SymbolTable} = require('../../src/gnomish/symboltable')
 
 describe('Type', function () {
   let st, tType, tInt, tString, tReal, tBool
@@ -10,7 +10,7 @@ describe('Type', function () {
   beforeEach(function () {
     st = new SymbolTable()
     tType = makeType('Type')
-    st.put('Type', new StaticEntry(tType, tType))
+    st.setStatic('Type', tType, tType)
 
     tInt = makeType('Int')
     tString = makeType('String')
@@ -52,21 +52,21 @@ describe('Type', function () {
 
     it('resolves type parameters from the SymbolTable', function () {
       const tInt = makeType('Int')
-      st.put("'A", new StaticEntry(tType, tInt))
+      st.setStatic("'A", tType, tInt)
 
       const t = makeType("'A")
       assert.strictEqual(t.resolve(st), tInt)
     })
 
     it('fails if the SymbolTable entry is non-static', function () {
-      st.put("'B", new SlotEntry(tType, 0))
+      st.allocateSlot("'B", tType)
 
       const t = makeType("'B")
       assert.throws(() => t.resolve(st), /'B is not known at compile time/)
     })
 
     it('fails if the SymbolTable entry is not a Type', function () {
-      st.put("'C", new StaticEntry(makeType('Int'), 10))
+      st.setStatic("'C", makeType('Int'), 10)
 
       const t = makeType("'C")
       assert.throws(() => t.resolve(st), /'C is not a Type/)
@@ -78,8 +78,8 @@ describe('Type', function () {
     })
 
     it('resolves type parameters of compound types shallowly', function () {
-      st.put("'A", new StaticEntry(tType, tInt))
-      st.put("'B", new StaticEntry(tType, tInt))
+      st.setStatic("'A", tType, tInt)
+      st.setStatic("'B", tType, tInt)
 
       const tB = makeType("'B")
       const t0 = makeType("'A", [tB])
@@ -123,7 +123,7 @@ describe('Type', function () {
       const t0 = makeType('Int')
       const t1 = makeType("'A")
 
-      st.put("'A", new StaticEntry(tType, t0))
+      st.setStatic("'A", tType, t0)
 
       unifyBothWays(t0, t1, u => {
         assert.isTrue(u.wasSuccessful())
@@ -136,7 +136,7 @@ describe('Type', function () {
       const t0 = makeType('Int')
       const t1 = makeType("'A")
 
-      st.put("'A", new StaticEntry(tType, makeType('Nope')))
+      st.setStatic("'A", tType, makeType('Nope'))
 
       unifyBothWays(t0, t1, u => assert.isFalse(u.wasSuccessful()))
     })
