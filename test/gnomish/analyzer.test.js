@@ -3,7 +3,7 @@
 const {assert} = require('chai')
 const {parse} = require('./helper')
 const {makeType} = require('../../src/gnomish/type')
-const {SymbolTable, SlotEntry, StaticEntry} = require('../../src/gnomish/symboltable')
+const {SymbolTable} = require('../../src/gnomish/symboltable')
 const {MethodRegistry} = require('../../src/gnomish/methodregistry')
 
 describe('Analyzer', function () {
@@ -20,16 +20,16 @@ describe('Analyzer', function () {
     tType = makeType('Type')
 
     st = new SymbolTable()
-    st.put('Int', new StaticEntry(tType, tInt))
-    st.put('Real', new StaticEntry(tType, tReal))
-    st.put('String', new StaticEntry(tType, tString))
-    st.put('Bool', new StaticEntry(tType, tBool))
-    st.put('Block', new StaticEntry(tType, tBlock))
-    st.put('Option', new StaticEntry(tType, tOption))
-    st.put('Type', new StaticEntry(tType, tType))
+    st.setStatic('Type', tType, tType)
+    st.setStatic('Int', tType, tInt)
+    st.setStatic('Real', tType, tReal)
+    st.setStatic('String', tType, tString)
+    st.setStatic('Bool', tType, tBool)
+    st.setStatic('Block', tType, tBlock)
+    st.setStatic('Option', tType, tOption)
 
-    st.put('true', new StaticEntry(tBool, true))
-    st.put('false', new StaticEntry(tBool, false))
+    st.setStatic('true', tBool, true)
+    st.setStatic('false', tBool, false)
 
     mr = new MethodRegistry()
   })
@@ -51,7 +51,7 @@ describe('Analyzer', function () {
     })
 
     it('assigns a type from the symbol table to a VarNode', function () {
-      st.put('variable', new SlotEntry(tString, 0))
+      st.allocateSlot('variable', tString)
 
       const root = parse('variable').analyze(st, mr)
       assert.strictEqual(root.node.getType(), tString)
@@ -190,7 +190,7 @@ describe('Analyzer', function () {
 
     describe('AssignNode', function () {
       it('ensures that the binding is already present', function () {
-        st.put('x', new SlotEntry(tInt, 0))
+        st.allocateSlot('x', tInt)
 
         parse('x = 4').analyze(st, mr)
 
@@ -200,7 +200,7 @@ describe('Analyzer', function () {
 
       it("ensures that the binding's type is consistent with the assigned expression", function () {
         const blockType = makeType(tBlock, [tInt, makeType(tOption, [tString])])
-        st.put('x', new SlotEntry(blockType, 0))
+        st.allocateSlot('x', blockType)
 
         parse("x = { y : Option('A) | 7 }").analyze(st, mr)
         parse("x = { q : 'Z | 12 }").analyze(st, mr)
@@ -215,7 +215,7 @@ describe('Analyzer', function () {
       })
 
       it('derives a type matching the assigned value', function () {
-        st.put('result', new SlotEntry(tString, 0))
+        st.allocateSlot('result', tString)
 
         const root = parse('result = "boo"').analyze(st, mr)
         assert.strictEqual(root.node.getType(), tString)
@@ -238,7 +238,7 @@ describe('Analyzer', function () {
       })
 
       it('replaces an existing binding', function () {
-        st.put('r', new SlotEntry(tInt, 0))
+        st.allocateSlot('r', tInt)
         parse('let r = true').analyze(st, mr)
         assert.strictEqual(st.at('r').getType(), tBool)
       })

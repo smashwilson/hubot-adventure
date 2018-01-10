@@ -1,5 +1,3 @@
-const {StaticEntry} = require('./symboltable')
-
 class Unification {
   static successful (type, bindings) {
     return new Unification(type, bindings)
@@ -21,7 +19,7 @@ class Unification {
   apply (symbolTable) {
     const tType = symbolTable.at('Type').getValue()
     for (const [name, type] of this.bindings) {
-      symbolTable.put(name, new StaticEntry(tType, type))
+      symbolTable.setStatic(name, tType, type)
     }
     return this
   }
@@ -152,7 +150,7 @@ function unify (symbolTable, lType, rType) {
   }
 
   function assignParameter (param, value) {
-    st.put(param.getName(), new StaticEntry(tType, value))
+    st.setStatic(param.getName(), tType, value)
     return Unification.successful(value, [[param.getName(), value]])
   }
 

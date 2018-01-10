@@ -71,8 +71,10 @@ class SymbolTable {
     return e
   }
 
-  put (name, entry) {
-    this.symbols.set(name, entry)
+  setStatic (name, type, value) {
+    const e = new StaticEntry(type, value)
+    this.symbols.set(name, e)
+    return e
   }
 
   push (newFrame) {
@@ -87,4 +89,4 @@ class SymbolTable {
   }
 }
 
-module.exports = {SymbolTable, SlotEntry, StaticEntry}
+module.exports = {SymbolTable}

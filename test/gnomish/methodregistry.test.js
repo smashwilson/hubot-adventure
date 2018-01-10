@@ -2,7 +2,7 @@
 
 const {assert} = require('chai')
 const {MethodRegistry} = require('../../src/gnomish/methodregistry')
-const {SymbolTable, StaticEntry} = require('../../src/gnomish/symboltable')
+const {SymbolTable} = require('../../src/gnomish/symboltable')
 const {makeType} = require('../../src/gnomish/type')
 
 describe('MethodRegistry', function () {
@@ -22,7 +22,7 @@ describe('MethodRegistry', function () {
     st = new SymbolTable()
 
     const tType = makeType('Type')
-    st.put('Type', new StaticEntry(tType, tType))
+    st.setStatic('Type', tType, tType)
 
     registry = new MethodRegistry()
   })

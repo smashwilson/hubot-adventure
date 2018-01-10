@@ -1,6 +1,5 @@
 const {Visitor} = require('./visitor')
 const {makeType, unify} = require('./type')
-const {SlotEntry} = require('./symboltable')
 
 // Static analysis phase, to be performed immediately after parsing an AST, but before interpreting it. Responsible for:
 //
@@ -73,7 +72,7 @@ class Analyzer extends Visitor {
       node.setType(node.getValue().getType())
     }
 
-    this.symbolTable.put(node.getName(), new SlotEntry(node.getType(), 0))
+    this.symbolTable.allocateSlot(node.getName(), node.getType())
   }
 
   visitBlock (node) {
@@ -102,7 +101,7 @@ class Analyzer extends Visitor {
     } else {
       node.setType(annotatedType || defType)
     }
-    this.symbolTable.put(node.getName(), new SlotEntry(node.getType(), 0))
+    this.symbolTable.allocateSlot(node.getName(), node.getType())
   }
 
   visitCall (node) {
