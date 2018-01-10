@@ -1,44 +1,3 @@
-class SymbolTable {
-  constructor (parent = null) {
-    this.symbols = new Map()
-    this.parent = parent
-  }
-
-  has (name) {
-    if (this.symbols.has(name)) return true
-    if (!this.parent) return false
-
-    return this.parent.has(name)
-  }
-
-  at (name) {
-    let v = this.symbols.get(name)
-    if (v === undefined) {
-      if (this.parent) {
-        return this.parent.at(name)
-      } else {
-        throw new Error(`Identifier "${name}" not found`)
-      }
-    }
-    return v
-  }
-
-  put (name, entry) {
-    this.symbols.set(name, entry)
-  }
-
-  push () {
-    return new SymbolTable(this)
-  }
-
-  pop () {
-    if (!this.parent) {
-      throw new Error('Attempt to pop root symbol table')
-    }
-    return this.parent
-  }
-}
-
 class Entry {
   constructor (type) {
     this.type = type
@@ -67,6 +26,65 @@ class StaticEntry extends Entry {
   getValue () { return this.value }
 
   isStatic () { return true }
+}
+
+class SymbolTable {
+  constructor (frame, parent = null) {
+    this.frame = frame
+    this.parent = parent
+    this.symbols = new Map()
+    this.nextSlot = 0
+  }
+
+  getNextSlot () {
+    const s = this.nextSlot
+    this.nextSlot++
+    return s
+  }
+
+  has (name) {
+    if (this.symbols.has(name)) return true
+    if (!this.parent) return false
+
+    return this.parent.has(name)
+  }
+
+  binding (name) {
+    let v = this.symbols.get(name)
+    if (v === undefined) {
+      if (this.parent) {
+        return this.parent.binding(name)
+      } else {
+        throw new Error(`Identifier "${name}" not found`)
+      }
+    }
+    return {entry: v, frame: this.frame}
+  }
+
+  at (name) {
+    return this.binding(name).entry
+  }
+
+  allocateSlot (name, type) {
+    const e = new SlotEntry(type, this.getNextSlot())
+    this.symbols.set(name, e)
+    return e
+  }
+
+  put (name, entry) {
+    this.symbols.set(name, entry)
+  }
+
+  push (newFrame) {
+    return new SymbolTable(newFrame, this)
+  }
+
+  pop () {
+    if (!this.parent) {
+      throw new Error('Attempt to pop root symbol table')
+    }
+    return this.parent
+  }
 }
 
 module.exports = {SymbolTable, SlotEntry, StaticEntry}
