@@ -18,11 +18,20 @@ class Node {
 class SlotNode extends Node {
   constructor () {
     super()
+    this.frame = null
     this.slot = null
   }
 
-  setSlot (slot) {
+  setSlot (frame, slot) {
+    this.frame = frame
     this.slot = slot
+  }
+
+  getFrame () {
+    if (!this.frame) {
+      throw new Error(`${this.constructor.name} has not been assigned a frame yet`)
+    }
+    return this.frame
   }
 
   getSlot () {
