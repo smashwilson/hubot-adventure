@@ -33,6 +33,7 @@ class SymbolTable {
     this.frame = frame
     this.parent = parent
     this.symbols = new Map()
+    this.captures = new Set()
     this.nextSlot = 0
   }
 
@@ -40,6 +41,10 @@ class SymbolTable {
     const s = this.nextSlot
     this.nextSlot++
     return s
+  }
+
+  getCaptures () {
+    return this.captures
   }
 
   has (name) {
@@ -53,7 +58,9 @@ class SymbolTable {
     let v = this.symbols.get(name)
     if (v === undefined) {
       if (this.parent) {
-        return this.parent.binding(name)
+        const inherited = this.parent.binding(name)
+        this.captures.add(inherited.frame)
+        return inherited
       } else {
         throw new Error(`Identifier "${name}" not found`)
       }

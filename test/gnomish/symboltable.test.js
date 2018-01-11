@@ -8,6 +8,8 @@ describe('SymbolTable', function () {
   const ROOT = Symbol('root')
   const CHILD = Symbol('child')
 
+  const tInt = makeType('Int')
+
   describe('variable names', function () {
     it('stores and retrieves identifier information', function () {
       const st = new SymbolTable(ROOT)
@@ -28,8 +30,6 @@ describe('SymbolTable', function () {
 
   describe('scope heirarchy', function () {
     it('creates a child table', function () {
-      const tInt = makeType('Int')
-
       const parent = new SymbolTable(ROOT)
 
       const e0 = parent.allocateSlot('inherited', tInt)
@@ -50,13 +50,67 @@ describe('SymbolTable', function () {
 
     it('restores its parent table', function () {
       const parent = new SymbolTable(ROOT)
-      const child = parent.push()
+      const child = parent.push(CHILD)
       assert.strictEqual(child.pop(), parent)
     })
 
     it("doesn't allow you to pop the final table", function () {
       const root = new SymbolTable(ROOT)
       assert.throws(() => root.pop(), /Attempt to pop root symbol table/)
+    })
+
+    describe('frame captures', function () {
+      it('does not add a capture for local symbols', function () {
+        const root = new SymbolTable(ROOT)
+        root.allocateSlot('a', tInt)
+
+        root.binding('a')
+        assert.strictEqual(root.getCaptures().size, 0)
+      })
+
+      it('adds a capture for symbols referenced in an outer scope', function () {
+        const root = new SymbolTable(ROOT)
+        root.allocateSlot('a', tInt)
+
+        const child = root.push(CHILD)
+
+        assert.strictEqual(root.getCaptures().size, 0)
+        assert.strictEqual(child.getCaptures().size, 0)
+
+        child.binding('a')
+
+        assert.strictEqual(root.getCaptures().size, 0)
+        assert.strictEqual(child.getCaptures().size, 1)
+        assert.isTrue(child.getCaptures().has(ROOT))
+      })
+
+      it('adds captures for intermediate scopes between the definition and access', function () {
+        const CHILD1 = Symbol('Child 1')
+        const CHILD2 = Symbol('Child 2')
+        const CHILD3 = Symbol('Child 3')
+
+        const root = new SymbolTable(ROOT)
+
+        const child1 = root.push(CHILD1)
+        child1.allocateSlot('x', tInt)
+
+        const child2 = child1.push(CHILD2)
+        const child3 = child2.push(CHILD3)
+
+        assert.strictEqual(root.getCaptures().size, 0)
+        assert.strictEqual(child1.getCaptures().size, 0)
+        assert.strictEqual(child2.getCaptures().size, 0)
+        assert.strictEqual(child3.getCaptures().size, 0)
+
+        child3.binding('x')
+
+        assert.strictEqual(root.getCaptures().size, 0)
+        assert.strictEqual(child1.getCaptures().size, 0)
+        assert.strictEqual(child2.getCaptures().size, 1)
+        assert.isTrue(child2.getCaptures().has(CHILD1))
+        assert.strictEqual(child3.getCaptures().size, 1)
+        assert.isTrue(child3.getCaptures().has(CHILD1))
+      })
     })
   })
 })
