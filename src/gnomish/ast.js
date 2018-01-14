@@ -177,6 +177,7 @@ class BlockNode extends Node {
     super()
     this.args = args || []
     this.body = body || new ExprListNode([])
+    this.captures = new Set()
   }
 
   getArgs () {
@@ -185,6 +186,17 @@ class BlockNode extends Node {
 
   getBody () {
     return this.body
+  }
+
+  getCaptures () {
+    return this.captures
+  }
+
+  captureFrames (frames) {
+    console.log('capturing', frames)
+    for (const frame of frames) {
+      this.captures.add(frame)
+    }
   }
 
   visitBy (visitor) {
