@@ -454,5 +454,19 @@ describe('Analyzer', function () {
       })
     })
   })
+
+  describe('method lookup', function () {
+    const right = () => {}
+    const wrong = () => {}
+
+    it('recalls the callback assocated with the discovered method', function () {
+      mr.register(tInt, '+', [tInt], tInt, right)
+      mr.register(tReal, '+', [tReal], tReal, wrong)
+
+      const root = parse('3 + 4').analyze(st, mr)
+      const callNode = root.node.getExprs()[0]
+
+      assert.strictEqual(callNode.getCallback(), right)
+    })
   })
 })

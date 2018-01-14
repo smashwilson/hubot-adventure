@@ -136,6 +136,7 @@ class Analyzer extends Visitor {
       node.getArgs().map(a => a.getType())
     )
     node.setType(signature.getReturnType())
+    node.setCallback(signature.getCallback())
   }
 
   visitInt (node) {
