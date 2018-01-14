@@ -81,7 +81,8 @@ class Analyzer extends Visitor {
       node.setType(node.getValue().getType())
     }
 
-    this.symbolTable.allocateSlot(node.getName(), node.getType())
+    const slotEntry = this.symbolTable.allocateSlot(node.getName(), node.getType())
+    node.setSlot(this.symbolTable.getFrame(), slotEntry.getSlot())
   }
 
   visitBlock (node) {
@@ -142,7 +143,13 @@ class Analyzer extends Visitor {
   }
 
   visitVar (node) {
-    node.setType(this.symbolTable.at(node.getName()).getType())
+    const {entry, frame} = this.symbolTable.binding(node.getName())
+    node.setType(entry.getType())
+    if (entry.isStatic()) {
+      node.setStaticValue(entry.getValue())
+    } else {
+      node.setSlot(frame, entry.getSlot())
+    }
   }
 
   typeFromNode (node) {
