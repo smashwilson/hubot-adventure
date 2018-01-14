@@ -1,3 +1,5 @@
+const STATIC = Symbol('static')
+
 class Node {
   constructor () {
     this.type = null
@@ -13,6 +15,10 @@ class Node {
     }
     return this.type
   }
+
+  hasStaticValue () {
+    return false
+  }
 }
 
 class SlotNode extends Node {
@@ -27,18 +33,33 @@ class SlotNode extends Node {
     this.slot = slot
   }
 
+  setStaticValue (value) {
+    this.frame = STATIC
+    this.slot = value
+  }
+
   getFrame () {
-    if (!this.frame) {
+    if (this.frame === null) {
       throw new Error(`${this.constructor.name} has not been assigned a frame yet`)
     }
     return this.frame
   }
 
   getSlot () {
-    if (!this.slot) {
+    if (this.slot === null) {
       throw new Error(`${this.constructor.name} has not been assigned a slot index yet`)
     }
     return this.slot
+  }
+
+  hasStaticValue () {
+    return this.slot === STATIC
+  }
+
+  getStaticValue () {
+    if (this.slot !== STATIC) {
+      throw new Error(`${this.constructor.name} is not a static value`)
+    }
   }
 }
 
