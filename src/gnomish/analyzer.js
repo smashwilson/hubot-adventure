@@ -122,7 +122,8 @@ class Analyzer extends Visitor {
     } else {
       node.setType(annotatedType || defType)
     }
-    this.symbolTable.allocateSlot(node.getName(), node.getType())
+    const slotEntry = this.symbolTable.allocateSlot(node.getName(), node.getType())
+    node.setSlot(this.symbolTable.getFrame(), slotEntry.getSlot())
   }
 
   visitCall (node) {

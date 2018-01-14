@@ -427,5 +427,32 @@ describe('Analyzer', function () {
         assert.isTrue(block3.getCaptures().has(GLOBAL))
       })
     })
+
+    describe('ArgNode', function () {
+      it('assigns each a unique slot number', function () {
+        const root = parse(`
+          { x : Int, y : String |
+            let z = 12
+            x
+          }
+        `).analyze(st, mr)
+
+        const blockNode = root.node.getExprs()[0]
+        const frame = blockNode.getBody()
+        const xArg = blockNode.getArgs()[0]
+        const yArg = blockNode.getArgs()[1]
+        const zAssign = frame.getExprs()[0]
+
+        assert.strictEqual(xArg.getFrame(), frame)
+        assert.strictEqual(xArg.getSlot(), 0)
+
+        assert.strictEqual(yArg.getFrame(), frame)
+        assert.strictEqual(yArg.getSlot(), 1)
+
+        assert.strictEqual(zAssign.getFrame(), frame)
+        assert.strictEqual(zAssign.getSlot(), 2)
+      })
+    })
+  })
   })
 })
