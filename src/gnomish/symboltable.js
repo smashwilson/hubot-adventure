@@ -43,6 +43,10 @@ class SymbolTable {
     return s
   }
 
+  getFrame () {
+    return this.frame
+  }
+
   getCaptures () {
     return this.captures
   }
