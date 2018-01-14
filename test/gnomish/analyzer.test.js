@@ -271,4 +271,111 @@ describe('Analyzer', function () {
       })
     })
   })
+
+  describe('slot allocation', function () {
+    describe('LetNode', function () {
+      it('assigns each a unique slot number', function () {
+        const root = parse(`
+          let x = 1
+          let y = "yes"
+          let z = true
+        `).analyze(st, mr)
+
+        const frame = root.node
+        const xNode = frame.getExprs()[0]
+        const yNode = frame.getExprs()[1]
+        const zNode = frame.getExprs()[2]
+
+        assert.strictEqual(xNode.getFrame(), frame)
+        assert.strictEqual(xNode.getSlot(), 0)
+
+        assert.strictEqual(yNode.getFrame(), frame)
+        assert.strictEqual(yNode.getSlot(), 1)
+
+        assert.strictEqual(zNode.getFrame(), frame)
+        assert.strictEqual(zNode.getSlot(), 2)
+      })
+
+      it('assigns distinct slot numbers in different scopes', function () {
+        const root = parse(`
+          let aa = 12
+          {
+            let bb = 34
+          }
+          let cc = 14
+        `).analyze(st, mr)
+
+        const rootFrame = root.node
+        const aaNode = rootFrame.getExprs()[0]
+        const ccNode = rootFrame.getExprs()[2]
+
+        const childFrame = rootFrame.getExprs()[1].getBody()
+        const bbNode = childFrame.getExprs()[0]
+
+        assert.strictEqual(aaNode.getFrame(), rootFrame)
+        assert.strictEqual(aaNode.getSlot(), 0)
+
+        assert.strictEqual(bbNode.getFrame(), childFrame)
+        assert.strictEqual(bbNode.getSlot(), 0)
+
+        assert.strictEqual(ccNode.getFrame(), rootFrame)
+        assert.strictEqual(ccNode.getSlot(), 1)
+      })
+    })
+
+    describe('VarNode', function () {
+      it("discovers the identifier's allocated slot and frame", function () {
+        const root = parse(`
+          {
+            let first = 1
+            {
+              { first }
+            }
+          }
+        `).analyze(st, mr)
+
+        const frame0 = root.node
+        const frame1 = frame0.getExprs()[0].getBody()
+        const declaration = frame1.getExprs()[0]
+        const frame2 = frame1.getExprs()[1].getBody()
+        const frame3 = frame2.getExprs()[0].getBody()
+        const access = frame3.getExprs()[0]
+
+        assert.strictEqual(declaration.getFrame(), frame1)
+        assert.strictEqual(access.getFrame(), frame1)
+        assert.strictEqual(declaration.getSlot(), access.getSlot())
+      })
+
+      it('adds a capture to containing BlockNodes', function () {
+        const root = parse(`
+          {
+            let first = 1
+            {
+              { first }
+            }
+          }
+        `).analyze(st, mr)
+
+        const frame0 = root.node
+        const block1 = frame0.getExprs()[0]
+        const frame1 = block1.getBody()
+        const block2 = frame1.getExprs()[1]
+        const frame2 = block2.getBody()
+        const block3 = frame2.getExprs()[0]
+
+        console.log(block1.getCaptures())
+        assert.strictEqual(block1.getCaptures().size, 1)
+        assert.isTrue(block1.getCaptures().has(GLOBAL))
+
+        assert.strictEqual(block2.getCaptures().size, 2)
+        assert.isFalse(block2.getCaptures().has(frame0))
+        assert.isTrue(block2.getCaptures().has(frame1))
+        assert.isTrue(block2.getCaptures().has(GLOBAL))
+
+        assert.strictEqual(block3.getCaptures().size, 2)
+        assert.isFalse(block3.getCaptures().has(frame0))
+        assert.isTrue(block3.getCaptures().has(frame1))
+        assert.isTrue(block3.getCaptures().has(GLOBAL))
+      })
+    })
 })
