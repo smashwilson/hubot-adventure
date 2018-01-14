@@ -23,7 +23,7 @@
 // Expressions ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 exprlist
-  = first:expr rest:( _ ( ';' / '\n' ) _ each:expr _ { return each } )*
+  = exprsep? first:expr rest:( exprsep each:expr { return each } )* exprsep?
     { return new ExprListNode([first, ...rest]) }
 
 // Non-associative
@@ -109,7 +109,7 @@ identifier
   = $ ( [a-zA-Z'_] [0-9a-zA-Z'_]* )
 
 opstem "operator stem"
-  = [*/%+&|<>=^-]*
+  = [*/%+&|<>=^-]+
 
 powlike "exponentiation operator"
   = $ ( '^' opstem? )
@@ -123,8 +123,9 @@ addlike "additive operator"
 andlike "logical and"
   = $ ( '&' opstem? )
 
+// Note that a single "|" is reserved for block argument terminations
 orlike "logical or"
-  = $ ( '|' opstem? )
+  = $ ( '|' opstem )
 
 // Note that a single "=" on its own is reserved for assignment and "let".
 complike "comparison operator"
@@ -165,6 +166,8 @@ block
 blockargs "block arguments"
   = first:blockarg rest:(_ ',' _ arg:blockarg { return arg } )* _ '|'
     { return [first, ...rest] }
+  / '|'
+    { return [] }
 
 blockarg "block argument"
   = name:identifier type:(_ ':' _ t:typeexpr { return t })? repeatable:'*'? def:(_ '=' _ d:expr { return d })?
@@ -173,4 +176,7 @@ blockarg "block argument"
 // Whitespace /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 _ "optional whitespace"
-  = [ \t\r\n]*
+  = [ \t]*
+
+exprsep "expression separator"
+  = ( _ ( [\r\n] / ';' ) _ )+

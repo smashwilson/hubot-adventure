@@ -14,7 +14,7 @@ class Visitor {
   visitIf (node) {
     this.visit(node.getCondition())
     this.visit(node.getThen())
-    this.visit(node.getElse())
+    if (node.getElse()) this.visit(node.getElse())
   }
 
   visitWhile (node) {
@@ -27,7 +27,7 @@ class Visitor {
   }
 
   visitLet (node) {
-    this.visit(node.getType())
+    if (node.getTypeNode()) this.visit(node.getTypeNode())
     this.visit(node.getValue())
   }
 
@@ -39,7 +39,7 @@ class Visitor {
   }
 
   visitArg (node) {
-    if (node.getType()) this.visit(node.getType())
+    if (node.getTypeNode()) this.visit(node.getTypeNode())
     if (node.getDefault()) this.visit(node.getDefault())
   }
 

@@ -1,9 +1,16 @@
 const parser = require('./gnomish')
 const {SexpVisitor} = require('./sexpr')
+const {Analyzer} = require('./analyzer')
 
-class Root {
+class Program {
   constructor (node) {
     this.node = node
+  }
+
+  analyze (symbolTable, methodRegistry) {
+    const analyzer = new Analyzer(symbolTable, methodRegistry)
+    analyzer.visit(this.node)
+    return this
   }
 
   sexp () {
@@ -15,6 +22,6 @@ class Root {
 
 module.exports = {
   parse (...args) {
-    return new Root(parser.parse(...args))
+    return new Program(parser.parse(...args))
   }
 }

@@ -1,5 +1,71 @@
-class ExprListNode {
+const STATIC = Symbol('static')
+
+class Node {
+  constructor () {
+    this.type = null
+  }
+
+  setType (type) {
+    this.type = type
+  }
+
+  getType () {
+    if (!this.type) {
+      throw new Error(`${this.constructor.name} has not been assigned a type yet`)
+    }
+    return this.type
+  }
+
+  hasStaticValue () {
+    return false
+  }
+}
+
+class SlotNode extends Node {
+  constructor () {
+    super()
+    this.frame = null
+    this.slot = null
+  }
+
+  setSlot (frame, slot) {
+    this.frame = frame
+    this.slot = slot
+  }
+
+  setStaticValue (value) {
+    this.frame = STATIC
+    this.slot = value
+  }
+
+  getFrame () {
+    if (this.frame === null) {
+      throw new Error(`${this.constructor.name} has not been assigned a frame yet`)
+    }
+    return this.frame
+  }
+
+  getSlot () {
+    if (this.slot === null) {
+      throw new Error(`${this.constructor.name} has not been assigned a slot index yet`)
+    }
+    return this.slot
+  }
+
+  hasStaticValue () {
+    return this.slot === STATIC
+  }
+
+  getStaticValue () {
+    if (this.slot !== STATIC) {
+      throw new Error(`${this.constructor.name} is not a static value`)
+    }
+  }
+}
+
+class ExprListNode extends Node {
   constructor (exprs) {
+    super()
     this.exprs = exprs
   }
 
@@ -7,16 +73,22 @@ class ExprListNode {
     return this.exprs
   }
 
+  getLastExpr () {
+    if (this.exprs.length === 0) return null
+    return this.exprs[this.exprs.length - 1]
+  }
+
   visitBy (visitor) {
     return visitor.visitExprList(this)
   }
 }
 
-class IfNode {
+class IfNode extends Node {
   constructor ({condition, thenb, elseb}) {
+    super()
     this.condition = condition
     this.thenb = thenb
-    this.elseb = elseb || new BlockNode({})
+    this.elseb = elseb
   }
 
   getCondition () { return this.condition }
@@ -30,8 +102,9 @@ class IfNode {
   }
 }
 
-class WhileNode {
+class WhileNode extends Node {
   constructor ({condition, action}) {
+    super()
     this.condition = condition
     this.action = action
   }
@@ -45,8 +118,9 @@ class WhileNode {
   }
 }
 
-class AssignNode {
+class AssignNode extends SlotNode {
   constructor ({name, value}) {
+    super()
     this.name = name
     this.value = value
   }
@@ -60,16 +134,17 @@ class AssignNode {
   }
 }
 
-class LetNode {
+class LetNode extends SlotNode {
   constructor ({name, type, value}) {
+    super()
     this.name = name
-    this.type = type
+    this.typeNode = type
     this.value = value
   }
 
   getName () { return this.name }
 
-  getType () { return this.type }
+  getTypeNode () { return this.typeNode }
 
   getValue () { return this.value }
 
@@ -78,11 +153,13 @@ class LetNode {
   }
 }
 
-class CallNode {
+class CallNode extends Node {
   constructor ({receiver, name, args}) {
+    super()
     this.name = name
     this.receiver = receiver
     this.args = args || []
+    this.callback = null
   }
 
   getName () { return this.name }
@@ -91,15 +168,28 @@ class CallNode {
 
   getArgs () { return this.args }
 
+  setCallback (cb) {
+    this.callback = cb
+  }
+
+  getCallback () {
+    if (this.callback === null) {
+      throw new Error(`${this.constructor.name} has not been resolved yet`)
+    }
+    return this.callback
+  }
+
   visitBy (visitor) {
     return visitor.visitCall(this)
   }
 }
 
-class BlockNode {
+class BlockNode extends Node {
   constructor ({args, body}) {
+    super()
     this.args = args || []
     this.body = body || new ExprListNode([])
+    this.captures = new Set()
   }
 
   getArgs () {
@@ -110,22 +200,33 @@ class BlockNode {
     return this.body
   }
 
+  getCaptures () {
+    return this.captures
+  }
+
+  captureFrames (frames) {
+    for (const frame of frames) {
+      this.captures.add(frame)
+    }
+  }
+
   visitBy (visitor) {
     return visitor.visitBlock(this)
   }
 }
 
-class ArgNode {
+class ArgNode extends SlotNode {
   constructor ({name, type, repeatable, def}) {
+    super()
     this.name = name
-    this.type = type
+    this.typeNode = type
     this.repeatable = repeatable !== null
     this.def = def
   }
 
   getName () { return this.name }
 
-  getType () { return this.type }
+  getTypeNode () { return this.typeNode }
 
   getDefault () { return this.def }
 
@@ -136,8 +237,9 @@ class ArgNode {
   }
 }
 
-class IntNode {
+class IntNode extends Node {
   constructor ({minus, digits}) {
+    super()
     this.value = parseInt((minus || '') + digits.join(''), 10)
   }
 
@@ -146,8 +248,9 @@ class IntNode {
   }
 }
 
-class RealNode {
+class RealNode extends Node {
   constructor ({minus, whole, fraction}) {
+    super()
     this.value = parseFloat((minus || '') + whole.join('') + '.' + fraction.join(''))
   }
 
@@ -156,8 +259,9 @@ class RealNode {
   }
 }
 
-class StringNode {
+class StringNode extends Node {
   constructor ({chars}) {
+    super()
     this.value = chars.join('')
   }
 
@@ -166,18 +270,22 @@ class StringNode {
   }
 }
 
-class VarNode {
+class VarNode extends SlotNode {
   constructor ({name}) {
+    super()
     this.name = name
   }
+
+  getName () { return this.name }
 
   visitBy (visitor) {
     return visitor.visitVar(this)
   }
 }
 
-class TypeNode {
+class TypeNode extends Node {
   constructor ({name, params, optional}) {
+    super()
     this.name = name
     this.params = params || []
     this.optional = optional !== null

@@ -1,29 +1,6 @@
 /* eslint-env mocha */
 
-const {assert} = require('chai')
-const {parse} = require('../../src/gnomish')
-const Tracer = require('pegjs-backtrace')
-
-function assertSexp (text, expected, shouldParse = true) {
-  const tracer = new Tracer(text, {
-    showTrace: process.env.GNOMISH_TRACE === 'on'
-  })
-  let actual = ''
-  try {
-    actual = parse(text, {tracer}).sexp()
-    if (!shouldParse) {
-      assert.fail(null, null, `Should not parse ${text}`)
-    }
-  } catch (e) {
-    if (shouldParse) {
-      console.error(tracer.getBacktraceString())
-      assert.fail(null, null, `Unable to parse expression: ${e.message}`)
-    }
-  }
-
-  const normalize = str => str.trim().replace(/\s+/g, ' ')
-  assert.equal(normalize(actual), normalize(expected))
-}
+const {assertSexp} = require('./helper')
 
 describe('Gnomish expressions', function () {
   describe('all together', function () {
@@ -49,8 +26,7 @@ describe('Gnomish expressions', function () {
         (exprlist
           (if
             (block (exprlist (var true)))
-            (block (exprlist (42)))
-            (block (exprlist))))
+            (block (exprlist (42)))))
       `)
     })
 
