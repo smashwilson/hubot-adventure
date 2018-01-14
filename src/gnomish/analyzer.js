@@ -66,9 +66,15 @@ class Analyzer extends Visitor {
   visitAssign (node) {
     super.visitAssign(node)
 
-    const bindingType = this.symbolTable.at(node.getName()).getType()
-    const u = this.unifyTypes(bindingType, node.getValue().getType())
+    const {entry, frame} = this.symbolTable.binding(node.getName())
+
+    const u = this.unifyTypes(entry.getType(), node.getValue().getType())
     node.setType(u.getType())
+    if (entry.isStatic()) {
+      node.setStaticValue(entry.getValue())
+    } else {
+      node.setSlot(frame, entry.getSlot())
+    }
   }
 
   visitLet (node) {

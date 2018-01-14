@@ -378,4 +378,55 @@ describe('Analyzer', function () {
         assert.isTrue(block3.getCaptures().has(GLOBAL))
       })
     })
+
+    describe('AssignNode', function () {
+      it("discovers the identifier's allocated slot and frame", function () {
+        const root = parse(`
+          {
+            let first = "yes"
+            {
+              { first = "no" }
+            }
+          }
+        `).analyze(st, mr)
+
+        const frame1 = root.node.getExprs()[0].getBody()
+        const assignNode = frame1.getExprs()[1].getBody().getExprs()[0].getBody().getExprs()[0]
+
+        assert.strictEqual(assignNode.getFrame(), frame1)
+        assert.strictEqual(assignNode.getSlot(), 0)
+      })
+
+      it('adds a capture to containing BlockNodes', function () {
+        const root = parse(`
+          {
+            let first = "yes"
+            {
+              { first = "no" }
+            }
+          }
+        `).analyze(st, mr)
+
+        const frame0 = root.node
+        const block1 = frame0.getExprs()[0]
+        const frame1 = block1.getBody()
+        const block2 = frame1.getExprs()[1]
+        const frame2 = block2.getBody()
+        const block3 = frame2.getExprs()[0]
+
+        assert.strictEqual(block1.getCaptures().size, 1)
+        assert.isTrue(block1.getCaptures().has(GLOBAL))
+
+        assert.strictEqual(block2.getCaptures().size, 2)
+        assert.isFalse(block2.getCaptures().has(frame0))
+        assert.isTrue(block2.getCaptures().has(frame1))
+        assert.isTrue(block2.getCaptures().has(GLOBAL))
+
+        assert.strictEqual(block3.getCaptures().size, 2)
+        assert.isFalse(block3.getCaptures().has(frame0))
+        assert.isTrue(block3.getCaptures().has(frame1))
+        assert.isTrue(block3.getCaptures().has(GLOBAL))
+      })
+    })
+  })
 })
