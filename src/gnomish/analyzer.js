@@ -96,6 +96,7 @@ class Analyzer extends Visitor {
       ...node.getArgs().map(arg => arg.getType())
     ]))
 
+    node.captureFrames(this.symbolTable.getCaptures())
     this.symbolTable = this.symbolTable.pop()
   }
 
