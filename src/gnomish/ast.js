@@ -193,7 +193,6 @@ class BlockNode extends Node {
   }
 
   captureFrames (frames) {
-    console.log('capturing', frames)
     for (const frame of frames) {
       this.captures.add(frame)
     }

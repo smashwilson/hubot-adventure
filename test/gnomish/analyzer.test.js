@@ -363,7 +363,6 @@ describe('Analyzer', function () {
         const frame2 = block2.getBody()
         const block3 = frame2.getExprs()[0]
 
-        console.log(block1.getCaptures())
         assert.strictEqual(block1.getCaptures().size, 1)
         assert.isTrue(block1.getCaptures().has(GLOBAL))
 
