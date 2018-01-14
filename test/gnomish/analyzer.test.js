@@ -10,6 +10,8 @@ describe('Analyzer', function () {
   let st, mr
   let tInt, tReal, tString, tBool, tBlock, tOption, tType
 
+  const GLOBAL = Symbol('global')
+
   beforeEach(function () {
     tInt = makeType('Int')
     tReal = makeType('Real')
@@ -19,7 +21,7 @@ describe('Analyzer', function () {
     tOption = makeType('Option')
     tType = makeType('Type')
 
-    st = new SymbolTable()
+    st = new SymbolTable(GLOBAL)
     st.setStatic('Type', tType, tType)
     st.setStatic('Int', tType, tInt)
     st.setStatic('Real', tType, tReal)
@@ -224,23 +226,33 @@ describe('Analyzer', function () {
 
     describe('LetNode', function () {
       it('introduces a new binding with an explicit type', function () {
-        assert.isFalse(st.has('b'))
-        const root = parse('let b : Int = 0').analyze(st, mr)
+        const root = parse('let b : Int = 0')
+
+        const st0 = st.push(root.node)
+        assert.isFalse(st0.has('b'))
+        root.analyze(st0, mr)
+
         assert.strictEqual(root.node.getType(), tInt)
-        assert.strictEqual(st.at('b').getType(), tInt)
+        assert.strictEqual(st0.at('b').getType(), tInt)
       })
 
       it('introduces a new binding with an inferred type', function () {
-        assert.isFalse(st.has('num'))
-        const root = parse('let num = 4.7').analyze(st, mr)
+        const root = parse('let num = 4.7')
+
+        const st0 = st.push(root.node)
+        assert.isFalse(st0.has('num'))
+        root.analyze(st0, mr)
+
         assert.strictEqual(root.node.getType(), tReal)
-        assert.strictEqual(st.at('num').getType(), tReal)
+        assert.strictEqual(st0.at('num').getType(), tReal)
       })
 
       it('replaces an existing binding', function () {
-        st.allocateSlot('r', tInt)
-        parse('let r = true').analyze(st, mr)
-        assert.strictEqual(st.at('r').getType(), tBool)
+        const root = parse('let r = 3 ; let r = true')
+
+        const st0 = st.push(root.node)
+        root.analyze(st0, mr)
+        assert.strictEqual(st0.at('r').getType(), tBool)
       })
 
       it('ensures that an explict type matches an inferred type', function () {

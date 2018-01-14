@@ -24,8 +24,17 @@ class Analyzer extends Visitor {
   }
 
   visitExprList (node) {
+    const needsPush = this.symbolTable.getFrame() !== node
+    if (needsPush) {
+      this.symbolTable = this.symbolTable.push(node)
+    }
+
     super.visitExprList(node)
     node.setType(node.getLastExpr().getType())
+
+    if (needsPush) {
+      this.symbolTable = this.symbolTable.pop()
+    }
   }
 
   visitIf (node) {
@@ -76,6 +85,8 @@ class Analyzer extends Visitor {
   }
 
   visitBlock (node) {
+    this.symbolTable = this.symbolTable.push(node.getBody())
+
     super.visitBlock(node)
 
     const blockBase = this.symbolTable.at('Block').getValue()
@@ -83,6 +94,8 @@ class Analyzer extends Visitor {
       node.getBody().getLastExpr().getType(),
       ...node.getArgs().map(arg => arg.getType())
     ]))
+
+    this.symbolTable = this.symbolTable.pop()
   }
 
   visitArg (node) {
