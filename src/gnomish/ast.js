@@ -53,13 +53,14 @@ class SlotNode extends Node {
   }
 
   hasStaticValue () {
-    return this.slot === STATIC
+    return this.frame === STATIC
   }
 
   getStaticValue () {
-    if (this.slot !== STATIC) {
+    if (this.frame !== STATIC) {
       throw new Error(`${this.constructor.name} is not a static value`)
     }
+    return this.slot
   }
 }
 
