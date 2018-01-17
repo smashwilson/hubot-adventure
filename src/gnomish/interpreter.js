@@ -3,34 +3,21 @@ const {Visitor} = require('./visitor')
 class Interpreter extends Visitor {
   constructor () {
     super()
-    this.stack = []
-    this.currentFrame = null
+    this.stack = new Map()
   }
 
   setSlot (frame, slot, value) {
-    if (frame === this.currentFrame) {
-      this.stack[this.stack.length - 1][slot] = value
-    }
-    //
+    this.stack.get(frame)[slot] = value
   }
 
   getSlot (frame, slot) {
-    if (frame === this.currentFrame) {
-      return this.stack[this.stack.length - 1][slot]
-    }
-    //
+    return this.stack.get(frame)[slot]
   }
 
   visitExprList (node) {
-    const lastFrame = this.currentFrame
-    this.stack.push([])
-    this.currentFrame = node
-
+    this.stack.set(node, [])
     const result = super.visitExprList(node)
-
-    this.stack.pop()
-    this.currentFrame = lastFrame
-
+    this.stack.delete(node)
     return result
   }
 
