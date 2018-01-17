@@ -21,6 +21,14 @@ class Interpreter extends Visitor {
     return result
   }
 
+  visitIf (node) {
+    if (this.visit(node.getCondition().getBody()) === true) {
+      return this.visit(node.getThen().getBody())
+    } else {
+      return this.visit(node.getElse().getBody())
+    }
+  }
+
   visitLet (node) {
     const v = this.visit(node.getValue())
     this.setSlot(node.getFrame(), node.getSlot(), v)

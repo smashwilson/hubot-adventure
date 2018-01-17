@@ -72,4 +72,28 @@ describe('Interpreter', function () {
 
     assert.strictEqual(result, 42)
   })
+
+  describe('if statements', function () {
+    it('executes the then branch on true', function () {
+      const program = parse(`
+        if {true} then {1} else {2}
+      `).analyze(st, mr)
+      const {result} = program.interpret()
+
+      assert.strictEqual(result, 1)
+    })
+
+    it('executes the else branch on false', function () {
+      const program = parse(`
+        if {false} then {1} else {2}
+      `).analyze(st, mr)
+      const {result} = program.interpret()
+
+      assert.strictEqual(result, 2)
+    })
+
+    it('returns an option holding the expression value when an else-less if expression has a true condition')
+
+    it('returns none when an else-less if expression has a false condition')
+  })
 })
