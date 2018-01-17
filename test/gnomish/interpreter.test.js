@@ -73,6 +73,17 @@ describe('Interpreter', function () {
     assert.strictEqual(result, 42)
   })
 
+  it('interprets assignments', function () {
+    const program = parse(`
+      let x = 1
+      x = 2
+      x
+    `).analyze(st, mr)
+    const {result} = program.interpret()
+
+    assert.strictEqual(result, 2)
+  })
+
   describe('if statements', function () {
     it('executes the then branch on true', function () {
       const program = parse(`
