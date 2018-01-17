@@ -1,4 +1,5 @@
 const {Visitor} = require('./visitor')
+const {Block} = require('./stdlib/block')
 
 class Interpreter extends Visitor {
   constructor () {
@@ -47,6 +48,14 @@ class Interpreter extends Visitor {
     const v = this.visit(node.getValue())
     this.setSlot(node.getFrame(), node.getSlot(), v)
     return v
+  }
+
+  visitBlock (node) {
+    const b = new Block(node.getArgs(), node.getBody())
+    for (const frame of node.getCaptures()) {
+      b.captureFrame(frame, this.stack.get(frame))
+    }
+    return b
   }
 
   visitCall (node) {

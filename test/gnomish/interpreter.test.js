@@ -140,4 +140,30 @@ describe('Interpreter', function () {
 
     assert.strictEqual(result, 21)
   })
+
+  describe('blocks', function () {
+    it('creates a new Block with the appropriate AST nodes', function () {
+      const program = parse(`{x: Int, y: Int | x + y + 1}`).analyze(st, mr)
+      const {result} = program.interpret()
+
+      const blockNode = program.node.getExprs()[0]
+
+      assert.lengthOf(result.argNodes, 2)
+      assert.strictEqual(result.argNodes[0], blockNode.getArgs()[0])
+      assert.strictEqual(result.argNodes[1], blockNode.getArgs()[1])
+
+      assert.strictEqual(result.bodyNode, blockNode.getBody())
+    })
+
+    it('captures referenced external scopes', function () {
+      const program = parse(`
+        let outer = 7
+        { outer + 1 }
+      `).analyze(st, mr)
+      const {result} = program.interpret()
+
+      const rootFrame = program.node
+      assert.strictEqual(result.getSlot(rootFrame, 0), 7)
+    })
+  })
 })
