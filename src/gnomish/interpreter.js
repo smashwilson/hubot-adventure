@@ -29,6 +29,14 @@ class Interpreter extends Visitor {
     }
   }
 
+  visitWhile (node) {
+    let v = null
+    while (this.visit(node.getCondition().getBody()) === true) {
+      v = this.visit(node.getAction().getBody())
+    }
+    return v
+  }
+
   visitAssign (node) {
     const v = this.visit(node.getValue())
     this.setSlot(node.getFrame(), node.getSlot(), v)

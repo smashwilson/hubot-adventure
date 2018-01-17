@@ -122,4 +122,22 @@ describe('Interpreter', function () {
 
     it('returns none when an else-less if expression has a false condition')
   })
+
+  it('executes the body of a while statement while its condition is true', function () {
+    mr.register(tInt, '<', [tInt], tBool, ({receiver}, operand) => {
+      return receiver < operand
+    })
+
+    const program = parse(`
+      let x = 0
+      let y = 1
+      while {x < 10} do {
+        x = x + 1
+        y = y + 2
+      }
+    `).analyze(st, mr)
+    const {result} = program.interpret()
+
+    assert.strictEqual(result, 21)
+  })
 })
