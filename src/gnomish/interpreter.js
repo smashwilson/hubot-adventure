@@ -41,6 +41,17 @@ class Interpreter extends Visitor {
     return v
   }
 
+  visitCall (node) {
+    const receiver = this.visit(node.getReceiver())
+    const args = node.getArgs().map(arg => this.visit(arg))
+
+    return node.getCallback()({
+      receiver,
+      selector: node.getName(),
+      interpreter: this
+    }, ...args)
+  }
+
   visitInt (node) {
     return node.getStaticValue()
   }

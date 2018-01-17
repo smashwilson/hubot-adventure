@@ -84,6 +84,21 @@ describe('Interpreter', function () {
     assert.strictEqual(result, 2)
   })
 
+  describe('method calls', function () {
+    it('execues a bound callback', function () {
+      mr.register(tInt, '*', [tInt], tInt, ({receiver}, operand) => {
+        return receiver * operand
+      })
+
+      const program = parse('10 * 4').analyze(st, mr)
+      const {result} = program.interpret()
+
+      assert.strictEqual(result, 40)
+    })
+
+    it('passes the current implicit receiver')
+  })
+
   describe('if statements', function () {
     it('executes the then branch on true', function () {
       const program = parse(`
