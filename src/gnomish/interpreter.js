@@ -40,7 +40,11 @@ class Interpreter extends Visitor {
   }
 
   visitVar (node) {
-    return this.getSlot(node.getFrame(), node.getSlot())
+    if (node.hasStaticValue()) {
+      return node.getStaticValue()
+    } else {
+      return this.getSlot(node.getFrame(), node.getSlot())
+    }
   }
 }
 
