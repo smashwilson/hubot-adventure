@@ -52,6 +52,13 @@ class MethodRegistry {
       this.bySelector.set(selector, signatures)
     }
 
+    if (receiverType === undefined || !argTypes.every(Boolean) || retType === undefined) {
+      console.error({
+        receiverType, argTypes, retType
+      })
+      throw new Error('boom')
+    }
+
     const addedSignature = new Signature(receiverType, argTypes, callback, retType)
     signatures.push(addedSignature)
   }
