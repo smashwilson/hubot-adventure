@@ -1,5 +1,6 @@
 const {Visitor} = require('./visitor')
 const {Block} = require('./stdlib/block')
+const {Some, none} = require('./stdlib/option')
 
 class Interpreter extends Visitor {
   constructor () {
@@ -23,10 +24,20 @@ class Interpreter extends Visitor {
   }
 
   visitIf (node) {
-    if (this.visit(node.getCondition().getBody()) === true) {
-      return this.visit(node.getThen().getBody())
+    const condition = this.visit(node.getCondition().getBody()) === true
+
+    if (node.getElse()) {
+      if (condition) {
+        return this.visit(node.getThen().getBody())
+      } else {
+        return this.visit(node.getElse().getBody())
+      }
     } else {
-      return this.visit(node.getElse().getBody())
+      if (condition) {
+        return new Some(this.visit(node.getThen().getBody()))
+      } else {
+        return none
+      }
     }
   }
 

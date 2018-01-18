@@ -118,9 +118,24 @@ describe('Interpreter', function () {
       assert.strictEqual(result, 2)
     })
 
-    it('returns an option holding the expression value when an else-less if expression has a true condition')
+    it('returns an option holding the expression value when an else-less if expression has a true condition', function () {
+      const program = parse(`
+        if {true} then {7}
+      `).analyze(st, mr)
+      const {result} = program.interpret()
 
-    it('returns none when an else-less if expression has a false condition')
+      assert.isTrue(result.hasValue())
+      assert.strictEqual(result.getValue(), 7)
+    })
+
+    it('returns none when an else-less if expression has a false condition', function () {
+      const program = parse(`
+        if {false} then {"nope"}
+      `).analyze(st, mr)
+      const {result} = program.interpret()
+
+      assert.isFalse(result.hasValue())
+    })
   })
 
   it('executes the body of a while statement while its condition is true', function () {
