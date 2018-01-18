@@ -42,11 +42,11 @@ class Interpreter extends Visitor {
   }
 
   visitWhile (node) {
-    let v = null
+    let v = none
     while (this.visit(node.getCondition().getBody()) === true) {
       v = this.visit(node.getAction().getBody())
     }
-    return v
+    return v === none ? v : new Some(v)
   }
 
   visitAssign (node) {
