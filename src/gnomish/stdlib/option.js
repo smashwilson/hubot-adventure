@@ -24,5 +24,13 @@ const none = {
 
 module.exports = {
   Some,
-  none
+  none,
+
+  registerTypes (t, symbolTable, methodRegistry) {
+    t.registerType('Option')
+  },
+
+  registerMethods (t, symbolTable, methodRegistry) {
+    //
+  }
 }

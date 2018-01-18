@@ -14,4 +14,14 @@ class Block {
   }
 }
 
-module.exports = {Block}
+module.exports = {
+  Block,
+
+  registerTypes (t, symbolTable, methodRegistry) {
+    t.registerType('Block')
+  },
+
+  registerMethods (t, symbolTable, methodRegistry) {
+    //
+  }
+}
