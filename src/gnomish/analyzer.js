@@ -60,7 +60,8 @@ class Analyzer extends Visitor {
 
     this.unifyTypes(this.condType, node.getCondition().getType())
 
-    node.setType(node.getAction().getType().getParams()[0])
+    const optionType = makeType(this.tOption, [node.getAction().getType().getParams()[0]])
+    node.setType(optionType)
   }
 
   visitAssign (node) {

@@ -183,10 +183,14 @@ describe('Analyzer', function () {
         assert.throws(() => failure.analyze(st, mr), /Types "Block\(Bool\)" and "Block\(String\)" do not match/)
       })
 
-      it('derives a type matching the return type of the action clause', function () {
+      it('derives a type as an option matching the return type of the action clause', function () {
         const root = parse('while {true} do {4.0}').analyze(st, mr)
 
-        assert.strictEqual(root.node.getType(), tReal)
+        const whileType = root.node.getType()
+        assert.isTrue(whileType.isCompound())
+        assert.strictEqual(whileType.getBase(), tOption)
+        assert.lengthOf(whileType.getParams(), 1)
+        assert.strictEqual(whileType.getParams()[0], tReal)
       })
     })
 
