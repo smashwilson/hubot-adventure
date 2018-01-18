@@ -53,13 +53,14 @@ class SlotNode extends Node {
   }
 
   hasStaticValue () {
-    return this.slot === STATIC
+    return this.frame === STATIC
   }
 
   getStaticValue () {
-    if (this.slot !== STATIC) {
+    if (this.frame !== STATIC) {
       throw new Error(`${this.constructor.name} is not a static value`)
     }
+    return this.slot
   }
 }
 
@@ -243,6 +244,14 @@ class IntNode extends Node {
     this.value = parseInt((minus || '') + digits.join(''), 10)
   }
 
+  hasStaticValue () {
+    return true
+  }
+
+  getStaticValue () {
+    return this.value
+  }
+
   visitBy (visitor) {
     return visitor.visitInt(this)
   }
@@ -254,6 +263,14 @@ class RealNode extends Node {
     this.value = parseFloat((minus || '') + whole.join('') + '.' + fraction.join(''))
   }
 
+  hasStaticValue () {
+    return true
+  }
+
+  getStaticValue () {
+    return this.value
+  }
+
   visitBy (visitor) {
     return visitor.visitReal(this)
   }
@@ -263,6 +280,14 @@ class StringNode extends Node {
   constructor ({chars}) {
     super()
     this.value = chars.join('')
+  }
+
+  hasStaticValue () {
+    return true
+  }
+
+  getStaticValue () {
+    return this.value
   }
 
   visitBy (visitor) {

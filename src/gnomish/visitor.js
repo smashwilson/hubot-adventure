@@ -6,9 +6,11 @@ class Visitor {
   }
 
   visitExprList (node) {
+    let result = null
     for (const expr of node.getExprs()) {
-      this.visit(expr)
+      result = this.visit(expr)
     }
+    return result
   }
 
   visitIf (node) {
