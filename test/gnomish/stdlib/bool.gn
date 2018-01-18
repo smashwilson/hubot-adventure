@@ -1,0 +1,9 @@
+assert.equal(true && true, true)
+assert.equal(true && false, false)
+assert.equal(false && true, false)
+assert.equal(false && false, false)
+
+assert.equal(true || true, true)
+assert.equal(true || false, true)
+assert.equal(false || true, true)
+assert.equal(false || false, false)
