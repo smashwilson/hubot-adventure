@@ -46,7 +46,7 @@ class Visitor {
   }
 
   visitCall (node) {
-    if (node.getReceiver()) this.visit(node.getReceiver())
+    this.visit(node.getReceiver())
     for (const arg of node.getArgs()) {
       this.visit(arg)
     }

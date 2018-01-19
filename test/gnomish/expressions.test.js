@@ -268,7 +268,7 @@ describe('Gnomish expressions', function () {
     it('parses a method call with an implicit receiver', function () {
       assertSexp('methodname(3, 4)', `
         (exprlist
-          (call <implicit> methodname (3) (4)))
+          (call (var this) methodname (3) (4)))
       `)
     })
   })
