@@ -273,6 +273,14 @@ describe('Analyzer', function () {
         const root = parse('"boo".replace(3 + 4, "from", "to")').analyze(st, mr)
         assert.strictEqual(root.node.getType(), tInt)
       })
+
+      it('uses the "this" binding as an implicit receiver', function () {
+        mr.register(tInt, 'selector', [], tInt, () => {})
+        st.setStatic('this', tInt, 0)
+
+        const root = parse('selector()').analyze(st, mr)
+        assert.strictEqual(root.node.getType(), tInt)
+      })
     })
   })
 
@@ -468,6 +476,18 @@ describe('Analyzer', function () {
       mr.register(tReal, '+', [tReal], tReal, wrong)
 
       const root = parse('3 + 4').analyze(st, mr)
+      const callNode = root.node.getExprs()[0]
+
+      assert.strictEqual(callNode.getCallback(), right)
+    })
+
+    it('uses the "this" binding as an implicit receiver', function () {
+      mr.register(tInt, 'selector', [tInt], tInt, right)
+      mr.register(tReal, 'selector', [tInt], tInt, wrong)
+
+      st.setStatic('this', tInt, 0)
+
+      const root = parse('selector(1)').analyze(st, mr)
       const callNode = root.node.getExprs()[0]
 
       assert.strictEqual(callNode.getCallback(), right)
