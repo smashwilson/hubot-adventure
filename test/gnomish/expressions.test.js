@@ -272,4 +272,34 @@ describe('Gnomish expressions', function () {
       `)
     })
   })
+
+  describe('comments', function () {
+    it('parses comments from # to the end of the line', function () {
+      assertSexp(`
+        # This is a line comment
+        3 + 4
+      `, `
+        (exprlist
+          (call (3) + (4)))
+      `)
+    })
+
+    it('ignores # within string literals', function () {
+      assertSexp('"this # is still a string"', `
+        (exprlist
+          ("this # is still a string"))
+      `)
+    })
+
+    it('allows comments to occur after an expression', function () {
+      assertSexp(`
+        3 + 4  # this works too
+        7 / 2
+      `, `
+        (exprlist
+          (call (3) + (4))
+          (call (7) / (2)))
+      `)
+    })
+  })
 })
