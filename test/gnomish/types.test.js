@@ -5,7 +5,7 @@ const {makeType, unify} = require('../../src/gnomish/type')
 const {SymbolTable} = require('../../src/gnomish/symboltable')
 
 describe('Type', function () {
-  let st, tType, tInt, tString, tReal, tBool, tList
+  let st, tType, tInt, tString, tReal, tBool, tBlock, tList
 
   beforeEach(function () {
     st = new SymbolTable()
@@ -16,6 +16,7 @@ describe('Type', function () {
     tString = makeType('String')
     tReal = makeType('Real')
     tBool = makeType('Bool')
+    tBlock = makeType('Block')
     tList = makeType('List')
 
     st.setStatic('List', tType, tList)
@@ -165,6 +166,18 @@ describe('Type', function () {
 
       const t = makeType("'Args").splat()
       assert.deepEqual(t.resolve(st), [tInt, tBool, tReal])
+    })
+
+    it('flattens splats in type argument lists of compound types', function () {
+      st.setStatic("'Args", makeType(tList, [tType]), [tInt, tBool, tReal])
+
+      const t = makeType(tBlock, [tBool, makeType("'Args").splat(), tString, makeType("'Args").splat()])
+      const r = t.resolveRecursively(st)
+      assert.lengthOf(r, 1)
+      const r0 = r[0]
+      assert.isTrue(r0.isCompound())
+      assert.strictEqual(r0.getBase(), tBlock)
+      assert.deepEqual(r0.getParams(), [tBool, tInt, tBool, tReal, tString, tInt, tBool, tReal])
     })
   })
 

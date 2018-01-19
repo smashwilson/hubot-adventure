@@ -122,8 +122,11 @@ class CompoundType extends Type {
 
   resolveRecursively (symbolTable) {
     const t = this.resolve(symbolTable)[0]
-    const nParams = this.params.map(p => p.resolveRecursively(symbolTable))
-    const changed = nParams.some((np, i) => np !== this.params[i])
+    const nParams = this.params.reduce((acc, p) => {
+      acc.push(...p.resolveRecursively(symbolTable))
+      return acc
+    }, [])
+    const changed = nParams.length !== this.params.length || nParams.some((np, i) => np !== this.params[i])
     if (!changed && t === this) {
       return [this]
     } else {
