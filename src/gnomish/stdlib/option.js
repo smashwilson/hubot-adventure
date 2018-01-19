@@ -36,6 +36,20 @@ module.exports = {
     const tA = makeType("'A")
     const tOptionA = makeType(t.Option, [tA])
 
+    // Comparison
+
+    methodRegistry.register(tOptionA, '==', [tOptionA], t.Bool, ({receiver}, operand) => {
+      if (receiver.hasValue() !== operand.hasValue()) {
+        return false
+      }
+
+      if (receiver.hasValue()) {
+        return receiver.getValue() === operand.getValue()
+      } else {
+        return true
+      }
+    })
+
     // Direct form
     methodRegistry.register(tOptionA, 'or', [tA], tA, ({receiver}, alt) => {
       if (receiver.hasValue()) {
