@@ -12,6 +12,10 @@ class Block {
   getSlot (frame, slot) {
     return this.captures.get(frame)[slot]
   }
+
+  evaluate (interpreter) {
+    return interpreter.visit(this.bodyNode)
+  }
 }
 
 module.exports = {
