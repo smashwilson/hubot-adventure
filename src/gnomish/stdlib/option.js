@@ -34,12 +34,23 @@ module.exports = {
 
   registerMethods (t, symbolTable, methodRegistry) {
     const tA = makeType("'A")
+    const tOptionA = makeType(t.Option, [tA])
 
-    methodRegistry.register(makeType(t.Option, [tA]), 'or', [tA], tA, ({receiver}, alt) => {
+    // Direct form
+    methodRegistry.register(tOptionA, 'or', [tA], tA, ({receiver}, alt) => {
       if (receiver.hasValue()) {
         return receiver.getValue()
       } else {
         return alt
+      }
+    })
+
+    // Block form
+    methodRegistry.register(tOptionA, 'or', [makeType(t.Block, [tA])], tA, ({receiver, interpreter}, blk) => {
+      if (receiver.hasValue()) {
+        return receiver.getValue()
+      } else {
+        return blk.evaluate(interpreter)
       }
     })
   }

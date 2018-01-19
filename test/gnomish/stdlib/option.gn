@@ -1,5 +1,19 @@
 let s0 = if {true} then {3}
 let n0 = if {false} then {3}
 
+# Default values, computed directly...
+
 assert.equal(s0.or(7), 3)
 assert.equal(n0.or(7), 7)
+
+# ... or with a block.
+
+let count0 = 0
+let blk0 = {
+  count0 = count0 + 1
+  4 + 5
+}
+
+assert.equal(s0.or(blk0), 3)
+assert.equal(n0.or(blk0), 9)
+assert.equal(count0, 1)
