@@ -25,13 +25,34 @@ class Unification {
   }
 }
 
-const REPEATABLE = Symbol('repeatable')
-const SPLAT = Symbol('splat')
-
 class Type {
-  constructor (name, attr) {
+  resolve (symbolTable) {
+    return this
+  }
+
+  resolveRecursively (symbolTable) {
+    return this
+  }
+
+  isSimple () { return false }
+
+  isParameter () { return false }
+
+  isCompound () { return false }
+
+  isRepeatable () { return false }
+
+  isSplat () { return false }
+
+  repeatable () { return new RepeatableType(this) }
+
+  splat () { return new SplatType(this) }
+}
+
+class SimpleType extends Type {
+  constructor (name) {
+    super()
     this.name = name
-    this.attr = attr
   }
 
   getName () { return this.name }
@@ -46,23 +67,17 @@ class Type {
 
   isSimple () { return true }
 
-  isParameter () { return false }
-
-  isCompound () { return false }
-
-  isRepeatable () { return this.attr === REPEATABLE }
-
-  isSplat () { return this.attr === SPLAT }
-
-  toString () {
-    return this.name
+  splat () {
+    throw new Error(`Simple type ${this.toString()} cannot be a splat`)
   }
+
+  toString () { return this.name }
 }
 
-class TypeParameter {
-  constructor (name, attr) {
+class TypeParameter extends Type {
+  constructor (name) {
+    super()
     this.name = name
-    this.attr = attr
   }
 
   getName () { return this.name }
@@ -88,26 +103,16 @@ class TypeParameter {
     return this.resolve(symbolTable)
   }
 
-  isSimple () { return false }
-
   isParameter () { return true }
 
-  isCompound () { return false }
-
-  isRepeatable () { return this.attr === REPEATABLE }
-
-  isSplat () { return this.attr === SPLAT }
-
-  toString () {
-    return this.name
-  }
+  toString () { return this.name }
 }
 
-class CompoundType {
-  constructor (base, params, attr) {
+class CompoundType extends Type {
+  constructor (base, params) {
+    super()
     this.base = base
     this.params = params
-    this.attr = attr
   }
 
   getBase () { return this.base }
@@ -129,18 +134,69 @@ class CompoundType {
     return t
   }
 
-  isSimple () { return false }
-
-  isParameter () { return false }
-
   isCompound () { return true }
 
-  isRepeatable () { return this.attr === REPEATABLE }
-
-  isSplat () { return this.attr === SPLAT }
+  splat () {
+    throw new Error(`Compound type ${this.toString()} cannot be a splat`)
+  }
 
   toString () {
     return `${this.base.toString()}(${this.params.map(p => p.toString()).join(', ')})`
+  }
+}
+
+class TypeWrapper extends Type {
+  constructor (inner) {
+    super()
+    this.inner = inner
+  }
+
+  getInner () { return this.inner }
+
+  resolve (symbolTable) { return this.inner.resolve(symbolTable) }
+
+  resolveRecursively (symbolTable) { return this.inner.resolveRecursively(symbolTable) }
+
+  isSimple () { return this.inner.isSimple() }
+
+  isParameter () { return this.inner.isParameter() }
+
+  isCompound () { return this.inner.isCompound() }
+}
+
+class RepeatableType extends TypeWrapper {
+  isRepeatable () {
+    return true
+  }
+
+  repeatable () {
+    throw new Error(`Type ${this.toString()} is already repeatable`)
+  }
+
+  splat () {
+    throw new Error(`Repeatable type ${this.toString()} cannot be a splat`)
+  }
+
+  toString () {
+    return this.getInner().toString() + '*'
+  }
+}
+
+class SplatType extends TypeWrapper {
+  isSplat () {
+    return true
+  }
+
+  repeatable () {
+    throw new Error(`Splat type ${this.toString()} cannot be repeatable`)
+  }
+
+  splat () {
+    throw new Error(`Type ${this.toString()} is already a splat`)
+  }
+
+  toString () {
+    return this.getInner().toString() + '...'
   }
 }
 
@@ -148,10 +204,8 @@ function makeType (name, params = []) {
   let base
   if (typeof name === 'string') {
     let attr = null
-    if (name.endsWith('*')) attr = REPEATABLE
-    if (name.endsWith('...')) attr = SPLAT
 
-    base = name.startsWith("'") ? new TypeParameter(name, attr) : new Type(name, attr)
+    base = name.startsWith("'") ? new TypeParameter(name, attr) : new SimpleType(name, attr)
   } else {
     base = name
   }

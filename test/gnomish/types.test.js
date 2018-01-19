@@ -40,7 +40,7 @@ describe('Type', function () {
     })
 
     it('constructs a repeatable type', function () {
-      const p = makeType('Int*')
+      const p = makeType('Int').repeatable()
       assert.isTrue(p.isSimple())
       assert.isFalse(p.isParameter())
       assert.isFalse(p.isCompound())
@@ -50,7 +50,7 @@ describe('Type', function () {
     })
 
     it('constructs a repeatable type parameter', function () {
-      const p = makeType("'A*")
+      const p = makeType("'A").repeatable()
       assert.isFalse(p.isSimple())
       assert.isTrue(p.isParameter())
       assert.isFalse(p.isCompound())
@@ -60,7 +60,7 @@ describe('Type', function () {
     })
 
     it('constructs a splat type parameter', function () {
-      const p = makeType("'As...")
+      const p = makeType("'As").splat()
       assert.isFalse(p.isSimple())
       assert.isTrue(p.isParameter())
       assert.isFalse(p.isCompound())
