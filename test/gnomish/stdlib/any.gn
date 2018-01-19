@@ -1,0 +1,6 @@
+# Tests for methods that are available on any type
+
+## 'A#getType
+
+assert.equal(1.getType(), Int)
+assert.equal(3.0.getType(), Real)
