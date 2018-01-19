@@ -1,9 +1,13 @@
+# Math!
+
 assert.equal(3 + 4, 7)
 assert.equal(5 - 8, -3)
 assert.equal(6 * 3, 18)
 assert.equal(10 / 2, 5.0)
 assert.equal(11 // 2, 5)
 assert.equal(2 ^ 3, 8)
+
+# Comparisons
 
 assert.isTrue(3 == 3)
 assert.isFalse(3 == 4)
