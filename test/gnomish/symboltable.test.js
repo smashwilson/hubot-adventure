@@ -113,4 +113,27 @@ describe('SymbolTable', function () {
       })
     })
   })
+
+  describe('implicit receiver', function () {
+    it('tracks an implicit receiver entry', function () {
+      const st = new SymbolTable(ROOT)
+      st.setStatic('world', tInt, 5)
+      st.setStatic('global', tInt, 7)
+
+      st.setImplicitReceiver('world')
+      assert.strictEqual(st.getImplicitReceiver(), st.at('world'))
+
+      st.setImplicitReceiver('global')
+      assert.strictEqual(st.getImplicitReceiver(), st.at('global'))
+    })
+
+    it('inherits an implicit receiver from the parent scope', function () {
+      const root = new SymbolTable(ROOT)
+      root.setStatic('world', tInt, 5)
+      root.setImplicitReceiver('world')
+
+      const child = root.push(CHILD)
+      assert.strictEqual(child.getImplicitReceiver(), child.at('world'))
+    })
+  })
 })
