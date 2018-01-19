@@ -76,7 +76,8 @@ class Interpreter extends Visitor {
     return node.getCallback()({
       receiver,
       selector: node.getName(),
-      interpreter: this
+      interpreter: this,
+      astNode: node
     }, ...args)
   }
 
