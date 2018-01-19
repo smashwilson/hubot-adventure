@@ -5,7 +5,7 @@ const {makeType, unify} = require('../../src/gnomish/type')
 const {SymbolTable} = require('../../src/gnomish/symboltable')
 
 describe('Type', function () {
-  let st, tType, tInt, tString, tReal, tBool
+  let st, tType, tInt, tString, tReal, tBool, tList
 
   beforeEach(function () {
     st = new SymbolTable()
@@ -16,6 +16,9 @@ describe('Type', function () {
     tString = makeType('String')
     tReal = makeType('Real')
     tBool = makeType('Bool')
+    tList = makeType('List')
+
+    st.setStatic('List', tType, tList)
   })
 
   describe('makeType', function () {
@@ -83,7 +86,7 @@ describe('Type', function () {
   describe('resolve', function () {
     it('does nothing to simple types', function () {
       const t = makeType('Int')
-      assert.strictEqual(t.resolve(st), t)
+      assert.deepEqual(t.resolve(st), [t])
     })
 
     it('resolves type parameters from the SymbolTable', function () {
@@ -91,7 +94,7 @@ describe('Type', function () {
       st.setStatic("'A", tType, tInt)
 
       const t = makeType("'A")
-      assert.strictEqual(t.resolve(st), tInt)
+      assert.deepEqual(t.resolve(st), [tInt])
     })
 
     it('fails if the SymbolTable entry is non-static', function () {
@@ -110,7 +113,7 @@ describe('Type', function () {
 
     it('leaves the type parameter as-is if no entry is present', function () {
       const t = makeType("'D")
-      assert.strictEqual(t.resolve(st), t)
+      assert.deepEqual(t.resolve(st), [t])
     })
 
     it('resolves type parameters of compound types shallowly', function () {
@@ -121,10 +124,47 @@ describe('Type', function () {
       const t0 = makeType("'A", [tB])
 
       const r = t0.resolve(st)
-      assert.isTrue(r.isCompound())
-      assert.strictEqual(r.getBase(), tInt)
-      assert.lengthOf(r.getParams(), 1)
-      assert.strictEqual(r.getParams()[0], tB)
+      assert.lengthOf(r, 1)
+      const r0 = r[0]
+      assert.isTrue(r0.isCompound())
+      assert.strictEqual(r0.getBase(), tInt)
+      assert.lengthOf(r0.getParams(), 1)
+      assert.strictEqual(r0.getParams()[0], tB)
+    })
+
+    it('passes through repeatable types', function () {
+      st.setStatic("'B", tType, tString)
+
+      const t0 = tInt.repeatable()
+      assert.deepEqual(t0.resolve(st), [t0])
+
+      const t1 = makeType("'A").repeatable()
+      const r1 = t1.resolve(st)
+      assert.lengthOf(r1, 1)
+      const r10 = r1[0]
+      assert.isTrue(r10.isRepeatable())
+      assert.isTrue(r10.isParameter())
+
+      const t2 = makeType("'B").repeatable()
+      const r2 = t2.resolve(st)
+      assert.lengthOf(r2, 1)
+      const r20 = r2[0]
+      assert.isTrue(r20.isRepeatable())
+      assert.isTrue(r20.isSimple())
+      assert.strictEqual(r20.getInner(), tString)
+    })
+
+    it('passes through unbound splat types', function () {
+      const t = makeType("'Args").splat()
+
+      assert.deepEqual(t.resolve(st), [t])
+    })
+
+    it('replaces splats with the contents of a bound TypeList', function () {
+      st.setStatic("'Args", makeType(tList, [tType]), [tInt, tBool, tReal])
+
+      const t = makeType("'Args").splat()
+      assert.deepEqual(t.resolve(st), [tInt, tBool, tReal])
     })
   })
 

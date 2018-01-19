@@ -27,11 +27,11 @@ class Unification {
 
 class Type {
   resolve (symbolTable) {
-    return this
+    return [this]
   }
 
   resolveRecursively (symbolTable) {
-    return this
+    return [this]
   }
 
   isSimple () { return false }
@@ -56,14 +56,6 @@ class SimpleType extends Type {
   }
 
   getName () { return this.name }
-
-  resolve (symbolTable) {
-    return this
-  }
-
-  resolveRecursively (symbolTable) {
-    return this
-  }
 
   isSimple () { return true }
 
@@ -93,9 +85,9 @@ class TypeParameter extends Type {
         throw new Error(
           `Identifier ${this.name} is not a Type, so it can't be in a type expression`)
       }
-      return entry.getValue()
+      return [entry.getValue()]
     } else {
-      return this
+      return [this]
     }
   }
 
@@ -120,18 +112,24 @@ class CompoundType extends Type {
   getParams () { return this.params }
 
   resolve (symbolTable) {
-    const rBase = this.base.resolve(symbolTable)
+    const rBase = this.base.resolve(symbolTable)[0]
     if (rBase !== this.base) {
-      return new CompoundType(rBase, this.params.slice())
+      return [new CompoundType(rBase, this.params.slice())]
     } else {
-      return this
+      return [this]
     }
   }
 
   resolveRecursively (symbolTable) {
-    const t = this.resolve(symbolTable)
-    t.params = this.params.map(p => p.resolveRecursively(symbolTable))
-    return t
+    const t = this.resolve(symbolTable)[0]
+    const nParams = this.params.map(p => p.resolveRecursively(symbolTable))
+    const changed = nParams.some((np, i) => np !== this.params[i])
+    if (!changed && t === this) {
+      return [this]
+    } else {
+      t.params = nParams
+      return [t]
+    }
   }
 
   isCompound () { return true }
@@ -153,9 +151,18 @@ class TypeWrapper extends Type {
 
   getInner () { return this.inner }
 
-  resolve (symbolTable) { return this.inner.resolve(symbolTable) }
+  resolve (symbolTable) {
+    const i = this.inner.resolve(symbolTable)[0]
+    if (i !== this.inner) {
+      return [new this.constructor(i)]
+    } else {
+      return [this]
+    }
+  }
 
-  resolveRecursively (symbolTable) { return this.inner.resolveRecursively(symbolTable) }
+  resolveRecursively (symbolTable) {
+    return this.resolve(symbolTable)
+  }
 
   isSimple () { return this.inner.isSimple() }
 
@@ -185,6 +192,31 @@ class RepeatableType extends TypeWrapper {
 class SplatType extends TypeWrapper {
   isSplat () {
     return true
+  }
+
+  resolve (symbolTable) {
+    const name = this.getInner().getName()
+    if (symbolTable.has(name)) {
+      const entry = symbolTable.at(name)
+      if (!entry.isStatic()) {
+        throw new Error(
+          `Identifier ${this.name} is not known at compile time, so it can't be in a type expression`)
+      }
+
+      const entryType = entry.getType()
+      const isTypeList =
+        entryType.isCompound() &&
+        entryType.getBase() === symbolTable.at('List').getValue() &&
+        entryType.getParams().length === 1 &&
+        entryType.getParams()[0] === symbolTable.at('Type').getValue()
+      if (!isTypeList) {
+        throw new Error(
+          `Identifier ${this.name} is not a List(Type), so it can't be in a type splat expression`)
+      }
+      return entry.getValue()
+    } else {
+      return [this]
+    }
   }
 
   repeatable () {
