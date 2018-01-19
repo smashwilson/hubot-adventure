@@ -1,3 +1,5 @@
+const {makeType} = require('../type')
+
 class Some {
   constructor (value) {
     this.value = value
@@ -31,6 +33,14 @@ module.exports = {
   },
 
   registerMethods (t, symbolTable, methodRegistry) {
-    //
+    const tA = makeType("'A")
+
+    methodRegistry.register(makeType(t.Option, [tA]), 'or', [tA], tA, ({receiver}, alt) => {
+      if (receiver.hasValue()) {
+        return receiver.getValue()
+      } else {
+        return alt
+      }
+    })
   }
 }

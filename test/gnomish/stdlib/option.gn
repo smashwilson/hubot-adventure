@@ -1,5 +1,5 @@
 let s0 = if {true} then {3}
 let n0 = if {false} then {3}
 
-assert.equal(s0.default(7), 3)
-assert.equal(n0.default(7), 7)
+assert.equal(s0.or(7), 3)
+assert.equal(n0.or(7), 7)
