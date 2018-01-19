@@ -24,6 +24,8 @@ describe('Type', function () {
       assert.isTrue(t.isSimple())
       assert.isFalse(t.isParameter())
       assert.isFalse(t.isCompound())
+      assert.isFalse(t.isRepeatable())
+      assert.isFalse(t.isSplat())
       assert.equal(t.toString(), 'Int')
     })
 
@@ -32,7 +34,39 @@ describe('Type', function () {
       assert.isFalse(p.isSimple())
       assert.isTrue(p.isParameter())
       assert.isFalse(p.isCompound())
+      assert.isFalse(p.isRepeatable())
+      assert.isFalse(p.isSplat())
       assert.equal(p.toString(), "'A")
+    })
+
+    it('constructs a repeatable type', function () {
+      const p = makeType('Int*')
+      assert.isTrue(p.isSimple())
+      assert.isFalse(p.isParameter())
+      assert.isFalse(p.isCompound())
+      assert.isTrue(p.isRepeatable())
+      assert.isFalse(p.isSplat())
+      assert.equal(p.toString(), 'Int*')
+    })
+
+    it('constructs a repeatable type parameter', function () {
+      const p = makeType("'A*")
+      assert.isFalse(p.isSimple())
+      assert.isTrue(p.isParameter())
+      assert.isFalse(p.isCompound())
+      assert.isTrue(p.isRepeatable())
+      assert.isFalse(p.isSplat())
+      assert.equal(p.toString(), "'A*")
+    })
+
+    it('constructs a splat type parameter', function () {
+      const p = makeType("'As...")
+      assert.isFalse(p.isSimple())
+      assert.isTrue(p.isParameter())
+      assert.isFalse(p.isCompound())
+      assert.isFalse(p.isRepeatable())
+      assert.isTrue(p.isSplat())
+      assert.equal(p.toString(), "'As...")
     })
 
     it('constructs a compound type', function () {
@@ -40,6 +74,8 @@ describe('Type', function () {
       assert.isFalse(c.isSimple())
       assert.isFalse(c.isParameter())
       assert.isTrue(c.isCompound())
+      assert.isFalse(c.isRepeatable())
+      assert.isFalse(c.isSplat())
       assert.equal(c.toString(), "Block(Int, 'A, Bool)")
     })
   })

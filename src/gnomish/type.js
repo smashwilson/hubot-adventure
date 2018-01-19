@@ -25,9 +25,13 @@ class Unification {
   }
 }
 
+const REPEATABLE = Symbol('repeatable')
+const SPLAT = Symbol('splat')
+
 class Type {
-  constructor (name) {
+  constructor (name, attr) {
     this.name = name
+    this.attr = attr
   }
 
   getName () { return this.name }
@@ -46,14 +50,19 @@ class Type {
 
   isCompound () { return false }
 
+  isRepeatable () { return this.attr === REPEATABLE }
+
+  isSplat () { return this.attr === SPLAT }
+
   toString () {
     return this.name
   }
 }
 
 class TypeParameter {
-  constructor (name) {
+  constructor (name, attr) {
     this.name = name
+    this.attr = attr
   }
 
   getName () { return this.name }
@@ -85,15 +94,20 @@ class TypeParameter {
 
   isCompound () { return false }
 
+  isRepeatable () { return this.attr === REPEATABLE }
+
+  isSplat () { return this.attr === SPLAT }
+
   toString () {
     return this.name
   }
 }
 
 class CompoundType {
-  constructor (base, params) {
+  constructor (base, params, attr) {
     this.base = base
     this.params = params
+    this.attr = attr
   }
 
   getBase () { return this.base }
@@ -121,6 +135,10 @@ class CompoundType {
 
   isCompound () { return true }
 
+  isRepeatable () { return this.attr === REPEATABLE }
+
+  isSplat () { return this.attr === SPLAT }
+
   toString () {
     return `${this.base.toString()}(${this.params.map(p => p.toString()).join(', ')})`
   }
@@ -129,7 +147,11 @@ class CompoundType {
 function makeType (name, params = []) {
   let base
   if (typeof name === 'string') {
-    base = name.startsWith("'") ? new TypeParameter(name) : new Type(name)
+    let attr = null
+    if (name.endsWith('*')) attr = REPEATABLE
+    if (name.endsWith('...')) attr = SPLAT
+
+    base = name.startsWith("'") ? new TypeParameter(name, attr) : new Type(name, attr)
   } else {
     base = name
   }
