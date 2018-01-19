@@ -76,7 +76,7 @@ methodcall "method invocation"
   = receiver:atom '.' name:identifier args:methodargs
     { return new CallNode({receiver, name, args}) }
   / name:identifier args:methodargs
-    { return new CallNode({name, args}) }
+    { return new CallNode({receiver: new VarNode({name: 'this'}), name, args}) }
   / atom
 
 atom "literal or parenthesized subexpression"
