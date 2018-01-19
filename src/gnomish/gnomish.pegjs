@@ -179,4 +179,7 @@ _ "optional whitespace"
   = [ \t]*
 
 exprsep "expression separator"
-  = ( _ ( [\r\n] / ';' ) _ )+
+  = ( _ comment? ( [\r\n] / ';' ) _ )+
+
+comment
+  = '#' [^\n]*
