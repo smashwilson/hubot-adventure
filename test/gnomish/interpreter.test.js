@@ -8,7 +8,7 @@ const {MethodRegistry} = require('../../src/gnomish/methodregistry')
 
 describe('Interpreter', function () {
   let st, mr
-  let tInt, tReal, tString, tBool, tBlock, tOption, tType
+  let tInt, tReal, tString, tBool, tBlock, tOption, tList, tType
 
   const GLOBAL = Symbol('global')
 
@@ -19,6 +19,7 @@ describe('Interpreter', function () {
     tBool = makeType('Bool')
     tBlock = makeType('Block')
     tOption = makeType('Option')
+    tList = makeType('List')
     tType = makeType('Type')
 
     st = new SymbolTable(GLOBAL)
@@ -29,6 +30,7 @@ describe('Interpreter', function () {
     st.setStatic('Bool', tType, tBool)
     st.setStatic('Block', tType, tBlock)
     st.setStatic('Option', tType, tOption)
+    st.setStatic('List', tType, tList)
 
     st.setStatic('true', tBool, true)
     st.setStatic('false', tBool, false)
@@ -85,7 +87,7 @@ describe('Interpreter', function () {
   })
 
   describe('method calls', function () {
-    it('execues a bound callback', function () {
+    it('executes a bound callback', function () {
       mr.register(tInt, '*', [tInt], tInt, ({receiver}, operand) => {
         return receiver * operand
       })
