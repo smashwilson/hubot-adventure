@@ -114,10 +114,7 @@ class Analyzer extends Visitor {
     let defType = node.getDefault() && node.getDefault().getType()
 
     if (annotatedType && defType) {
-      const u = unify(this.symbolTable, annotatedType, defType)
-      if (!u.wasSuccessful()) {
-        throw new Error(`Types "${annotatedType.toString()}" and "${defType.toString()}" do not match`)
-      }
+      const u = this.unifyTypes(annotatedType, defType)
       u.apply(this.symbolTable)
       node.setType(u.getType())
     } else {
@@ -185,7 +182,8 @@ class Analyzer extends Visitor {
   }
 
   unifyTypes (lhs, rhs) {
-    const u = unify(this.symbolTable, lhs, rhs)
+    console.log({lhs, rhs})
+    const u = unify(this.symbolTable, [lhs], [rhs])
     if (!u.wasSuccessful()) {
       throw new Error(
         `Types "${lhs.toString()}" and "${rhs.toString()}" do not match`)
