@@ -36,6 +36,14 @@ module.exports = {
     const tA = makeType("'A")
     const tOptionA = makeType(t.Option, [tA])
 
+    // Construction
+
+    methodRegistry.register(t.World, 'some', [tA], tOptionA, (_, value) => {
+      return new Some(value)
+    })
+
+    methodRegistry.register(t.World, 'none', [], tOptionA, () => none)
+
     // Comparison
 
     methodRegistry.register(tOptionA, '==', [tOptionA], t.Bool, ({receiver}, operand) => {
