@@ -127,4 +127,24 @@ describe('Gnomish literals', function () {
       `)
     })
   })
+
+  describe('type annotations', function () {
+    it('supports repeated type parameters', function () {
+      assertSexp("{ x: List('A*) | x }", `
+        (exprlist
+          (block
+            (arg x : (type List (type 'A *)))
+            (exprlist (var x))))
+      `)
+    })
+
+    it('supports splat type parameters', function () {
+      assertSexp("{ y: Block('R, 'Args...) | y }", `
+        (exprlist
+          (block
+            (arg y : (type Block (type 'R) (type 'Args ...)))
+            (exprlist (var y))))
+      `)
+    })
+  })
 })

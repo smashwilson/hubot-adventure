@@ -309,18 +309,21 @@ class VarNode extends SlotNode {
 }
 
 class TypeNode extends Node {
-  constructor ({name, params, optional}) {
+  constructor ({name, params, attr}) {
     super()
     this.name = name
     this.params = params || []
-    this.optional = optional !== null
+    this.splat = attr && attr === '...'
+    this.repeatable = attr && attr === '*'
   }
 
   getName () { return this.name }
 
   getParams () { return this.params }
 
-  isOptional () { return this.optional }
+  isSplat () { return this.splat }
+
+  isRepeatable () { return this.repeatable }
 
   visitBy (visitor) {
     return visitor.visitType(this)

@@ -1,58 +1,105 @@
 class Unification {
-  static successful (type, bindings) {
-    return new Unification(type, bindings)
+  static successful (types, bindings) {
+    return new Unification(types, bindings)
   }
 
   static unsuccessful () {
     return new Unification(null, [])
   }
 
-  constructor (type, bindings) {
-    this.type = type
+  static base () {
+    return Unification.successful([], [])
+  }
+
+  constructor (types, bindings) {
+    this.types = types
     this.bindings = bindings
   }
 
-  wasSuccessful () { return this.type !== null }
+  wasSuccessful () { return this.types !== null }
 
-  getType () { return this.type }
+  getTypes () { return this.types }
+
+  getType () {
+    if (this.types.length !== 1) {
+      throw new Error(`Expected a single Type, but got ${this.types.length}`)
+    }
+    return this.types[0]
+  }
 
   apply (symbolTable) {
-    const tType = symbolTable.at('Type').getValue()
-    for (const [name, type] of this.bindings) {
-      symbolTable.setStatic(name, tType, type)
+    for (const [name, t, type] of this.bindings) {
+      symbolTable.setStatic(name, t, type)
     }
     return this
+  }
+
+  assimilate (other) {
+    this.types.push(...other.getTypes())
+    this.bindings.push(...other.bindings)
+    return this
+  }
+
+  toString () {
+    if (this.wasSuccessful()) {
+      let r = 'Unification : '
+      r += this.types.map(t => t.toString()).join(', ')
+      r += ' ['
+      r += this.bindings.map(b => `${b[0]} => ${b[2].toString()}`).join(' ')
+      r += ']'
+      return r
+    } else {
+      return 'Unification [failed]'
+    }
   }
 }
 
 class Type {
-  constructor (name) {
-    this.name = name
-  }
-
-  getName () { return this.name }
-
   resolve (symbolTable) {
-    return this
+    return [this]
   }
 
   resolveRecursively (symbolTable) {
-    return this
+    return [this]
   }
 
-  isSimple () { return true }
+  isSimple () { return false }
 
   isParameter () { return false }
 
   isCompound () { return false }
 
-  toString () {
-    return this.name
-  }
+  isWrapped () { return false }
+
+  isRepeatable () { return false }
+
+  isSplat () { return false }
+
+  repeatable () { return new RepeatableType(this) }
+
+  splat () { return new SplatType(this) }
 }
 
-class TypeParameter {
+class SimpleType extends Type {
   constructor (name) {
+    super()
+    this.name = name
+  }
+
+  getName () { return this.name }
+
+  isSimple () { return true }
+
+  splat () {
+    throw new Error(`Simple type ${this.toString()} cannot be a splat`)
+  }
+
+  toString () { return this.name }
+}
+
+class TypeParameter extends Type {
+  constructor (name) {
+    super()
     this.name = name
   }
 
@@ -69,9 +116,9 @@ class TypeParameter {
         throw new Error(
           `Identifier ${this.name} is not a Type, so it can't be in a type expression`)
       }
-      return entry.getValue()
+      return [entry.getValue()]
     } else {
-      return this
+      return [this]
     }
   }
 
@@ -79,19 +126,14 @@ class TypeParameter {
     return this.resolve(symbolTable)
   }
 
-  isSimple () { return false }
-
   isParameter () { return true }
 
-  isCompound () { return false }
-
-  toString () {
-    return this.name
-  }
+  toString () { return this.name }
 }
 
-class CompoundType {
+class CompoundType extends Type {
   constructor (base, params) {
+    super()
     this.base = base
     this.params = params
   }
@@ -101,35 +143,137 @@ class CompoundType {
   getParams () { return this.params }
 
   resolve (symbolTable) {
-    const rBase = this.base.resolve(symbolTable)
+    const rBase = this.base.resolve(symbolTable)[0]
     if (rBase !== this.base) {
-      return new CompoundType(rBase, this.params.slice())
+      return [new CompoundType(rBase, this.params.slice())]
     } else {
-      return this
+      return [this]
     }
   }
 
   resolveRecursively (symbolTable) {
-    const t = this.resolve(symbolTable)
-    t.params = this.params.map(p => p.resolveRecursively(symbolTable))
-    return t
+    const t = this.resolve(symbolTable)[0]
+    const nParams = this.params.reduce((acc, p) => {
+      acc.push(...p.resolveRecursively(symbolTable))
+      return acc
+    }, [])
+    const changed = nParams.length !== this.params.length || nParams.some((np, i) => np !== this.params[i])
+    if (!changed && t === this) {
+      return [this]
+    } else {
+      t.params = nParams
+      return [t]
+    }
   }
 
-  isSimple () { return false }
-
-  isParameter () { return false }
-
   isCompound () { return true }
+
+  splat () {
+    throw new Error(`Compound type ${this.toString()} cannot be a splat`)
+  }
 
   toString () {
     return `${this.base.toString()}(${this.params.map(p => p.toString()).join(', ')})`
   }
 }
 
+class TypeWrapper extends Type {
+  constructor (inner) {
+    super()
+    this.inner = inner
+  }
+
+  getInner () { return this.inner }
+
+  resolve (symbolTable) {
+    const i = this.inner.resolve(symbolTable)[0]
+    if (i !== this.inner) {
+      return [new this.constructor(i)]
+    } else {
+      return [this]
+    }
+  }
+
+  resolveRecursively (symbolTable) {
+    return this.resolve(symbolTable)
+  }
+
+  isSimple () { return this.inner.isSimple() }
+
+  isParameter () { return this.inner.isParameter() }
+
+  isCompound () { return this.inner.isCompound() }
+
+  isWrapped () { return true }
+}
+
+class RepeatableType extends TypeWrapper {
+  isRepeatable () {
+    return true
+  }
+
+  repeatable () {
+    throw new Error(`Type ${this.toString()} is already repeatable`)
+  }
+
+  splat () {
+    throw new Error(`Repeatable type ${this.toString()} cannot be a splat`)
+  }
+
+  toString () {
+    return this.getInner().toString() + '*'
+  }
+}
+
+class SplatType extends TypeWrapper {
+  isSplat () {
+    return true
+  }
+
+  resolve (symbolTable) {
+    const name = this.getInner().getName()
+    if (symbolTable.has(name)) {
+      const entry = symbolTable.at(name)
+      if (!entry.isStatic()) {
+        throw new Error(
+          `Identifier ${this.name} is not known at compile time, so it can't be in a type expression`)
+      }
+
+      const entryType = entry.getType()
+      const isTypeList =
+        entryType.isCompound() &&
+        entryType.getBase() === symbolTable.at('List').getValue() &&
+        entryType.getParams().length === 1 &&
+        entryType.getParams()[0] === symbolTable.at('Type').getValue()
+      if (!isTypeList) {
+        throw new Error(
+          `Identifier ${this.name} is not a List(Type), so it can't be in a type splat expression`)
+      }
+      return entry.getValue()
+    } else {
+      return [this]
+    }
+  }
+
+  repeatable () {
+    throw new Error(`Splat type ${this.toString()} cannot be repeatable`)
+  }
+
+  splat () {
+    throw new Error(`Type ${this.toString()} is already a splat`)
+  }
+
+  toString () {
+    return this.getInner().toString() + '...'
+  }
+}
+
 function makeType (name, params = []) {
   let base
   if (typeof name === 'string') {
-    base = name.startsWith("'") ? new TypeParameter(name) : new Type(name)
+    let attr = null
+
+    base = name.startsWith("'") ? new TypeParameter(name, attr) : new SimpleType(name, attr)
   } else {
     base = name
   }
@@ -140,56 +284,143 @@ function makeType (name, params = []) {
   }
 }
 
-function unify (symbolTable, lType, rType) {
+function unify (symbolTable, lTypes, rTypes) {
   const st = symbolTable.push()
   const tType = st.at('Type').getValue()
+  const tList = st.at('List').getValue()
+  const tTypeList = makeType(tList, [tType])
 
   function exact (a, b) {
-    if (a === b) return Unification.successful(a, [])
+    if (a === b) return Unification.successful([a], [])
     return Unification.unsuccessful()
   }
 
   function assignParameter (param, value) {
     st.setStatic(param.getName(), tType, value)
-    return Unification.successful(value, [[param.getName(), value]])
+    return Unification.successful([value], [[param.getName(), tType, value]])
   }
 
-  function pass (lType, rType) {
-    const lRes = lType.resolve(st)
-    const rRes = rType.resolve(st)
+  function assignParameterList (param, values) {
+    st.setStatic(param.getName(), tTypeList, values)
+    return Unification.successful(values, [[param.getName(), tTypeList, values]])
+  }
 
-    if (lRes.isParameter() && !rRes.isParameter()) return assignParameter(lRes, rRes)
-    if (rRes.isParameter()) return assignParameter(rRes, lRes)
+  function resolveInPlace (types, i) {
+    const results = types[i].resolve(st)
+    if (results.length !== 1 || results[0] !== types[i]) {
+      types.splice(i, 1, ...results)
+    }
+    return types[i]
+  }
 
-    if (lRes.isCompound() && rRes.isCompound()) {
-      const lParams = lRes.getParams()
-      const rParams = rRes.getParams()
+  function unifySingle (lType, rType) {
+    if (lType.isParameter() && !rType.isParameter()) return assignParameter(lType, rType)
+    if (rType.isParameter()) return assignParameter(rType, lType)
 
-      if (lParams.length !== rParams.length) return Unification.unsuccessful()
-
-      const uBase = pass(lRes.getBase(), rRes.getBase())
+    if (lType.isCompound() && rType.isCompound()) {
+      const uBase = unifySingle(lType.getBase(), rType.getBase())
       if (!uBase.wasSuccessful()) return Unification.unsuccessful()
 
-      const uParams = []
-      const uBindings = []
-      for (let i = 0; i < lParams.length; i++) {
-        const uParam = pass(lParams[i], rParams[i])
-        if (!uParam.wasSuccessful()) return Unification.unsuccessful()
+      const uParams = unifyMulti(lType.getParams(), rType.getParams())
+      if (!uParams.wasSuccessful()) return Unification.unsuccessful()
 
-        uBindings.push(...uParam.bindings)
-        uParams.push(uParam)
-      }
-
-      const nType = uBindings.length === 0 ? lRes : new CompoundType(uBase.getType(), uParams.map(p => p.getType()))
-      return Unification.successful(nType, uBindings)
+      return Unification.successful(
+        [makeType(uBase.getType(), uParams.getTypes())],
+        uBase.bindings.concat(uParams.bindings))
     }
 
-    if (lRes.isSimple() && rRes.isSimple()) return exact(lRes, rRes)
+    if (lType.isSimple() && rType.isSimple()) return exact(lType, rType)
 
     return Unification.unsuccessful()
   }
 
-  return pass(lType, rType)
+  function unifyMulti (lTypesOriginal, rTypesOriginal) {
+    const lTypes = lTypesOriginal.slice()
+    const rTypes = rTypesOriginal.slice()
+
+    let li = 0
+    let ri = 0
+
+    let lSplat = null
+    const lSplatValues = []
+
+    let rSplat = null
+    const rSplatValues = []
+
+    const result = Unification.base()
+
+    while (li < lTypes.length && ri < rTypes.length) {
+      const lType = resolveInPlace(lTypes, li)
+      const rType = resolveInPlace(rTypes, ri)
+
+      if (lType.isSplat()) {
+        lSplat = lType
+        lSplatValues.push(rType)
+        ri++
+        if (ri >= rTypes.length) li++
+        continue
+      }
+      if (rType.isSplat()) {
+        rSplat = rType
+        rSplatValues.push(lType)
+        li++
+        if (li >= lTypes.length) ri++
+        continue
+      }
+
+      const lInner = lType.isWrapped() ? lType.getInner() : lType
+      const rInner = rType.isWrapped() ? rType.getInner() : rType
+
+      const u = unifySingle(lInner, rInner)
+      if (!u.wasSuccessful()) {
+        if (lType.isRepeatable()) {
+          li++
+          continue
+        }
+        if (rType.isRepeatable()) {
+          ri++
+          continue
+        }
+
+        return Unification.unsuccessful()
+      }
+
+      result.assimilate(u)
+
+      if (!lType.isRepeatable() || ri + 1 >= rTypes.length) li++
+      if (!rType.isRepeatable() || li >= lTypes.length) ri++
+    }
+
+    while (li < lTypes.length) {
+      if (lTypes[li].isRepeatable()) li++
+      if (lTypes[li].isSplat()) {
+        result.assimilate(assignParameterList(lTypes[li].getInner(), []))
+        li++
+      }
+      break
+    }
+    while (ri < rTypes.length) {
+      if (rTypes[ri].isRepeatable()) ri++
+      if (rTypes[ri].isSplat()) {
+        result.assimilate(assignParameterList(rTypes[ri].getInner(), []))
+        ri++
+      }
+      break
+    }
+
+    if (li < lTypes.length || ri < rTypes.length) return Unification.unsuccessful()
+
+    if (lSplat) {
+      result.assimilate(assignParameterList(lSplat.getInner(), lSplatValues))
+    }
+    if (rSplat) {
+      result.assimilate(assignParameterList(rSplat.getInner(), rSplatValues))
+    }
+
+    return result
+  }
+
+  return unifyMulti(lTypes, rTypes)
 }
 
 module.exports = {makeType, unify}

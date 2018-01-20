@@ -12,6 +12,7 @@ describe('MethodRegistry', function () {
   const tBool = makeType('Bool')
   const tOption = makeType('Option')
   const tBlock = makeType('Block')
+  const tList = makeType('List')
 
   const right = () => {}
   const wrong = () => {}
@@ -23,6 +24,7 @@ describe('MethodRegistry', function () {
 
     const tType = makeType('Type')
     st.setStatic('Type', tType, tType)
+    st.setStatic('List', tType, tList)
 
     registry = new MethodRegistry()
   })
