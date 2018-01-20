@@ -1,5 +1,5 @@
 const {TypeRegistry} = require('../typeregistry')
-const builtins = ['./any', './bool', './numbers', './block', './option'].map(p => require(p))
+const builtins = ['./world', './any', './bool', './numbers', './block', './option', './list'].map(p => require(p))
 
 module.exports = {
   register (symbolTable, methodRegistry) {
