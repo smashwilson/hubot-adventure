@@ -132,8 +132,8 @@ complike "comparison operator"
   = $ ( ( '<' / '>' ) opstem? / '=' opstem )
 
 typeexpr "type expression"
-  = name:identifier params:typeparams? optional:'?'?
-    { return new TypeNode({name, params, optional}) }
+  = name:identifier params:typeparams? attr:( '*' / '...' )?
+    { return new TypeNode({name, params, attr}) }
 
 typeparams "type parameters"
   = '(' _ first:typeexpr rest:( _ ',' _ param:typeexpr { return param } )* ')'
