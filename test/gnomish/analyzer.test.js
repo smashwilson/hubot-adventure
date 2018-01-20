@@ -8,7 +8,7 @@ const {MethodRegistry} = require('../../src/gnomish/methodregistry')
 
 describe('Analyzer', function () {
   let st, mr
-  let tInt, tReal, tString, tBool, tBlock, tOption, tType
+  let tInt, tReal, tString, tBool, tBlock, tOption, tList, tType
 
   const GLOBAL = Symbol('global')
 
@@ -19,6 +19,7 @@ describe('Analyzer', function () {
     tBool = makeType('Bool')
     tBlock = makeType('Block')
     tOption = makeType('Option')
+    tList = makeType('List')
     tType = makeType('Type')
 
     st = new SymbolTable(GLOBAL)
@@ -29,6 +30,7 @@ describe('Analyzer', function () {
     st.setStatic('Bool', tType, tBool)
     st.setStatic('Block', tType, tBlock)
     st.setStatic('Option', tType, tOption)
+    st.setStatic('List', tType, tList)
 
     st.setStatic('true', tBool, true)
     st.setStatic('false', tBool, false)
@@ -145,6 +147,32 @@ describe('Analyzer', function () {
         assert.isTrue(blockType.getParams()[0].isParameter())
         assert.equal(blockType.getParams()[0].getName(), "'A")
         assert.strictEqual(blockType.getParams()[1], blockType.getParams()[0])
+      })
+
+      it('understands repeated type parameters', function () {
+        const program = parse('{ x: List(Int*) | x }').analyze(st, mr)
+
+        const blockType = program.node.getLastExpr().getType()
+        const retType = blockType.getParams()[0]
+        assert.isTrue(retType.isCompound())
+        assert.strictEqual(retType.getBase(), tList)
+        assert.lengthOf(retType.getParams(), 1)
+        assert.isTrue(retType.getParams()[0].isRepeatable())
+        assert.strictEqual(retType.getParams()[0].getInner(), tInt)
+      })
+
+      it('understands splat type parameters', function () {
+        const program = parse("{ y: Block(Bool, 'Args...) | y }").analyze(st, mr)
+
+        const blockType = program.node.getLastExpr().getType()
+        const retType = blockType.getParams()[0]
+        assert.isTrue(retType.isCompound())
+        assert.strictEqual(retType.getBase(), tBlock)
+        assert.lengthOf(retType.getParams(), 2)
+        assert.strictEqual(retType.getParams()[0], tBool)
+        assert.isTrue(retType.getParams()[1].isSplat())
+        assert.isTrue(retType.getParams()[1].getInner().isParameter())
+        assert.strictEqual(retType.getParams()[1].getInner().getName(), "'Args")
       })
     })
 
@@ -271,6 +299,14 @@ describe('Analyzer', function () {
         mr.register(tString, 'replace', [tInt, tString, tString], tInt, () => {})
 
         const root = parse('"boo".replace(3 + 4, "from", "to")').analyze(st, mr)
+        assert.strictEqual(root.node.getType(), tInt)
+      })
+
+      it('uses the "this" binding as an implicit receiver', function () {
+        mr.register(tInt, 'selector', [], tInt, () => {})
+        st.setStatic('this', tInt, 0)
+
+        const root = parse('selector()').analyze(st, mr)
         assert.strictEqual(root.node.getType(), tInt)
       })
     })
@@ -468,6 +504,18 @@ describe('Analyzer', function () {
       mr.register(tReal, '+', [tReal], tReal, wrong)
 
       const root = parse('3 + 4').analyze(st, mr)
+      const callNode = root.node.getExprs()[0]
+
+      assert.strictEqual(callNode.getCallback(), right)
+    })
+
+    it('uses the "this" binding as an implicit receiver', function () {
+      mr.register(tInt, 'selector', [tInt], tInt, right)
+      mr.register(tReal, 'selector', [tInt], tInt, wrong)
+
+      st.setStatic('this', tInt, 0)
+
+      const root = parse('selector(1)').analyze(st, mr)
       const callNode = root.node.getExprs()[0]
 
       assert.strictEqual(callNode.getCallback(), right)

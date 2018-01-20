@@ -76,7 +76,7 @@ methodcall "method invocation"
   = receiver:atom '.' name:identifier args:methodargs
     { return new CallNode({receiver, name, args}) }
   / name:identifier args:methodargs
-    { return new CallNode({name, args}) }
+    { return new CallNode({receiver: new VarNode({name: 'this'}), name, args}) }
   / atom
 
 atom "literal or parenthesized subexpression"
@@ -132,8 +132,8 @@ complike "comparison operator"
   = $ ( ( '<' / '>' ) opstem? / '=' opstem )
 
 typeexpr "type expression"
-  = name:identifier params:typeparams? optional:'?'?
-    { return new TypeNode({name, params, optional}) }
+  = name:identifier params:typeparams? attr:( '*' / '...' )?
+    { return new TypeNode({name, params, attr}) }
 
 typeparams "type parameters"
   = '(' _ first:typeexpr rest:( _ ',' _ param:typeexpr { return param } )* ')'

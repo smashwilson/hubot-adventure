@@ -82,11 +82,7 @@ class SexpVisitor extends Visitor {
 
   visitCall (node) {
     this.result += `(call `
-    if (node.getReceiver()) {
-      this.visit(node.getReceiver())
-    } else {
-      this.result += '<implicit>'
-    }
+    this.visit(node.getReceiver())
     this.result += ` ${node.getName()}`
     for (const arg of node.getArgs()) {
       this.result += ' '
@@ -118,7 +114,8 @@ class SexpVisitor extends Visitor {
       this.result += ' '
       this.visit(param)
     }
-    if (node.isOptional()) this.result += '?'
+    if (node.isRepeatable()) this.result += ' *'
+    if (node.isSplat()) this.result += ' ...'
     this.result += ')'
   }
 }

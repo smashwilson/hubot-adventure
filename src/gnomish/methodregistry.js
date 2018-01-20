@@ -9,22 +9,13 @@ class Signature {
   }
 
   match (symbolTable, receiverType, callArgTypes) {
-    const st = symbolTable.push()
+    const st = symbolTable.push(Symbol('MethodRegistry match'))
+    const u = unify(st, [this.receiverType, ...this.argTypes], [receiverType, ...callArgTypes])
+    if (!u.wasSuccessful()) return null
 
-    const typePairs = [
-      [this.receiverType, receiverType],
-      ...this.argTypes.map((t, i) => [t, callArgTypes[i]])
-    ]
+    u.apply(st)
 
-    for (const [lhs, rhs] of typePairs) {
-      const u = unify(st, lhs, rhs)
-      if (!u.wasSuccessful()) {
-        return null
-      }
-      u.apply(st)
-    }
-
-    const boundRetType = this.retType.resolveRecursively(st)
+    const boundRetType = this.retType.resolveRecursively(st)[0]
 
     return boundRetType === this.retType
       ? this
