@@ -341,6 +341,13 @@ function unify (symbolTable, lTypes, rTypes) {
 
     let li = 0
     let ri = 0
+
+    let lSplat = null
+    const lSplatValues = []
+
+    let rSplat = null
+    const rSplatValues = []
+
     const result = Unification.base()
 
     while (li < lTypes.length && ri < rTypes.length) {
@@ -349,21 +356,17 @@ function unify (symbolTable, lTypes, rTypes) {
       console.log('Resolved:\n', {lType: lType.toString(), rType: rType.toString()})
 
       if (lType.isSplat()) {
-        const values = rTypes.slice(ri)
-        const u = assignParameterList(lType, values)
-        result.assimilate(u)
-
-        li++
-        ri = rTypes.length
+        lSplat = lType
+        lSplatValues.push(rType)
+        ri++
+        if (ri >= rTypes.length) li++
         continue
       }
       if (rType.isSplat()) {
-        const values = lTypes.slice(li)
-        const u = assignParameterList(rType, values)
-        result.assimilate(u)
-
-        li = lTypes.length
-        ri++
+        rSplat = rType
+        rSplatValues.push(lType)
+        li++
+        if (li >= lTypes.length) ri++
         continue
       }
 
@@ -412,6 +415,13 @@ function unify (symbolTable, lTypes, rTypes) {
       li, llen: lTypes.length, ri, rlen: rTypes.length, result: result.toString()
     })
     if (li < lTypes.length || ri < rTypes.length) return Unification.unsuccessful()
+
+    if (lSplat) {
+      result.assimilate(assignParameterList(lSplat.getInner(), lSplatValues))
+    }
+    if (rSplat) {
+      result.assimilate(assignParameterList(rSplat.getInner(), rSplatValues))
+    }
 
     return result
   }
