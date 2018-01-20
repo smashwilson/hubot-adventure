@@ -380,5 +380,55 @@ describe('Type', function () {
         })
       })
     })
+
+    describe('splat types', function () {
+      it('unifies against an empty list', function () {
+        const t0s = [tInt, makeType("'As").splat()]
+        const t1s = [tInt]
+
+        unifyBothWays(t0s, t1s, u => {
+          assert.isTrue(u.wasSuccessful())
+          assert.deepEqual(u.getTypes(), [tInt])
+          assert.lengthOf(u.bindings, 1)
+          assert.strictEqual(u.bindings[0][0], "'As")
+          assert.deepEqual(u.bindings[0][2], [])
+        })
+      })
+
+      it('unifies against a list of types', function () {
+        const t0s = [tBool, makeType("'Args").splat()]
+        const t1s = [tBool, tInt, tString, tReal, tReal]
+
+        unifyBothWays(t0s, t1s, u => {
+          assert.isTrue(u.wasSuccessful())
+          assert.deepEqual(u.getTypes(), [tBool, tInt, tString, tReal, tReal])
+          assert.lengthOf(u.bindings, 1)
+          assert.strictEqual(u.bindings[0][0], "'Args")
+          assert.deepEqual(u.bindings[0][2], [tInt, tString, tReal, tReal])
+        })
+      })
+
+      it('unifies an existing splat binding', function () {
+        st.setStatic("'Args", makeType(tList, [tType]), [tInt, tBool, tBool])
+
+        const t0s = [tBool, makeType("'Args").splat(), tString]
+        const t1s = [tBool, tInt, tBool, tBool, tString]
+
+        unifyBothWays(t0s, t1s, u => {
+          assert.isTrue(u.wasSuccessful())
+          assert.deepEqual(u.getTypes(), [tBool, tInt, tBool, tBool, tString])
+          assert.lengthOf(u.bindings, 0)
+        })
+      })
+
+      it('fails to unify with a conflicting splat binding', function () {
+        st.setStatic("'Args", makeType(tList, [tType]), [tInt, tBool, tBool])
+
+        const t0s = [tBool, makeType("'Args").splat(), tString]
+        const t1s = [tBool, tInt, tReal, tBool, tString]
+
+        unifyBothWays(t0s, t1s, u => assert.isFalse(u.wasSuccessful()))
+      })
+    })
   })
 })
