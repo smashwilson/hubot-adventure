@@ -391,6 +391,23 @@ function unify (symbolTable, lTypes, rTypes) {
       if (!rType.isRepeatable() || li >= lTypes.length) ri++
     }
 
+    while (li < lTypes.length) {
+      if (lTypes[li].isRepeatable()) li++
+      if (lTypes[li].isSplat()) {
+        result.assimilate(assignParameterList(lTypes[li].getInner(), []))
+        li++
+      }
+      break
+    }
+    while (ri < rTypes.length) {
+      if (rTypes[ri].isRepeatable()) ri++
+      if (rTypes[ri].isSplat()) {
+        result.assimilate(assignParameterList(rTypes[ri].getInner(), []))
+        ri++
+      }
+      break
+    }
+
     console.log('Final tally:\n', {
       li, llen: lTypes.length, ri, rlen: rTypes.length, result: result.toString()
     })
