@@ -339,5 +339,46 @@ describe('Type', function () {
         assert.isFalse(u.wasSuccessful())
       })
     })
+
+    describe('repeatable types', function () {
+      it('unifies with no matching types', function () {
+        const t0s = [tInt, tBool.repeatable(), tString]
+        const t1s = [tInt, tString]
+
+        unifyBothWays(t0s, t1s, u => {
+          assert.isTrue(u.wasSuccessful())
+          assert.deepEqual(u.getTypes(), [tInt, tString])
+        })
+      })
+
+      it('unifies with multiple matching types', function () {
+        const t0s = [tInt.repeatable()]
+        const t1s = [tInt, tInt, tInt, tInt]
+
+        unifyBothWays(t0s, t1s, u => {
+          assert.isTrue(u.wasSuccessful())
+          assert.deepEqual(u.getTypes(), [tInt, tInt, tInt, tInt])
+        })
+      })
+
+      it('fails to unify with non-matching types', function () {
+        const t0s = [makeType("'A").repeatable()]
+        const t1s = [tInt, tInt, tBool]
+
+        unifyBothWays(t0s, t1s, u => assert.isFalse(u.wasSuccessful()))
+      })
+
+      it('produces a single binding', function () {
+        const t0s = [makeType("'A").repeatable()]
+        const t1s = [tInt, tInt, tInt]
+
+        unifyBothWays(t0s, t1s, u => {
+          assert.isTrue(u.wasSuccessful())
+          assert.deepEqual(u.getTypes(), t1s)
+          assert.lengthOf(u.bindings, 1)
+          assert.deepEqual(u.bindings[0], ["'A", tType, tInt])
+        })
+      })
+    })
   })
 })
