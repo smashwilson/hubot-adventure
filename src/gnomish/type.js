@@ -285,7 +285,6 @@ function makeType (name, params = []) {
 }
 
 function unify (symbolTable, lTypes, rTypes) {
-  console.log('--- beginning unification ---\n', {lTypes: lTypes.map(t => t.toString()), rTypes: rTypes.map(t => t.toString())})
   const st = symbolTable.push()
   const tType = st.at('Type').getValue()
   const tList = st.at('List').getValue()
@@ -353,7 +352,6 @@ function unify (symbolTable, lTypes, rTypes) {
     while (li < lTypes.length && ri < rTypes.length) {
       const lType = resolveInPlace(lTypes, li)
       const rType = resolveInPlace(rTypes, ri)
-      console.log('Resolved:\n', {lType: lType.toString(), rType: rType.toString()})
 
       if (lType.isSplat()) {
         lSplat = lType
@@ -387,7 +385,6 @@ function unify (symbolTable, lTypes, rTypes) {
         return Unification.unsuccessful()
       }
 
-      console.log('Unified single types as:\n', u.toString())
       result.assimilate(u)
 
       if (!lType.isRepeatable() || ri + 1 >= rTypes.length) li++
@@ -411,9 +408,6 @@ function unify (symbolTable, lTypes, rTypes) {
       break
     }
 
-    console.log('Final tally:\n', {
-      li, llen: lTypes.length, ri, rlen: rTypes.length, result: result.toString()
-    })
     if (li < lTypes.length || ri < rTypes.length) return Unification.unsuccessful()
 
     if (lSplat) {

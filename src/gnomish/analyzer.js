@@ -182,7 +182,6 @@ class Analyzer extends Visitor {
   }
 
   unifyTypes (lhs, rhs) {
-    console.log({lhs, rhs})
     const u = unify(this.symbolTable, [lhs], [rhs])
     if (!u.wasSuccessful()) {
       throw new Error(
