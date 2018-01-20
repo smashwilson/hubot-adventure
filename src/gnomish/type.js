@@ -69,6 +69,8 @@ class Type {
 
   isCompound () { return false }
 
+  isWrapped () { return false }
+
   isRepeatable () { return false }
 
   isSplat () { return false }
@@ -201,6 +203,8 @@ class TypeWrapper extends Type {
   isParameter () { return this.inner.isParameter() }
 
   isCompound () { return this.inner.isCompound() }
+
+  isWrapped () { return true }
 }
 
 class RepeatableType extends TypeWrapper {
@@ -340,8 +344,8 @@ function unify (symbolTable, lTypes, rTypes) {
     const result = Unification.base()
 
     while (li < lTypes.length && ri < rTypes.length) {
-      let lType = resolveInPlace(lTypes, li)
-      let rType = resolveInPlace(rTypes, ri)
+      const lType = resolveInPlace(lTypes, li)
+      const rType = resolveInPlace(rTypes, ri)
       console.log('Resolved:\n', {lType: lType.toString(), rType: rType.toString()})
 
       if (lType.isSplat()) {
@@ -363,47 +367,34 @@ function unify (symbolTable, lTypes, rTypes) {
         continue
       }
 
-      if (lType.isRepeatable()) {
-        while (ri < rTypes.length) {
-          rType = rTypes[ri]
-          const u = unifySingle(lType.getInner(), rType)
-          if (!u.wasSuccessful()) {
-            ri--
-            break
-          } else {
-            result.assimilate(u)
-            ri++
-          }
-        }
-        li++
-        continue
-      }
-      if (rType.isRepeatable()) {
-        while (li < lTypes.length) {
-          lType = lTypes[li]
-          const u = unifySingle(lType, rType.getInner())
-          if (!u.wasSuccessful()) {
-            li--
-            break
-          } else {
-            result.assimilate(u)
-            li++
-          }
-        }
-        ri++
-        continue
-      }
+      const lInner = lType.isWrapped() ? lType.getInner() : lType
+      const rInner = rType.isWrapped() ? rType.getInner() : rType
 
-      const u = unifySingle(lType, rType)
+      const u = unifySingle(lInner, rInner)
       if (!u.wasSuccessful()) {
+        if (lType.isRepeatable()) {
+          li++
+          continue
+        }
+        if (rType.isRepeatable()) {
+          ri++
+          continue
+        }
+
         return Unification.unsuccessful()
       }
-      console.log('Unified single types as:\n', {u})
+
+      console.log('Unified single types as:\n', u.toString())
       result.assimilate(u)
 
-      li++
-      ri++
+      if (!lType.isRepeatable() || ri + 1 >= rTypes.length) li++
+      if (!rType.isRepeatable() || li >= lTypes.length) ri++
     }
+
+    console.log('Final tally:\n', {
+      li, llen: lTypes.length, ri, rlen: rTypes.length, result: result.toString()
+    })
+    if (li < lTypes.length || ri < rTypes.length) return Unification.unsuccessful()
 
     return result
   }
