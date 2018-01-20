@@ -148,6 +148,32 @@ describe('Analyzer', function () {
         assert.equal(blockType.getParams()[0].getName(), "'A")
         assert.strictEqual(blockType.getParams()[1], blockType.getParams()[0])
       })
+
+      it('understands repeated type parameters', function () {
+        const program = parse('{ x: List(Int*) | x }').analyze(st, mr)
+
+        const blockType = program.node.getLastExpr().getType()
+        const retType = blockType.getParams()[0]
+        assert.isTrue(retType.isCompound())
+        assert.strictEqual(retType.getBase(), tList)
+        assert.lengthOf(retType.getParams(), 1)
+        assert.isTrue(retType.getParams()[0].isRepeatable())
+        assert.strictEqual(retType.getParams()[0].getInner(), tInt)
+      })
+
+      it('understands splat type parameters', function () {
+        const program = parse("{ y: Block(Bool, 'Args...) | y }").analyze(st, mr)
+
+        const blockType = program.node.getLastExpr().getType()
+        const retType = blockType.getParams()[0]
+        assert.isTrue(retType.isCompound())
+        assert.strictEqual(retType.getBase(), tBlock)
+        assert.lengthOf(retType.getParams(), 2)
+        assert.strictEqual(retType.getParams()[0], tBool)
+        assert.isTrue(retType.getParams()[1].isSplat())
+        assert.isTrue(retType.getParams()[1].getInner().isParameter())
+        assert.strictEqual(retType.getParams()[1].getInner().getName(), "'Args")
+      })
     })
 
     describe('IfNode', function () {

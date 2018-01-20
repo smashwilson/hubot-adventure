@@ -161,7 +161,10 @@ class Analyzer extends Visitor {
 
   typeFromNode (node) {
     const base = this.getTypeNamed(node.getName())
-    return makeType(base, node.getParams().map(p => this.typeFromNode(p)))
+    let t = makeType(base, node.getParams().map(p => this.typeFromNode(p)))
+    if (node.isRepeated()) t = t.repeatable()
+    if (node.isSplat()) t = t.splat()
+    return t
   }
 
   getTypeNamed (name) {
