@@ -39,6 +39,19 @@ class Unification {
     this.bindings.push(...other.bindings)
     return this
   }
+
+  toString () {
+    if (this.wasSuccessful()) {
+      let r = 'Unification : '
+      r += this.types.map(t => t.toString()).join(', ')
+      r += ' ['
+      r += this.bindings.map(b => `${b[0]} => ${b[2].toString()}`).join(' ')
+      r += ']'
+      return r
+    } else {
+      return 'Unification [failed]'
+    }
+  }
 }
 
 class Type {
