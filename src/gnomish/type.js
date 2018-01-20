@@ -1,26 +1,42 @@
 class Unification {
-  static successful (type, bindings) {
-    return new Unification(type, bindings)
+  static successful (types, bindings) {
+    return new Unification(types, bindings)
   }
 
   static unsuccessful () {
     return new Unification(null, [])
   }
 
-  constructor (type, bindings) {
-    this.type = type
+  static base () {
+    return Unification.successful([], [])
+  }
+
+  constructor (types, bindings) {
+    this.types = types
     this.bindings = bindings
   }
 
-  wasSuccessful () { return this.type !== null }
+  wasSuccessful () { return this.types !== null }
 
-  getType () { return this.type }
+  getTypes () { return this.types }
+
+  getType () {
+    if (this.types.length !== 1) {
+      throw new Error(`Expected a single Type, but got ${this.types.length}`)
+    }
+    return this.types[0]
+  }
 
   apply (symbolTable) {
-    const tType = symbolTable.at('Type').getValue()
-    for (const [name, type] of this.bindings) {
-      symbolTable.setStatic(name, tType, type)
+    for (const [name, t, type] of this.bindings) {
+      symbolTable.setStatic(name, t, type)
     }
+    return this
+  }
+
+  assimilate (other) {
+    this.types.push(...other.getTypes())
+    this.bindings.push(...other.bindings)
     return this
   }
 }
@@ -251,56 +267,135 @@ function makeType (name, params = []) {
   }
 }
 
-function unify (symbolTable, lType, rType) {
+function unify (symbolTable, lTypes, rTypes) {
+  console.log('--- beginning unification ---\n', {lTypes: lTypes.map(t => t.toString()), rTypes: rTypes.map(t => t.toString())})
   const st = symbolTable.push()
   const tType = st.at('Type').getValue()
+  const tList = st.at('List').getValue()
+  const tTypeList = makeType(tList, [tType])
 
   function exact (a, b) {
-    if (a === b) return Unification.successful(a, [])
+    if (a === b) return Unification.successful([a], [])
     return Unification.unsuccessful()
   }
 
   function assignParameter (param, value) {
     st.setStatic(param.getName(), tType, value)
-    return Unification.successful(value, [[param.getName(), value]])
+    return Unification.successful([value], [[param.getName(), tType, value]])
   }
 
-  function pass (lType, rType) {
-    const lRes = lType.resolve(st)
-    const rRes = rType.resolve(st)
+  function assignParameterList (param, values) {
+    st.setStatic(param.getName(), tTypeList, values)
+    return Unification.successful(values, [[param.getName(), tTypeList, values]])
+  }
 
-    if (lRes.isParameter() && !rRes.isParameter()) return assignParameter(lRes, rRes)
-    if (rRes.isParameter()) return assignParameter(rRes, lRes)
+  function resolveInPlace (types, i) {
+    const results = types[i].resolve(st)
+    if (results.length !== 1 || results[0] !== types[i]) {
+      types.splice(i, 1, ...results)
+    }
+    return types[i]
+  }
 
-    if (lRes.isCompound() && rRes.isCompound()) {
-      const lParams = lRes.getParams()
-      const rParams = rRes.getParams()
+  function unifySingle (lType, rType) {
+    if (lType.isParameter() && !rType.isParameter()) return assignParameter(lType, rType)
+    if (rType.isParameter()) return assignParameter(rType, lType)
 
-      if (lParams.length !== rParams.length) return Unification.unsuccessful()
-
-      const uBase = pass(lRes.getBase(), rRes.getBase())
+    if (lType.isCompound() && rType.isCompound()) {
+      const uBase = unifySingle(lType.getBase(), rType.getBase())
       if (!uBase.wasSuccessful()) return Unification.unsuccessful()
 
-      const uParams = []
-      const uBindings = []
-      for (let i = 0; i < lParams.length; i++) {
-        const uParam = pass(lParams[i], rParams[i])
-        if (!uParam.wasSuccessful()) return Unification.unsuccessful()
+      const uParams = unifyMulti(lType.getParams(), rType.getParams())
+      if (!uParams.wasSuccessful()) return Unification.unsuccessful()
 
-        uBindings.push(...uParam.bindings)
-        uParams.push(uParam)
-      }
-
-      const nType = uBindings.length === 0 ? lRes : new CompoundType(uBase.getType(), uParams.map(p => p.getType()))
-      return Unification.successful(nType, uBindings)
+      return Unification.successful(
+        [makeType(uBase.getType(), uParams.getTypes())],
+        uBase.bindings.concat(uParams.bindings))
     }
 
-    if (lRes.isSimple() && rRes.isSimple()) return exact(lRes, rRes)
+    if (lType.isSimple() && rType.isSimple()) return exact(lType, rType)
 
     return Unification.unsuccessful()
   }
 
-  return pass(lType, rType)
+  function unifyMulti (lTypesOriginal, rTypesOriginal) {
+    const lTypes = lTypesOriginal.slice()
+    const rTypes = rTypesOriginal.slice()
+
+    let li = 0
+    let ri = 0
+    const result = Unification.base()
+
+    while (li < lTypes.length && ri < rTypes.length) {
+      let lType = resolveInPlace(lTypes, li)
+      let rType = resolveInPlace(rTypes, ri)
+      console.log('Resolved:\n', {lType: lType.toString(), rType: rType.toString()})
+
+      if (lType.isSplat()) {
+        const values = rTypes.slice(ri)
+        const u = assignParameterList(lType, values)
+        result.assimilate(u)
+
+        li++
+        ri = rTypes.length
+        continue
+      }
+      if (rType.isSplat()) {
+        const values = lTypes.slice(li)
+        const u = assignParameterList(rType, values)
+        result.assimilate(u)
+
+        li = lTypes.length
+        ri++
+        continue
+      }
+
+      if (lType.isRepeatable()) {
+        while (ri < rTypes.length) {
+          rType = rTypes[ri]
+          const u = unifySingle(lType.getInner(), rType)
+          if (!u.wasSuccessful()) {
+            ri--
+            break
+          } else {
+            result.assimilate(u)
+            ri++
+          }
+        }
+        li++
+        continue
+      }
+      if (rType.isRepeatable()) {
+        while (li < lTypes.length) {
+          lType = lTypes[li]
+          const u = unifySingle(lType, rType.getInner())
+          if (!u.wasSuccessful()) {
+            li--
+            break
+          } else {
+            result.assimilate(u)
+            li++
+          }
+        }
+        ri++
+        continue
+      }
+
+      const u = unifySingle(lType, rType)
+      if (!u.wasSuccessful()) {
+        return Unification.unsuccessful()
+      }
+      console.log('Unified single types as:\n', {u})
+      result.assimilate(u)
+
+      li++
+      ri++
+    }
+
+    return result
+  }
+
+  return unifyMulti(lTypes, rTypes)
 }
 
 module.exports = {makeType, unify}

@@ -182,61 +182,61 @@ describe('Type', function () {
   })
 
   describe('unify', function () {
-    function unifyBothWays (t0, t1, block) {
+    function unifyBothWays (t0s, t1s, block) {
       st = st.push()
-      block(unify(st, t0, t1))
+      block(unify(st, t0s, t1s))
       st = st.pop()
 
       st = st.push()
-      block(unify(st, t1, t0))
+      block(unify(st, t1s, t0s))
       st = st.pop()
     }
 
     it('unifies simple types that match', function () {
-      const t0 = makeType('Int')
+      const t0s = [makeType('Int')]
 
-      unifyBothWays(t0, t0, u => {
+      unifyBothWays(t0s, t0s, u => {
         assert.isTrue(u.wasSuccessful())
-        assert.strictEqual(u.getType(), t0)
+        assert.deepEqual(u.getTypes(), t0s)
       })
     })
 
     it('fails to unify simple types that do not match', function () {
-      const t0 = makeType('Int')
-      const t1 = makeType('Nah')
+      const t0s = [makeType('Int')]
+      const t1s = [makeType('Nah')]
 
-      unifyBothWays(t0, t1, u => assert.isFalse(u.wasSuccessful()))
+      unifyBothWays(t0s, t1s, u => assert.isFalse(u.wasSuccessful()))
     })
 
     it('uses an existing binding to unify a type parameter', function () {
-      const t0 = makeType('Int')
-      const t1 = makeType("'A")
+      const t0s = [makeType('Int')]
+      const t1s = [makeType("'A")]
 
-      st.setStatic("'A", tType, t0)
+      st.setStatic("'A", tType, t0s[0])
 
-      unifyBothWays(t0, t1, u => {
+      unifyBothWays(t0s, t1s, u => {
         assert.isTrue(u.wasSuccessful())
-        assert.strictEqual(u.getType(), t0)
+        assert.deepEqual(u.getTypes(), t0s)
         assert.lengthOf(u.bindings, 0)
       })
     })
 
     it('uses an existing binding to fail to unify a type parameter', function () {
-      const t0 = makeType('Int')
-      const t1 = makeType("'A")
+      const t0s = [makeType('Int')]
+      const t1s = [makeType("'A")]
 
       st.setStatic("'A", tType, makeType('Nope'))
 
-      unifyBothWays(t0, t1, u => assert.isFalse(u.wasSuccessful()))
+      unifyBothWays(t0s, t1s, u => assert.isFalse(u.wasSuccessful()))
     })
 
     it('produces bindings for a new type parameter assignment', function () {
-      const t0 = makeType('Int')
-      const t1 = makeType("'A")
+      const t0s = [makeType('Int')]
+      const t1s = [makeType("'A")]
 
-      unifyBothWays(t0, t1, u => {
+      unifyBothWays(t0s, t1s, u => {
         assert.isTrue(u.wasSuccessful())
-        assert.strictEqual(u.getType(), t0)
+        assert.deepEqual(u.getTypes(), t0s)
 
         assert.isFalse(st.has("'A"))
         assert.strictEqual(u.apply(st), u)
@@ -244,28 +244,28 @@ describe('Type', function () {
         const entry = st.at("'A")
         assert.isTrue(entry.isStatic())
         assert.strictEqual(entry.getType(), tType)
-        assert.strictEqual(entry.getValue(), t0)
+        assert.strictEqual(entry.getValue(), t0s[0])
       })
     })
 
     it('binds one symbol to an unbound one', function () {
-      const t0 = makeType("'A")
-      const t1 = makeType("'B")
+      const t0s = [makeType("'A")]
+      const t1s = [makeType("'B")]
 
-      const u = unify(st, t0, t1)
+      const u = unify(st, t0s, t1s)
       assert.isTrue(u.wasSuccessful())
-      assert.strictEqual(u.getType(), t0)
+      assert.deepEqual(u.getTypes(), t0s)
 
       assert.isFalse(st.has("'B"))
       u.apply(st)
-      assert.strictEqual(st.at("'B").getValue(), t0)
+      assert.strictEqual(st.at("'B").getValue(), t0s[0])
     })
 
     it('unifies compound types that match recursively', function () {
-      const t0 = makeType('Block', [tInt, tString])
-      unifyBothWays(t0, t0, u => {
+      const t0s = [makeType('Block', [tInt, tString])]
+      unifyBothWays(t0s, t0s, u => {
         assert.isTrue(u.wasSuccessful())
-        assert.strictEqual(u.getType(), t0)
+        assert.deepEqual(u.getTypes(), t0s)
       })
     })
 
@@ -274,24 +274,24 @@ describe('Type', function () {
       const tString = makeType('String')
       const tReal = makeType('Real')
 
-      const t0 = makeType('Block', [tInt, tString])
-      const t1 = makeType(t0.getBase(), [tString, tInt])
-      const t2 = makeType(t0.getBase(), [tString, tInt])
-      const t3 = makeType(t0.getBase(), [tString, tInt, tReal])
-      const t4 = makeType('Other', [tInt, tString])
+      const t0s = [makeType('Block', [tInt, tString])]
+      const t1s = [makeType(t0s[0].getBase(), [tString, tInt])]
+      const t2s = [makeType(t0s[0].getBase(), [tString, tInt])]
+      const t3s = [makeType(t0s[0].getBase(), [tString, tInt, tReal])]
+      const t4s = [makeType('Other', [tInt, tString])]
 
-      for (const t of [t1, t2, t3, t4]) {
-        unifyBothWays(t0, t, u => assert.isFalse(u.wasSuccessful()))
+      for (const ts of [t1s, t2s, t3s, t4s]) {
+        unifyBothWays(t0s, ts, u => assert.isFalse(u.wasSuccessful()))
       }
     })
 
     it('produces bindings for new recursive type parameter assignments', function () {
-      const t0 = makeType('Block', [makeType("'A")])
-      const t1 = makeType(t0.getBase(), [tReal])
-      unifyBothWays(t0, t1, u => {
+      const t0s = [makeType('Block', [makeType("'A")])]
+      const t1s = [makeType(t0s[0].getBase(), [tReal])]
+      unifyBothWays(t0s, t1s, u => {
         assert.isTrue(u.wasSuccessful())
-        const ut = u.getType()
-        assert.strictEqual(ut.getBase(), t0.getBase())
+        const ut = u.getTypes()[0]
+        assert.strictEqual(ut.getBase(), t0s[0].getBase())
         assert.lengthOf(ut.getParams(), 1)
         assert.strictEqual(ut.getParams()[0], tReal)
 
@@ -302,13 +302,13 @@ describe('Type', function () {
     })
 
     it('uses earlier bindings to match later type parameters', function () {
-      const t0 = makeType('Block', [makeType("'A"), tBool, makeType("'A")])
+      const t0s = [makeType('Block', [makeType("'A"), tBool, makeType("'A")])]
 
-      const t1 = makeType(t0.getBase(), [tInt, tBool, tInt])
-      unifyBothWays(t0, t1, u => {
+      const t1s = [makeType(t0s[0].getBase(), [tInt, tBool, tInt])]
+      unifyBothWays(t0s, t1s, u => {
         assert.isTrue(u.wasSuccessful())
-        const ut = u.getType()
-        assert.strictEqual(ut.getBase(), t0.getBase())
+        const ut = u.getTypes()[0]
+        assert.strictEqual(ut.getBase(), t0s[0].getBase())
         assert.lengthOf(ut.getParams(), 3)
         assert.strictEqual(ut.getParams()[0], tInt)
         assert.strictEqual(ut.getParams()[1], tBool)
@@ -319,11 +319,11 @@ describe('Type', function () {
         assert.strictEqual(st.at("'A").getValue(), tInt)
       })
 
-      const t2 = makeType(t0.getBase(), [tString, tBool, tString])
-      unifyBothWays(t0, t2, u => {
+      const t2s = [makeType(t0s[0].getBase(), [tString, tBool, tString])]
+      unifyBothWays(t0s, t2s, u => {
         assert.isTrue(u.wasSuccessful())
-        const ut = u.getType()
-        assert.strictEqual(ut.getBase(), t0.getBase())
+        const ut = u.getTypes()[0]
+        assert.strictEqual(ut.getBase(), t0s[0].getBase())
         assert.lengthOf(ut.getParams(), 3)
         assert.strictEqual(ut.getParams()[0], tString)
         assert.strictEqual(ut.getParams()[1], tBool)
@@ -334,8 +334,8 @@ describe('Type', function () {
         assert.strictEqual(st.at("'A").getValue(), tString)
       })
 
-      const t3 = makeType(t0.getBase(), [tInt, tBool, tString])
-      unifyBothWays(t0, t3, u => {
+      const t3s = [makeType(t0s[0].getBase(), [tInt, tBool, tString])]
+      unifyBothWays(t0s, t3s, u => {
         assert.isFalse(u.wasSuccessful())
       })
     })
