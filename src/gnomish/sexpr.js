@@ -114,7 +114,7 @@ class SexpVisitor extends Visitor {
       this.result += ' '
       this.visit(param)
     }
-    if (node.isRepeated()) this.result += ' *'
+    if (node.isRepeatable()) this.result += ' *'
     if (node.isSplat()) this.result += ' ...'
     this.result += ')'
   }

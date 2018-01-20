@@ -314,7 +314,7 @@ class TypeNode extends Node {
     this.name = name
     this.params = params || []
     this.splat = attr && attr === '...'
-    this.repeated = attr && attr === '*'
+    this.repeatable = attr && attr === '*'
   }
 
   getName () { return this.name }
@@ -323,7 +323,7 @@ class TypeNode extends Node {
 
   isSplat () { return this.splat }
 
-  isRepeated () { return this.repeated }
+  isRepeatable () { return this.repeatable }
 
   visitBy (visitor) {
     return visitor.visitType(this)
