@@ -1,6 +1,6 @@
 class Unification {
-  static successful (types, bindings) {
-    return new Unification(types, bindings)
+  static successful (types, bindings, counts) {
+    return new Unification(types, bindings, counts)
   }
 
   static unsuccessful () {
@@ -8,12 +8,13 @@ class Unification {
   }
 
   static base () {
-    return Unification.successful([], [])
+    return Unification.successful([], [], {})
   }
 
-  constructor (types, bindings) {
+  constructor (types, bindings, counts) {
     this.types = types
     this.bindings = bindings
+    this.counts = Object.assign({exact: 0, multis: 0}, counts)
   }
 
   wasSuccessful () { return this.types !== null }
@@ -27,6 +28,12 @@ class Unification {
     return this.types[0]
   }
 
+  countExactMatches () { return this.counts.exact }
+
+  countMultiMatches () { return this.counts.multis }
+
+  countBindings () { return this.bindings.length }
+
   apply (symbolTable) {
     for (const [name, t, type] of this.bindings) {
       symbolTable.setStatic(name, t, type)
@@ -37,6 +44,8 @@ class Unification {
   assimilate (other) {
     this.types.push(...other.getTypes())
     this.bindings.push(...other.bindings)
+    this.counts.exact += other.counts.exact
+    this.counts.multis += other.counts.multis
     return this
   }
 
@@ -290,30 +299,31 @@ function unify (symbolTable, lTypes, rTypes) {
   const tList = st.at('List').getValue()
   const tTypeList = makeType(tList, [tType])
 
-  function exact (a, b) {
-    if (a === b) return Unification.successful([a], [])
+  function exact (a, b, counts) {
+    if (a === b) return Unification.successful([a], [], counts)
     return Unification.unsuccessful()
   }
 
   function assignParameter (param, value) {
     st.setStatic(param.getName(), tType, value)
-    return Unification.successful([value], [[param.getName(), tType, value]])
+    return Unification.successful([value], [[param.getName(), tType, value]], {})
   }
 
   function assignParameterList (param, values) {
     st.setStatic(param.getName(), tTypeList, values)
-    return Unification.successful(values, [[param.getName(), tTypeList, values]])
+    return Unification.successful(values, [[param.getName(), tTypeList, values]], {multis: values.length})
   }
 
   function resolveInPlace (types, i) {
     const results = types[i].resolve(st)
-    if (results.length !== 1 || results[0] !== types[i]) {
+    const replaced = results[0] !== types[i]
+    if (results.length !== 1 || replaced) {
       types.splice(i, 1, ...results)
     }
-    return types[i]
+    return {replaced, type: types[i]}
   }
 
-  function unifySingle (lType, rType) {
+  function unifySingle (lType, rType, replaced) {
     if (lType.isParameter() && !rType.isParameter()) return assignParameter(lType, rType)
     if (rType.isParameter()) return assignParameter(rType, lType)
 
@@ -329,7 +339,7 @@ function unify (symbolTable, lTypes, rTypes) {
         uBase.bindings.concat(uParams.bindings))
     }
 
-    if (lType.isSimple() && rType.isSimple()) return exact(lType, rType)
+    if (lType.isSimple() && rType.isSimple()) return exact(lType, rType, replaced)
 
     return Unification.unsuccessful()
   }
@@ -350,8 +360,8 @@ function unify (symbolTable, lTypes, rTypes) {
     const result = Unification.base()
 
     while (li < lTypes.length && ri < rTypes.length) {
-      const lType = resolveInPlace(lTypes, li)
-      const rType = resolveInPlace(rTypes, ri)
+      const {replaced: lReplaced, type: lType} = resolveInPlace(lTypes, li)
+      const {replaced: rReplaced, type: rType} = resolveInPlace(rTypes, ri)
 
       if (lType.isSplat()) {
         lSplat = lType
@@ -371,7 +381,14 @@ function unify (symbolTable, lTypes, rTypes) {
       const lInner = lType.isWrapped() ? lType.getInner() : lType
       const rInner = rType.isWrapped() ? rType.getInner() : rType
 
-      const u = unifySingle(lInner, rInner)
+      const counts = {}
+      if (lType.isRepeatable() || rType.isRepeatable()) {
+        counts.multis = 1
+      } else if (!lReplaced && !rReplaced) {
+        counts.exact = 1
+      }
+
+      const u = unifySingle(lInner, rInner, counts)
       if (!u.wasSuccessful()) {
         if (lType.isRepeatable()) {
           li++
