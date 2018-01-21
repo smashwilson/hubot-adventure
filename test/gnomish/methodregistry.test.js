@@ -48,6 +48,58 @@ describe('MethodRegistry', function () {
       assert.strictEqual(registry.lookup(st, makeType(tOption, [tReal]), 'selector', [tInt, tReal]).getCallback(), right)
     })
 
+    describe('priority', function () {
+      it('prefers exact matches over parameter assignments', function () {
+        const tA = makeType("'A")
+
+        registry.register(tInt, 'selector', [tInt], tBool, right)
+        registry.register(tInt, 'selector', [tA], tBool, wrong)
+
+        assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt]).getCallback(), right)
+      })
+
+      it('prefers the greatest number of exact type matches', function () {
+        const tA = makeType("'A")
+
+        registry.register(tInt, 'selector', [tA, tA], tBool, wrong)
+        registry.register(tInt, 'selector', [tInt, tA], tBool, right)
+
+        assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt, tInt]).getCallback(), right)
+      })
+
+      it('among signatures with the same exact type match count, prefers the fewest bindings created', function () {
+        const tA = makeType("'A")
+        const tB = makeType("'B")
+
+        registry.register(tInt, 'selector', [tA, tB], tBool, wrong)
+        registry.register(tInt, 'selector', [tA, tA], tBool, right)
+
+        assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt, tInt]).getCallback(), right)
+      })
+
+      it('prefers exact enumerations to repeated type matches', function () {
+        registry.register(tInt, 'selector', [tInt.repeatable()], tBool, wrong)
+        registry.register(tInt, 'selector', [tInt, tInt, tInt], tBool, right)
+
+        assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt, tInt, tInt]).getCallback(), right)
+      })
+
+      it('gives the lowest priority to splat matches', function () {
+        const tA = makeType("'A")
+
+        const splat = () => {}
+        const exact = () => {}
+
+        registry.register(tInt, 'selector', [tA.splat()], tBool, splat)
+        registry.register(tInt, 'selector', [tInt, tString], tBool, exact)
+
+        assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt, tString]).getCallback(), exact)
+        assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt, tString, tBool]).getCallback(), splat)
+        assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt]).getCallback(), splat)
+        assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt, tBool]).getCallback(), splat)
+      })
+    })
+
     it('derives the signature return type from bound type variables', function () {
       const tA = makeType("'A")
       const tB = makeType("'B")
