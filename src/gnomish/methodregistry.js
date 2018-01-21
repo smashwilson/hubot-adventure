@@ -15,11 +15,9 @@ class Signature {
 
     u.apply(st)
 
-    const boundRetType = this.retType.resolveRecursively(st)[0]
 
-    return boundRetType === this.retType
-      ? this
-      : new Signature(this.receiverType, this.argTypes, this.callback, boundRetType)
+    const boundRetType = this.retType.resolveRecursively(st)[0]
+    return new Match(this, u, boundRetType)
   }
 
   getCallback () {
@@ -29,6 +27,64 @@ class Signature {
   getReturnType () {
     return this.retType
   }
+
+  toString () {
+    let r = this.receiverType.toString()
+    r += '#('
+    r += this.argTypes.map(t => t.toString()).join(', ')
+    r += ') -> '
+    r += this.retType.toString()
+    return r
+  }
+}
+
+class Match {
+  constructor (signature, unification, retType) {
+    this.signature = signature
+    this.unification = unification
+    this.retType = retType
+  }
+
+  getCallback () {
+    return this.signature.getCallback()
+  }
+
+  getReturnType () {
+    return this.retType
+  }
+
+  getUnification () {
+    return this.unification
+  }
+
+  toString () {
+    return `${this.signature} @ ${this.unification}`
+  }
+}
+
+function comparePriority (a, b) {
+  const ua = a.getUnification()
+  const ub = b.getUnification()
+
+  // Unifications with multi matches are always lower priority than those without them.
+  // If both have multi matches, prefer the unification that has fewer.
+  if (ua.countMultiMatches() === 0 && ub.countMultiMatches() > 0) return 1
+  if (ua.countMultiMatches() > 0 && ub.countMultiMatches() === 0) return -1
+  if (ua.countMultiMatches() !== ub.countMultiMatches()) {
+    return ua.countMultiMatches() > ub.countMultiMatches() ? 1 : -1
+  }
+
+  // Unifications with more exact matches are higher priority.
+  if (ua.countExactMatches() !== ub.countExactMatches()) {
+    return ua.countExactMatches() < ub.countExactMatches() ? -1 : 1
+  }
+
+  // Unifications that bind fewer parameters are higher priority.
+  if (ua.countBindings() !== ub.countBindings()) {
+    return ua.countBindings() > ub.countBindings() ? -1 : 1
+  }
+
+  return 0
 }
 
 class MethodRegistry {
@@ -56,6 +112,7 @@ class MethodRegistry {
     const matches = signatures
       .map(signature => signature.match(symbolTable, receiverType, argTypes))
       .filter(Boolean)
+
     if (matches.length === 0) {
       const argMessage = argTypes.length === 0
         ? 'without arguments'
@@ -64,19 +121,32 @@ class MethodRegistry {
       throw new Error(`Type ${receiverType.toString()} has no method "${selector}" ${argMessage}`)
     }
 
-    if (matches.length > 1) {
+    let priority = [matches[0]]
+    for (let i = 1; i < matches.length; i++) {
+      const m = matches[i]
+      const p = priority[0]
+
+      const cmp = comparePriority(p, m)
+      if (cmp === 0) {
+        priority.push(m)
+      } else if (cmp < 0) {
+        priority = [m]
+      }
+    }
+
+    if (priority.length > 1) {
       const argMessage = argTypes.length === 0
         ? 'without arguments'
         : `with argument types ${argTypes.map(t => t.toString()).join(', ')}`
 
       const e = new Error(
-        `Type ${receiverType.toString()} has ${matches.length} methods called "${selector}" ${argMessage}`
+        `Type ${receiverType.toString()} has ${priority.length} methods called "${selector}" ${argMessage}`
       )
-      e.candidates = matches
+      e.candidates = priority
       throw e
     }
 
-    return matches[0]
+    return priority[0]
   }
 }
 
