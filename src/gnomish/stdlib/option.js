@@ -83,7 +83,7 @@ module.exports = {
       tOptionA, 'map', [makeType(t.Block, [tB, tA])], makeType(t.Option, [tB]),
       ({receiver, interpreter}, blk) => {
         if (receiver.hasValue()) {
-          return new Some(blk.evaluate(interpreter))
+          return new Some(blk.evaluate(interpreter, [receiver.getValue()]))
         } else {
           return none
         }
