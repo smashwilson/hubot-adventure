@@ -421,16 +421,18 @@ function unify (symbolTable, lTypes, rTypes) {
     }
 
     while (li < lTypes.length) {
-      if (lTypes[li].isRepeatable()) li++
-      if (lTypes[li].isSplat()) {
+      if (lTypes[li].isRepeatable()) {
+        li++
+      } else if (lTypes[li].isSplat()) {
         result.assimilate(assignParameterList(lTypes[li].getInner(), []))
         li++
       }
       break
     }
     while (ri < rTypes.length) {
-      if (rTypes[ri].isRepeatable()) ri++
-      if (rTypes[ri].isSplat()) {
+      if (rTypes[ri].isRepeatable()) {
+        ri++
+      } else if (rTypes[ri].isSplat()) {
         result.assimilate(assignParameterList(rTypes[ri].getInner(), []))
         ri++
       }
