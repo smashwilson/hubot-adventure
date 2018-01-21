@@ -17,7 +17,7 @@ class Interpreter extends Visitor {
   }
 
   visitExprList (node) {
-    this.stack.set(node, [])
+    if (!this.stack.has(node)) this.stack.set(node, [])
     const result = super.visitExprList(node)
     this.stack.delete(node)
     return result
@@ -99,6 +99,19 @@ class Interpreter extends Visitor {
     } else {
       return this.getSlot(node.getFrame(), node.getSlot())
     }
+  }
+
+  evaluateBlock (block, args) {
+    const bodyNode = block.getBodyNode()
+    this.stack.set(bodyNode, [])
+
+    const argNodes = block.getArgNodes()
+    for (let i = 0; i < argNodes.length; i++) {
+      const argValue = args[i] ? args[i] : this.visit(argNodes[i].getDefault())
+      this.setSlot(argNodes[i].getFrame(), argNodes[i].getSlot(), argValue)
+    }
+
+    return this.visit(bodyNode)
   }
 }
 

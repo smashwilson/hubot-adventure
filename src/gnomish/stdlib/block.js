@@ -13,8 +13,12 @@ class Block {
     return this.captures.get(frame)[slot]
   }
 
-  evaluate (interpreter) {
-    return interpreter.visit(this.bodyNode)
+  getArgNodes () { return this.argNodes }
+
+  getBodyNode () { return this.bodyNode }
+
+  evaluate (interpreter, args) {
+    return interpreter.evaluateBlock(this, args)
   }
 }
 
