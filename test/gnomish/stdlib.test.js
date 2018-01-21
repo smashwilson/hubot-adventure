@@ -16,7 +16,8 @@ assert.register(symbolTable, methodRegistry)
 describe('Gnomish standard library', function () {
   async function executeTestFile (testPath) {
     const testSource = await fs.readFile(testPath, {encoding: 'utf8'})
-    parse(testSource).analyze(symbolTable, methodRegistry).interpret()
+    const normalized = testSource.replace(/\r\n/g, '\n')
+    parse(normalized).analyze(symbolTable, methodRegistry).interpret()
   }
 
   const testDir = path.join(__dirname, 'stdlib')
