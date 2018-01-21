@@ -34,6 +34,7 @@ module.exports = {
 
   registerMethods (t, symbolTable, methodRegistry) {
     const tA = makeType("'A")
+    const tB = makeType("'B")
     const tOptionA = makeType(t.Option, [tA])
 
     // Construction
@@ -75,5 +76,17 @@ module.exports = {
         return blk.evaluate(interpreter)
       }
     })
+
+    // Map
+
+    methodRegistry.register(
+      tOptionA, 'map', [makeType(t.Block, [tB, tA])], makeType(t.Option, [tB]),
+      ({receiver, interpreter}, blk) => {
+        if (receiver.hasValue()) {
+          return new Some(blk.evaluate(interpreter))
+        } else {
+          return none
+        }
+      })
   }
 }
