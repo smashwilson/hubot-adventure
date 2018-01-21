@@ -22,7 +22,7 @@ module.exports = {
     methodRegistry.register(
       tA, 'debug', [], tA,
       ({receiver, astNode}) => {
-        const type = astNode.getReceiver().getType()
+        const type = astNode ? astNode.getReceiver().getType() : '<unknown>'
         console.log(`${util.inspect(receiver, {breakLength: 100})}: ${type}`)
         return receiver
       })
