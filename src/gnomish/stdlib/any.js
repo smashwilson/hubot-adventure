@@ -1,3 +1,4 @@
+const util = require('util')
 const {makeType} = require('../type')
 
 module.exports = {
@@ -14,10 +15,12 @@ module.exports = {
         return astNode.getReceiver().getType()
       })
 
-    methodRegistry.register(tA, 'debug', [], tA, ({receiver, astNode}) => {
-      const type = astNode.getReceiver().getType()
-      console.log(receiver, `: ${type}`)
-      return receiver
-    })
+    methodRegistry.register(
+      tA, 'debug', [], tA,
+      ({receiver, astNode}) => {
+        const type = astNode.getReceiver().getType()
+        console.log(`${util.inspect(receiver, {breakLength: 100})}: ${type}`)
+        return receiver
+      })
   }
 }
