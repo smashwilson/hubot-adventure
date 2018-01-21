@@ -16,6 +16,10 @@ module.exports = {
       })
 
     methodRegistry.register(
+      tA, '==', [tA], t.Bool,
+      ({receiver}, arg) => receiver == arg)
+
+    methodRegistry.register(
       tA, 'debug', [], tA,
       ({receiver, astNode}) => {
         const type = astNode.getReceiver().getType()
