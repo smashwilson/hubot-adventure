@@ -15,7 +15,6 @@ class Signature {
 
     u.apply(st)
 
-
     const boundRetType = this.retType.resolveRecursively(st)[0]
     return new Match(this, u, boundRetType)
   }
