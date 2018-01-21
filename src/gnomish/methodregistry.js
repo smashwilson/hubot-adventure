@@ -154,6 +154,16 @@ class MethodRegistry {
 
     return priority[0]
   }
+
+  inspect () {
+    const ks = [...this.bySelector.keys()]
+    ks.sort()
+
+    return ks.map(k => {
+      const signatures = this.bySelector.get(k)
+      return signatures.map(s => `${k}: ${s}`).join('\n')
+    }).join('\n')
+  }
 }
 
 module.exports = {MethodRegistry}
