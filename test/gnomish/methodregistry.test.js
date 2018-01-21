@@ -98,6 +98,20 @@ describe('MethodRegistry', function () {
         assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt]).getCallback(), splat)
         assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt, tBool]).getCallback(), splat)
       })
+
+      it('includes compound type bases as exact type matches', function () {
+        const tA = makeType("'A")
+        const tOptionA = makeType(tOption, [tA])
+
+        const fallback = () => {}
+        const compound = () => {}
+
+        registry.register(tA, 'selector', [tA], tBool, fallback)
+        registry.register(tOptionA, 'selector', [tOptionA], tBool, compound)
+
+        assert.strictEqual(registry.lookup(st, tInt, 'selector', [tInt]).getCallback(), fallback)
+        assert.strictEqual(registry.lookup(st, makeType(tOption, [tInt]), 'selector', [makeType(tOption, [tInt])]).getCallback(), compound)
+      })
     })
 
     it('derives the signature return type from bound type variables', function () {

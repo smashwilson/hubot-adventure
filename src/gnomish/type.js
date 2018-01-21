@@ -305,7 +305,14 @@ function unify (symbolTable, lTypes, rTypes) {
   const tList = st.at('List').getValue()
   const tTypeList = makeType(tList, [tType])
 
-  function exact (a, b, counts) {
+  function exact (a, b, replaced, multi) {
+    const counts = {}
+    if (multi) {
+      counts.multis = 1
+    } else if (!replaced) {
+      counts.exact = 1
+    }
+
     if (a === b) return Unification.successful([a], [], counts)
     return Unification.unsuccessful()
   }
@@ -329,12 +336,12 @@ function unify (symbolTable, lTypes, rTypes) {
     return {replaced, type: types[i]}
   }
 
-  function unifySingle (lType, rType, replaced) {
+  function unifySingle (lType, rType, replaced, multi) {
     if (lType.isParameter() && !rType.isParameter()) return assignParameter(lType, rType)
     if (rType.isParameter()) return assignParameter(rType, lType)
 
     if (lType.isCompound() && rType.isCompound()) {
-      const uBase = unifySingle(lType.getBase(), rType.getBase())
+      const uBase = unifySingle(lType.getBase(), rType.getBase(), replaced, multi)
       if (!uBase.wasSuccessful()) return Unification.unsuccessful()
 
       const uParams = unifyMulti(lType.getParams(), rType.getParams())
@@ -342,10 +349,14 @@ function unify (symbolTable, lTypes, rTypes) {
 
       return Unification.successful(
         [makeType(uBase.getType(), uParams.getTypes())],
-        uBase.bindings.concat(uParams.bindings))
+        uBase.bindings.concat(uParams.bindings),
+        {
+          exact: uBase.countExactMatches() + uParams.countExactMatches(),
+          multis: uBase.countMultiMatches() + uParams.countMultiMatches()
+        })
     }
 
-    if (lType.isSimple() && rType.isSimple()) return exact(lType, rType, replaced)
+    if (lType.isSimple() && rType.isSimple()) return exact(lType, rType, replaced, multi)
 
     return Unification.unsuccessful()
   }
@@ -387,14 +398,9 @@ function unify (symbolTable, lTypes, rTypes) {
       const lInner = lType.isWrapped() ? lType.getInner() : lType
       const rInner = rType.isWrapped() ? rType.getInner() : rType
 
-      const counts = {}
-      if (lType.isRepeatable() || rType.isRepeatable()) {
-        counts.multis = 1
-      } else if (!lReplaced && !rReplaced) {
-        counts.exact = 1
-      }
-
-      const u = unifySingle(lInner, rInner, counts)
+      const replaced = lReplaced || rReplaced
+      const multi = lType.isRepeatable() || rType.isRepeatable()
+      const u = unifySingle(lInner, rInner, replaced, multi)
       if (!u.wasSuccessful()) {
         if (lType.isRepeatable()) {
           li++
