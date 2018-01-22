@@ -49,9 +49,8 @@ assert.equal(l5, list(1, 2, 100))
 assert.equal(strList.first(), some("aaa"))
 assert.equal(strList.last(), some("zzz"))
 
-# TODO: infinite recursion in unification
-# assert.equal(empty.first(), none)
-# assert.equal(empty.last(), none)
+assert.equal(empty.first(), none)
+assert.equal(empty.last(), none)
 
 ## 7. List#do()
 
