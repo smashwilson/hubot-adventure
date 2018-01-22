@@ -1,0 +1,110 @@
+## Construction
+
+let empty = list()
+let intList = list(1, 4, 2, 3)
+let strList = list("aaa", "ddd", "bbb", "ccc", "zzz")
+
+# TODO: this is an annoyance. Option('A) does not right-unify
+let ni: Option(Int) = none()
+let ns: Option(String) = none()
+
+## 0. List#length()
+
+assert.equal(empty.length(), 0)
+assert.equal(intList.length(), 4)
+assert.equal(strList.length(), 5)
+
+## 1. List#empty()
+
+assert.isTrue(empty.empty())
+assert.isFalse(intList.empty())
+assert.isFalse(strList.empty())
+
+## 2. List#==
+
+assert.isTrue(list(1, 4, 2, 3) == intList)
+assert.isFalse(list(4, 3, 1) == intList)
+assert.isFalse(list("no") == strList)
+assert.isFalse(empty == intList)
+assert.isFalse(empty == strList)
+
+## 3. List#<<
+
+let l3 = list(1)
+
+l3 << 3
+assert.equal(l3, list(1, 3))
+assert.equal(l3 << 7, list(1, 3, 7))
+
+## 4. List#at()
+
+assert.equal(intList.at(0), some(1))
+assert.equal(intList.at(12), ni)
+
+## 5. List#put()
+
+let l5 = list(1, 10, 100)
+
+assert.equal(l5.put(1, 2), l5)
+assert.equal(l5, list(1, 2, 100))
+
+## 6. List#first(), List#last()
+
+assert.equal(strList.first(), some("aaa"))
+assert.equal(strList.last(), some("zzz"))
+
+# TODO: infinite recursion in unification
+# assert.equal(empty.first(), none())
+# assert.equal(empty.last(), none())
+
+## 7. List#do()
+
+let results7_0: List(Int) = list()
+intList.do({ each: Int | results7_0 << each + 1 })
+assert.equal(results7_0, list(2, 5, 3, 4))
+
+let results7_1: List(Int) = list()
+strList.do({ each: String, index: Int | results7_1 << index })
+assert.equal(results7_1, list(0, 1, 2, 3, 4))
+
+## 8. List#map()
+
+let results8_0 = intList.map({ each: Int | each * 2 })
+assert.equal(results8_0, list(2, 8, 4, 6))
+
+# TODO: fails to parse
+#  { args: [ BlockNode { type: null, args: [Array], body: [Object], captures: Set {} } ] }
+#  { args: [ [ '(', [Object], ')' ] ] }
+# let results8_1 = intList.map({ each: Int, index: Int | each + (index * 10) })
+let results8_1 = intList.map({ each: Int, index: Int | each + index * 10 })
+assert.equal(results8_1, list(1, 14, 22, 33))
+
+## 9. List#flatMap()
+
+let results9_0 = intList.flatMap({ each: Int |
+  list(each, each * 2)
+})
+assert.equal(results9_0, list(1, 2, 4, 8, 2, 4, 3, 6))
+
+let results9_1 = intList.flatMap({ each: Int, index: Int |
+  list(index, each)
+})
+assert.equal(results9_1, list(0, 1, 1, 4, 2, 2, 3, 3))
+
+let results9_2 = intList.flatMap({ each: Int | if {each % 2 == 0} then {each * 10} })
+assert.equal(results9_2, list(40, 20))
+
+let results9_3 = intList.flatMap({ each: Int, index: Int | if {index % 2 == 0} then {each * 100} })
+assert.equal(results9_3, list(100, 200))
+
+## 10. List#reduce()
+
+let results10_0 = intList.reduce(0, { acc: Int, each: Int | acc + each })
+assert.equal(results10_0, 10)
+
+# let results10_1 = intList.reduce(list(0), { acc: List(Int), each: Int | acc << each << each + 10 })
+# assert.equal(results10_1, list(0, 1, 11, 4, 14, 2, 12, 3, 13))
+
+## List#fold()
+
+## List#filter()
