@@ -3,7 +3,7 @@
 const {assertSexp} = require('./helper')
 
 describe('Gnomish expressions', function () {
-  describe('all together', function () {
+  describe('anomalies', function () {
     // This is a place to accumulate any parsing oddities that we notice organically.
     it('parses a quadratic equation', function () {
       assertSexp('let y = 4*x^2 + 2*x - 7', `
@@ -16,6 +16,13 @@ describe('Gnomish expressions', function () {
                 (call (2) * (var x)))
               -
               (7))))
+      `)
+    })
+
+    it('parses parentheticals', function () {
+      assertSexp('x + (10 - 4)', `
+        (exprlist
+          (call (var x) + (call (10) - (4))))
       `)
     })
   })
