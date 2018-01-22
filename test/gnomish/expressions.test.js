@@ -25,6 +25,18 @@ describe('Gnomish expressions', function () {
           (call (var x) + (call (10) - (4))))
       `)
     })
+
+    it('parses chained << calls', function () {
+      assertSexp('acc << each << each + 10', `
+        (exprlist
+          (call
+            (call
+              (var acc) <<
+              (var each))
+            <<
+            (call (var each) + (10))))
+      `)
+    })
   })
 
   describe('if', function () {
@@ -123,8 +135,11 @@ describe('Gnomish expressions', function () {
       `)
     })
 
-    it('is non-associative', function () {
-      assertSexp('a == b < c', '', false)
+    it('is left-associative', function () {
+      assertSexp('a == b < c', `
+        (exprlist
+          (call (call (var a) == (var b)) < (var c)))
+      `)
     })
   })
 

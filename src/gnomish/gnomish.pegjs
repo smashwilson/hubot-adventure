@@ -39,11 +39,10 @@ assignment
     { return new AssignNode({name, value}) }
   / opcomp
 
-// "==", "<", ">". Non-associative.
+// "==", "<", ">". Left-associative.
 opcomp "comparison operator application"
-  = receiver:opor _ op:complike _ arg:opor
-    { return new CallNode({receiver, name: op, args: [arg]}) }
-  / opor
+  = first:opor rest:( _ op:complike _ arg:opor { return {op, arg} } )*
+    { return leftAssocCall(first, rest) }
 
 // "||". Left-associative.
 opor "logical or operator application"
