@@ -67,11 +67,7 @@ assert.equal(results7_1, list(0, 1, 2, 3, 4))
 let results8_0 = intList.map({ each: Int | each * 2 })
 assert.equal(results8_0, list(2, 8, 4, 6))
 
-# TODO: fails to parse
-#  { args: [ BlockNode { type: null, args: [Array], body: [Object], captures: Set {} } ] }
-#  { args: [ [ '(', [Object], ')' ] ] }
-# let results8_1 = intList.map({ each: Int, index: Int | each + (index * 10) })
-let results8_1 = intList.map({ each: Int, index: Int | each + index * 10 })
+let results8_1 = intList.map({ each: Int, index: Int | each + (index * 10) })
 assert.equal(results8_1, list(1, 14, 22, 33))
 
 ## 9. List#flatMap()
