@@ -131,10 +131,10 @@ module.exports = {
     }
 
     methodRegistry.register(
-      tListA, 'reduce', [tB, makeType(t.Block, [tB, tA])], tB,
+      tListA, 'reduce', [tB, makeType(t.Block, [tB, tB, tA])], tB,
       reduceBody)
     methodRegistry.register(
-      tListA, 'reduce', [tB, makeType(t.Block, [tB, tA, t.Int])], tB,
+      tListA, 'reduce', [tB, makeType(t.Block, [tB, tB, tA, t.Int])], tB,
       reduceBody)
 
     const foldBody = ({receiver, interpreter}, blk) => {
