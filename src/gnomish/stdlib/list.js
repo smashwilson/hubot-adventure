@@ -149,5 +149,27 @@ module.exports = {
     methodRegistry.register(
       tListA, 'reduce', [tB, makeType(t.Block, [tB, tA, t.Int])], tB,
       reduceBody)
+
+    const foldBody = ({receiver, interpreter}, blk) => {
+      return receiver.reduce((acc, each, index) => blk.evaluate(interpreter, [acc, each, index]))
+    }
+
+    methodRegistry.register(
+      tListA, 'fold', [makeType(t.Block, [tA, tA])], tA,
+      foldBody)
+    methodRegistry.register(
+      tListA, 'fold', [makeType(t.Block, [tA, tA, t.Int])], tA,
+      foldBody)
+
+    const filterBody = ({receiver, interpreter}, blk) => {
+      return receiver.filter((each, index) => blk.evaluate(interpreter, [each, index]))
+    }
+
+    methodRegistry.register(
+      tListA, 'filter', [makeType(t.Block, [t.Bool, tA])], tListA,
+      filterBody)
+    methodRegistry.register(
+      tListA, 'filter', [makeType(t.Block, [t.Bool, tA, t.Int])], tListA,
+      filterBody)
   }
 }

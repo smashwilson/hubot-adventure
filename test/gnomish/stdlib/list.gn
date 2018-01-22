@@ -105,6 +105,14 @@ assert.equal(results10_0, 10)
 # let results10_1 = intList.reduce(list(0), { acc: List(Int), each: Int | acc << each << each + 10 })
 # assert.equal(results10_1, list(0, 1, 11, 4, 14, 2, 12, 3, 13))
 
-## List#fold()
+## 11. List#fold()
 
-## List#filter()
+# list(1, 4, 2, 3)
+
+let results11_0 = intList.fold({ acc: Int, each: Int | acc * each })
+assert.equal(results11_0, 24)
+
+## 12. List#filter()
+
+let results12_0 = intList.filter({ each: Int | each % 2 == 0 })
+assert.equal(results12_0, list(4, 2))
