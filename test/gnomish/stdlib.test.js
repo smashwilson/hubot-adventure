@@ -14,8 +14,8 @@ stdlib.register(symbolTable, methodRegistry)
 assert.register(symbolTable, methodRegistry)
 
 describe('Gnomish standard library', function () {
-  async function executeTestFile (testPath) {
-    const testSource = await fs.readFile(testPath, {encoding: 'utf8'})
+  function executeTestFile (testPath) {
+    const testSource = fs.readFileSync(testPath, {encoding: 'utf8'})
     const normalized = testSource.replace(/\r\n/g, '\n')
     parse(normalized).analyze(symbolTable, methodRegistry).interpret()
   }
@@ -24,8 +24,8 @@ describe('Gnomish standard library', function () {
   const testFiles = fs.readdirSync(testDir).filter(each => each.endsWith('.gn'))
 
   for (const testFile of testFiles) {
-    it(`${testFile} passes`, async function () {
-      await executeTestFile(path.join(testDir, testFile))
+    describe(testFile, function () {
+      executeTestFile(path.join(testDir, testFile))
     })
   }
 })

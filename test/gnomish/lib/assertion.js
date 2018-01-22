@@ -1,3 +1,5 @@
+/* eslint-env mocha */
+
 const {TypeRegistry} = require('../../../src/gnomish/typeregistry')
 const {makeType} = require('../../../src/gnomish/type')
 const {none} = require('../../../src/gnomish/stdlib/option')
@@ -10,6 +12,24 @@ module.exports = {
     const tA = makeType("'A")
 
     symbolTable.setStatic('assert', t.Assert, Symbol('assert'))
+
+    methodRegistry.register(
+      t.World, 'describe', [t.String, makeType(t.Block, [tA])], t.World,
+      ({receiver, interpreter}, message, blk) => {
+        describe(message, function () {
+          blk.evaluate(interpreter)
+        })
+        return receiver
+      })
+
+    methodRegistry.register(
+      t.World, 'it', [t.String, makeType(t.Block, [tA])], t.World,
+      ({receiver, interpreter}, message, blk) => {
+        it(message, function () {
+          blk.evaluate(interpreter)
+        })
+        return receiver
+      })
 
     methodRegistry.register(
       t.Assert, 'isTrue', [t.Bool], t.Option,

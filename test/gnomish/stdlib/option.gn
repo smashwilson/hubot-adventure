@@ -1,38 +1,40 @@
-let s0 = if {true} then {3}
-let n0 = if {false} then {3}
+describe("Option('A)", {
+  let s0 = if {true} then {3}
+  let n0 = if {false} then {3}
 
-## Option#==
+  it("==", {
+    let s1 = some(3)
+    let s2 = some(4)
+    let n1 = none
 
-let s1 = some(3)
-let s2 = some(4)
-let n1 = none
+    assert.isTrue(s0 == s1)
+    assert.isFalse(s0 == s2)
+    assert.isFalse(s0 == n1)
 
-assert.isTrue(s0 == s1)
-assert.isFalse(s0 == s2)
-assert.isFalse(s0 == n1)
+    assert.isTrue(n0 == n1)
+  })
 
-assert.isTrue(n0 == n1)
+  it("or()", {
+    # Default values, computed directly...
 
-## Option#or
+    assert.equal(s0.or(7), 3)
+    assert.equal(n0.or(7), 7)
 
-# Default values, computed directly...
+    # ... or with a block.
 
-assert.equal(s0.or(7), 3)
-assert.equal(n0.or(7), 7)
+    let count0 = 0
+    let blk0 = {
+      count0 = count0 + 1
+      4 + 5
+    }
 
-# ... or with a block.
+    assert.equal(s0.or(blk0), 3)
+    assert.equal(n0.or(blk0), 9)
+    assert.equal(count0, 1)
+  })
 
-let count0 = 0
-let blk0 = {
-  count0 = count0 + 1
-  4 + 5
-}
-
-assert.equal(s0.or(blk0), 3)
-assert.equal(n0.or(blk0), 9)
-assert.equal(count0, 1)
-
-## Option#map
-
-let r0 = s0.map({ i: Int | i + 1 })
-assert.isTrue(r0 == some(4))
+  it("map()", {
+    let r0 = s0.map({ i: Int | i + 1 })
+    assert.isTrue(r0 == some(4))
+  })
+})
