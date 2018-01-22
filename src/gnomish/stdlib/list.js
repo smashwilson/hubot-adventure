@@ -85,7 +85,7 @@ module.exports = {
       doBody)
 
     const mapBody = ({receiver, interpreter}, blk) => {
-      return receiver.map((each, index) => blk.evaluate(interpreter, [each, index])
+      return receiver.map((each, index) => blk.evaluate(interpreter, [each, index]))
     }
 
     methodRegistry.register(
@@ -95,7 +95,7 @@ module.exports = {
       tListA, 'map', [makeType(t.Block, [tB, tA, t.Int])], tListB,
       mapBody)
 
-    const flapMapListBody = ({receiver, interpreter}, blk) => {
+    const flatMapListBody = ({receiver, interpreter}, blk) => {
       return receiver.reduce((acc, each, index) => {
         acc.push(...blk.evaluate(interpreter, [each, index]))
         return acc
