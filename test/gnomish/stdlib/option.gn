@@ -5,7 +5,7 @@ let n0 = if {false} then {3}
 
 let s1 = some(3)
 let s2 = some(4)
-let n1 = none()
+let n1 = none
 
 assert.isTrue(s0 == s1)
 assert.isFalse(s0 == s2)

@@ -4,10 +4,6 @@ let empty = list()
 let intList = list(1, 4, 2, 3)
 let strList = list("aaa", "ddd", "bbb", "ccc", "zzz")
 
-# TODO: this is an annoyance. Option('A) does not right-unify
-let ni: Option(Int) = none()
-let ns: Option(String) = none()
-
 ## 0. List#length()
 
 assert.equal(empty.length(), 0)
@@ -39,7 +35,7 @@ assert.equal(l3 << 7, list(1, 3, 7))
 ## 4. List#at()
 
 assert.equal(intList.at(0), some(1))
-assert.equal(intList.at(12), ni)
+assert.equal(intList.at(12), none)
 
 ## 5. List#put()
 
@@ -54,8 +50,8 @@ assert.equal(strList.first(), some("aaa"))
 assert.equal(strList.last(), some("zzz"))
 
 # TODO: infinite recursion in unification
-# assert.equal(empty.first(), none())
-# assert.equal(empty.last(), none())
+# assert.equal(empty.first(), none)
+# assert.equal(empty.last(), none)
 
 ## 7. List#do()
 

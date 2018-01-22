@@ -43,7 +43,7 @@ module.exports = {
       return new Some(value)
     })
 
-    methodRegistry.register(t.World, 'none', [], tOptionA, () => none)
+    symbolTable.setStatic('none', tOptionA, none)
 
     // Comparison
 
