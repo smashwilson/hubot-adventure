@@ -140,7 +140,7 @@ module.exports = {
       })
 
     const reduceBody = ({receiver, interpreter}, initial, blk) => {
-      return receiver.reduce((acc, each, index) => blk.evaluate(interpreter, [acc, each, index]))
+      return receiver.reduce((acc, each, index) => blk.evaluate(interpreter, [acc, each, index]), initial)
     }
 
     methodRegistry.register(
