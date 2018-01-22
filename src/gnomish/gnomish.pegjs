@@ -85,7 +85,7 @@ atom "literal or parenthesized subexpression"
   / string
   / var
   / block
-  / '(' expr ')'
+  / '(' inner:expr ')' { return inner }
 
 if
   = 'if' _ condition:block _ 'then' _ thenb:block elseb:( _ 'else' _ e:block { return e } )?
