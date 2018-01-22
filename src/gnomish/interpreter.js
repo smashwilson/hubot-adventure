@@ -107,7 +107,7 @@ class Interpreter extends Visitor {
 
     const argNodes = block.getArgNodes()
     for (let i = 0; i < argNodes.length; i++) {
-      const argValue = args[i] ? args[i] : this.visit(argNodes[i].getDefault())
+      const argValue = args[i] !== undefined ? args[i] : this.visit(argNodes[i].getDefault())
       this.setSlot(argNodes[i].getFrame(), argNodes[i].getSlot(), argValue)
     }
 
