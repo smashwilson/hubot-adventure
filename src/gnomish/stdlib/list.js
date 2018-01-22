@@ -36,8 +36,7 @@ module.exports = {
       ({receiver}, arg) => {
         const v = receiver[arg]
         return v ? new Some(v) : none
-      }
-    )
+      })
 
     methodRegistry.register(
       tListA, 'first', [], tOptionA,
@@ -71,73 +70,61 @@ module.exports = {
 
     // Iteration
 
-    methodRegistry.register(
-      tListA, 'do', [makeType(t.Block, [tR, tA])], tListA,
-      ({receiver, interpreter}, blk) => {
-        for (let i = 0; i < receiver.length; i++) {
-          blk.evaluate(interpreter, [receiver[i]])
-        }
-        return receiver
-      })
+    const doBody = ({receiver, interpreter}, blk) => {
+      for (let i = 0; i < receiver.length; i++) {
+        blk.evaluate(interpreter, [receiver[i], i])
+      }
+      return receiver
+    }
 
     methodRegistry.register(
+      tListA, 'do', [makeType(t.Block, [tR, tA])], tListA,
+      doBody)
+    methodRegistry.register(
       tListA, 'do', [makeType(t.Block, [tR, tA, t.Int])], tListA,
-      ({receiver, interpreter}, blk) => {
-        for (let i = 0; i < receiver.length; i++) {
-          blk.evaluate(interpreter, [receiver[i], i])
-        }
-        return receiver
-      })
+      doBody)
+
+    const mapBody = ({receiver, interpreter}, blk) => {
+      return receiver.map((each, index) => blk.evaluate(interpreter, [each, index])
+    }
 
     methodRegistry.register(
       tListA, 'map', [makeType(t.Block, [tB, tA])], makeType(t.List, [tB]),
-      ({receiver, interpreter}, blk) => receiver.map(each => blk.evaluate(interpreter, [each])))
-
+      mapBody)
     methodRegistry.register(
       tListA, 'map', [makeType(t.Block, [tB, tA, t.Int])], tListB,
-      ({receiver, interpreter}, blk) => receiver.map((each, index) => blk.evaluate(interpreter, [each, index])))
+      mapBody)
+
+    const flapMapListBody = ({receiver, interpreter}, blk) => {
+      return receiver.reduce((acc, each, index) => {
+        acc.push(...blk.evaluate(interpreter, [each, index]))
+        return acc
+      }, [])
+    }
 
     methodRegistry.register(
       tListA, 'flatMap', [makeType(t.Block, [tListB, tA])], tListB,
-      ({receiver, interpreter}, blk) => {
-        return receiver.reduce((acc, each) => {
-          acc.push(...blk.evaluate(interpreter, [each]))
-          return acc
-        }, [])
-      })
-
+      flatMapListBody)
     methodRegistry.register(
       tListA, 'flatMap', [makeType(t.Block, [tListB, tA, t.Int])], tListB,
-      ({receiver, interpreter}, blk) => {
-        return receiver.reduce((acc, each, index) => {
-          acc.push(...blk.evaluate(interpreter, [each, index]))
-          return acc
-        }, [])
-      })
+      flatMapListBody)
+
+    const flatMapOptionBody = ({receiver, interpreter}, blk) => {
+      return receiver.reduce((acc, each, index) => {
+        const v = blk.evaluate(interpreter, [each, index])
+        if (v.hasValue()) {
+          acc.push(v.getValue())
+        }
+        return acc
+      }, [])
+    }
 
     methodRegistry.register(
       tListA, 'flatMap', [makeType(t.Block, [tOptionB, tA])], tListB,
-      ({receiver, interpreter}, blk) => {
-        return receiver.reduce((acc, each) => {
-          const v = blk.evaluate(interpreter, [each])
-          if (v.hasValue()) {
-            acc.push(v.getValue())
-          }
-          return acc
-        }, [])
-      })
-
+      flatMapOptionBody)
     methodRegistry.register(
       tListA, 'flatMap', [makeType(t.Block, [tOptionB, tA, t.Int])], tListB,
-      ({receiver, interpreter}, blk) => {
-        return receiver.reduce((acc, each, index) => {
-          const v = blk.evaluate(interpreter, [each, index])
-          if (v.hasValue()) {
-            acc.push(v.getValue())
-          }
-          return acc
-        }, [])
-      })
+      flatMapOptionBody)
 
     const reduceBody = ({receiver, interpreter}, initial, blk) => {
       return receiver.reduce((acc, each, index) => blk.evaluate(interpreter, [acc, each, index]), initial)
