@@ -13,7 +13,7 @@ class Signature {
     const u = unify(st, [this.receiverType, ...this.argTypes], [receiverType, ...callArgTypes])
     if (!u.wasSuccessful()) return null
 
-    u.apply(st)
+    u.applyLeft(st)
 
     const boundRetType = this.retType.resolveRecursively(st)[0]
     return new Match(this, u, boundRetType)

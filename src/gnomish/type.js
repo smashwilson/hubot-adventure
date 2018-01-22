@@ -1,6 +1,6 @@
 class Unification {
-  static successful (types, bindings, counts) {
-    return new Unification(types, bindings, counts)
+  static successful (types, leftBindings, counts) {
+    return new Unification(types, leftBindings, counts)
   }
 
   static unsuccessful () {
@@ -11,9 +11,9 @@ class Unification {
     return Unification.successful([], [], {})
   }
 
-  constructor (types, bindings, counts) {
+  constructor (types, leftBindings, counts) {
     this.types = types
-    this.bindings = bindings
+    this.leftBindings = leftBindings
     this.counts = Object.assign({exact: 0, multis: 0}, counts)
   }
 
@@ -32,10 +32,10 @@ class Unification {
 
   countMultiMatches () { return this.counts.multis }
 
-  countBindings () { return this.bindings.length }
+  countBindings () { return this.leftBindings.length }
 
-  apply (symbolTable) {
-    for (const [name, t, type] of this.bindings) {
+  applyLeft (symbolTable) {
+    for (const [name, t, type] of this.leftBindings) {
       symbolTable.setStatic(name, t, type)
     }
     return this
@@ -43,7 +43,7 @@ class Unification {
 
   assimilate (other) {
     this.types.push(...other.getTypes())
-    this.bindings.push(...other.bindings)
+    this.leftBindings.push(...other.leftBindings)
     this.counts.exact += other.counts.exact
     this.counts.multis += other.counts.multis
     return this
@@ -54,7 +54,7 @@ class Unification {
       let r = 'Unification : '
       r += this.types.map(t => t.toString()).join(', ')
       r += ' ['
-      r += this.bindings.map(b => `${b[0]} => ${b[2].toString()}`).join(' ')
+      r += this.leftBindings.map(b => `${b[0]} => ${b[2].toString()}`).join(' ')
       r += ']'
       return r
     } else {
@@ -294,9 +294,10 @@ function makeType (name, params = []) {
 }
 
 function unify (symbolTable, lTypes, rTypes) {
-  const st = symbolTable.push()
-  const tType = st.at('Type').getValue()
-  const tList = st.at('List').getValue()
+  const lSt = symbolTable.push('lhs')
+  const rSt = symbolTable.push('rhs')
+  const tType = symbolTable.at('Type').getValue()
+  const tList = symbolTable.at('List').getValue()
   const tTypeList = makeType(tList, [tType])
 
   function exact (a, b, replaced, multi) {
@@ -311,18 +312,28 @@ function unify (symbolTable, lTypes, rTypes) {
     return Unification.unsuccessful()
   }
 
-  function assignParameter (param, value) {
-    st.setStatic(param.getName(), tType, value)
+  function assignLeftParameter (param, value) {
+    lSt.setStatic(param.getName(), tType, value)
     return Unification.successful([value], [[param.getName(), tType, value]], {})
   }
 
-  function assignParameterList (param, values) {
-    st.setStatic(param.getName(), tTypeList, values)
+  function assignRightParameter (param, value) {
+    rSt.setStatic(param.getName(), tType, value)
+    return Unification.successful([value], [], {})
+  }
+
+  function assignLeftParameterList (param, values) {
+    lSt.setStatic(param.getName(), tTypeList, values)
     return Unification.successful(values, [[param.getName(), tTypeList, values]], {multis: values.length})
   }
 
-  function resolveInPlace (types, i) {
-    const results = types[i].resolve(st)
+  function assignRightParameterList (param, values) {
+    rSt.setStatic(param.getName(), tTypeList, values)
+    return Unification.successful(values, [], {multis: values.length})
+  }
+
+  function resolveInPlace (sideSt, types, i) {
+    const results = types[i].resolve(sideSt)
     const replaced = results[0] !== types[i]
     if (results.length !== 1 || replaced) {
       types.splice(i, 1, ...results)
@@ -331,8 +342,8 @@ function unify (symbolTable, lTypes, rTypes) {
   }
 
   function unifySingle (lType, rType, replaced, multi) {
-    if (lType.isParameter() && !rType.isParameter()) return assignParameter(lType, rType)
-    if (rType.isParameter()) return assignParameter(rType, lType)
+    if (lType.isParameter()) return assignLeftParameter(lType, rType)
+    if (rType.isParameter()) return assignRightParameter(rType, lType)
 
     if (lType.isCompound() && rType.isCompound()) {
       const uBase = unifySingle(lType.getBase(), rType.getBase(), replaced, multi)
@@ -343,7 +354,7 @@ function unify (symbolTable, lTypes, rTypes) {
 
       return Unification.successful(
         [makeType(uBase.getType(), uParams.getTypes())],
-        uBase.bindings.concat(uParams.bindings),
+        uBase.leftBindings.concat(uParams.leftBindings),
         {
           exact: uBase.countExactMatches() + uParams.countExactMatches(),
           multis: uBase.countMultiMatches() + uParams.countMultiMatches()
@@ -371,8 +382,8 @@ function unify (symbolTable, lTypes, rTypes) {
     const result = Unification.base()
 
     while (li < lTypes.length && ri < rTypes.length) {
-      const {replaced: lReplaced, type: lType} = resolveInPlace(lTypes, li)
-      const {replaced: rReplaced, type: rType} = resolveInPlace(rTypes, ri)
+      const {replaced: lReplaced, type: lType} = resolveInPlace(lSt, lTypes, li)
+      const {replaced: rReplaced, type: rType} = resolveInPlace(rSt, rTypes, ri)
 
       if (lType.isSplat()) {
         lSplat = lType
@@ -415,17 +426,19 @@ function unify (symbolTable, lTypes, rTypes) {
     }
 
     while (li < lTypes.length) {
-      if (lTypes[li].isRepeatable()) li++
-      if (lTypes[li].isSplat()) {
-        result.assimilate(assignParameterList(lTypes[li].getInner(), []))
+      if (lTypes[li].isRepeatable()) {
+        li++
+      } else if (lTypes[li].isSplat()) {
+        result.assimilate(assignLeftParameterList(lTypes[li].getInner(), []))
         li++
       }
       break
     }
     while (ri < rTypes.length) {
-      if (rTypes[ri].isRepeatable()) ri++
-      if (rTypes[ri].isSplat()) {
-        result.assimilate(assignParameterList(rTypes[ri].getInner(), []))
+      if (rTypes[ri].isRepeatable()) {
+        ri++
+      } else if (rTypes[ri].isSplat()) {
+        result.assimilate(assignRightParameterList(rTypes[ri].getInner(), []))
         ri++
       }
       break
@@ -434,10 +447,10 @@ function unify (symbolTable, lTypes, rTypes) {
     if (li < lTypes.length || ri < rTypes.length) return Unification.unsuccessful()
 
     if (lSplat) {
-      result.assimilate(assignParameterList(lSplat.getInner(), lSplatValues))
+      result.assimilate(assignLeftParameterList(lSplat.getInner(), lSplatValues))
     }
     if (rSplat) {
-      result.assimilate(assignParameterList(rSplat.getInner(), rSplatValues))
+      result.assimilate(assignRightParameterList(rSplat.getInner(), rSplatValues))
     }
 
     return result

@@ -217,7 +217,7 @@ describe('Type', function () {
       unifyBothWays(t0s, t1s, u => {
         assert.isTrue(u.wasSuccessful())
         assert.deepEqual(u.getTypes(), t0s)
-        assert.lengthOf(u.bindings, 0)
+        assert.lengthOf(u.leftBindings, 0)
       })
     })
 
@@ -230,35 +230,44 @@ describe('Type', function () {
       unifyBothWays(t0s, t1s, u => assert.isFalse(u.wasSuccessful()))
     })
 
-    it('produces bindings for a new type parameter assignment', function () {
+    it('produces bindings for a new type parameter assignment on the left', function () {
+      const t0s = [makeType("'A")]
+      const t1s = [makeType('Int')]
+
+      const u = unify(st, t0s, t1s)
+      assert.isTrue(u.wasSuccessful())
+      assert.deepEqual(u.getTypes(), t1s)
+
+      assert.isFalse(st.has("'A"))
+      assert.strictEqual(u.applyLeft(st), u)
+
+      const entry = st.at("'A")
+      assert.isTrue(entry.isStatic())
+      assert.strictEqual(entry.getType(), tType)
+      assert.strictEqual(entry.getValue(), t1s[0])
+    })
+
+    it('produces no bindings for type parameter assignments on the right', function () {
       const t0s = [makeType('Int')]
       const t1s = [makeType("'A")]
 
-      unifyBothWays(t0s, t1s, u => {
-        assert.isTrue(u.wasSuccessful())
-        assert.deepEqual(u.getTypes(), t0s)
-
-        assert.isFalse(st.has("'A"))
-        assert.strictEqual(u.apply(st), u)
-
-        const entry = st.at("'A")
-        assert.isTrue(entry.isStatic())
-        assert.strictEqual(entry.getType(), tType)
-        assert.strictEqual(entry.getValue(), t0s[0])
-      })
+      const u = unify(st, t0s, t1s)
+      assert.isTrue(u.wasSuccessful())
+      assert.deepEqual(u.getTypes(), t0s)
+      assert.lengthOf(u.leftBindings, 0)
     })
 
-    it('binds one symbol to an unbound one', function () {
+    it('binds a lhs symbol to an unbound rhs one', function () {
       const t0s = [makeType("'A")]
       const t1s = [makeType("'B")]
 
       const u = unify(st, t0s, t1s)
       assert.isTrue(u.wasSuccessful())
-      assert.deepEqual(u.getTypes(), t0s)
+      assert.deepEqual(u.getTypes(), t1s)
 
-      assert.isFalse(st.has("'B"))
-      u.apply(st)
-      assert.strictEqual(st.at("'B").getValue(), t0s[0])
+      assert.isFalse(st.has("'A"))
+      u.applyLeft(st)
+      assert.strictEqual(st.at("'A").getValue(), t1s[0])
     })
 
     it('unifies compound types that match recursively', function () {
@@ -288,56 +297,70 @@ describe('Type', function () {
     it('produces bindings for new recursive type parameter assignments', function () {
       const t0s = [makeType('Block', [makeType("'A")])]
       const t1s = [makeType(t0s[0].getBase(), [tReal])]
-      unifyBothWays(t0s, t1s, u => {
-        assert.isTrue(u.wasSuccessful())
-        const ut = u.getTypes()[0]
-        assert.strictEqual(ut.getBase(), t0s[0].getBase())
-        assert.lengthOf(ut.getParams(), 1)
-        assert.strictEqual(ut.getParams()[0], tReal)
 
-        assert.isFalse(st.has("'A"))
-        u.apply(st)
-        assert.strictEqual(st.at("'A").getValue(), tReal)
-      })
+      const u = unify(st, t0s, t1s)
+      assert.isTrue(u.wasSuccessful())
+
+      const ut = u.getTypes()[0]
+      assert.strictEqual(ut.getBase(), t0s[0].getBase())
+      assert.lengthOf(ut.getParams(), 1)
+      assert.strictEqual(ut.getParams()[0], tReal)
+
+      assert.isFalse(st.has("'A"))
+      u.applyLeft(st)
+      assert.strictEqual(st.at("'A").getValue(), tReal)
     })
 
     it('uses earlier bindings to match later type parameters', function () {
       const t0s = [makeType('Block', [makeType("'A"), tBool, makeType("'A")])]
-
       const t1s = [makeType(t0s[0].getBase(), [tInt, tBool, tInt])]
-      unifyBothWays(t0s, t1s, u => {
-        assert.isTrue(u.wasSuccessful())
-        const ut = u.getTypes()[0]
-        assert.strictEqual(ut.getBase(), t0s[0].getBase())
-        assert.lengthOf(ut.getParams(), 3)
-        assert.strictEqual(ut.getParams()[0], tInt)
-        assert.strictEqual(ut.getParams()[1], tBool)
-        assert.strictEqual(ut.getParams()[2], tInt)
 
-        assert.isFalse(st.has("'A"))
-        u.apply(st)
-        assert.strictEqual(st.at("'A").getValue(), tInt)
-      })
+      const u0 = unify(st, t0s, t1s)
+      assert.isTrue(u0.wasSuccessful())
+      const ut0 = u0.getTypes()[0]
+      assert.strictEqual(ut0.getBase(), t0s[0].getBase())
+      assert.lengthOf(ut0.getParams(), 3)
+      assert.strictEqual(ut0.getParams()[0], tInt)
+      assert.strictEqual(ut0.getParams()[1], tBool)
+      assert.strictEqual(ut0.getParams()[2], tInt)
+
+      const st0 = st.push('unification 0')
+      assert.isFalse(st0.has("'A"))
+      u0.applyLeft(st0)
+      assert.strictEqual(st0.at("'A").getValue(), tInt)
 
       const t2s = [makeType(t0s[0].getBase(), [tString, tBool, tString])]
-      unifyBothWays(t0s, t2s, u => {
-        assert.isTrue(u.wasSuccessful())
-        const ut = u.getTypes()[0]
-        assert.strictEqual(ut.getBase(), t0s[0].getBase())
-        assert.lengthOf(ut.getParams(), 3)
-        assert.strictEqual(ut.getParams()[0], tString)
-        assert.strictEqual(ut.getParams()[1], tBool)
-        assert.strictEqual(ut.getParams()[2], tString)
 
-        assert.isFalse(st.has("'A"))
-        u.apply(st)
-        assert.strictEqual(st.at("'A").getValue(), tString)
-      })
+      const u1 = unify(st, t0s, t2s)
+      assert.isTrue(u1.wasSuccessful())
+      const ut1 = u1.getTypes()[0]
+      assert.strictEqual(ut1.getBase(), t0s[0].getBase())
+      assert.lengthOf(ut1.getParams(), 3)
+      assert.strictEqual(ut1.getParams()[0], tString)
+      assert.strictEqual(ut1.getParams()[1], tBool)
+      assert.strictEqual(ut1.getParams()[2], tString)
+
+      const st1 = st.push('unificaiton 1')
+      assert.isFalse(st1.has("'A"))
+      u1.applyLeft(st1)
+      assert.strictEqual(st1.at("'A").getValue(), tString)
 
       const t3s = [makeType(t0s[0].getBase(), [tInt, tBool, tString])]
-      unifyBothWays(t0s, t3s, u => {
-        assert.isFalse(u.wasSuccessful())
-      })
+      unifyBothWays(t0s, t3s, u => assert.isFalse(u.wasSuccessful()))
+    })
+
+    it('tracks type bindings for the lhs and rhs independently', function () {
+      const tA = makeType("'A")
+      const t0s = [tA, tInt, tInt, tA]
+      const t1s = [tString, tA, tA, tString]
+
+      const u = unify(st, t0s, t1s)
+      assert.isTrue(u.wasSuccessful())
+      assert.deepEqual(u.getTypes(), [tString, tInt, tInt, tString])
+
+      assert.isFalse(st.has("'A"))
+      u.applyLeft(st)
+      assert.strictEqual(st.at("'A").getValue(), tString)
     })
 
     describe('repeatable types', function () {
@@ -368,16 +391,25 @@ describe('Type', function () {
         unifyBothWays(t0s, t1s, u => assert.isFalse(u.wasSuccessful()))
       })
 
-      it('produces a single binding', function () {
+      it('produces a single binding on the lhs', function () {
         const t0s = [makeType("'A").repeatable()]
         const t1s = [tInt, tInt, tInt]
 
-        unifyBothWays(t0s, t1s, u => {
-          assert.isTrue(u.wasSuccessful())
-          assert.deepEqual(u.getTypes(), t1s)
-          assert.lengthOf(u.bindings, 1)
-          assert.deepEqual(u.bindings[0], ["'A", tType, tInt])
-        })
+        const u = unify(st, t0s, t1s)
+        assert.isTrue(u.wasSuccessful())
+        assert.deepEqual(u.getTypes(), t1s)
+        assert.lengthOf(u.leftBindings, 1)
+        assert.deepEqual(u.leftBindings[0], ["'A", tType, tInt])
+      })
+
+      it('produces no bindings on the rhs', function () {
+        const t0s = [tInt, tInt, tInt]
+        const t1s = [makeType("'A").repeatable()]
+
+        const u = unify(st, t0s, t1s)
+        assert.isTrue(u.wasSuccessful())
+        assert.deepEqual(u.getTypes(), t0s)
+        assert.lengthOf(u.leftBindings, 0)
       })
     })
 
@@ -386,26 +418,24 @@ describe('Type', function () {
         const t0s = [tInt, makeType("'As").splat()]
         const t1s = [tInt]
 
-        unifyBothWays(t0s, t1s, u => {
-          assert.isTrue(u.wasSuccessful())
-          assert.deepEqual(u.getTypes(), [tInt])
-          assert.lengthOf(u.bindings, 1)
-          assert.strictEqual(u.bindings[0][0], "'As")
-          assert.deepEqual(u.bindings[0][2], [])
-        })
+        const u = unify(st, t0s, t1s)
+        assert.isTrue(u.wasSuccessful())
+        assert.deepEqual(u.getTypes(), [tInt])
+        assert.lengthOf(u.leftBindings, 1)
+        assert.strictEqual(u.leftBindings[0][0], "'As")
+        assert.deepEqual(u.leftBindings[0][2], [])
       })
 
       it('unifies against a list of types', function () {
         const t0s = [tBool, makeType("'Args").splat()]
         const t1s = [tBool, tInt, tString, tReal, tReal]
 
-        unifyBothWays(t0s, t1s, u => {
-          assert.isTrue(u.wasSuccessful())
-          assert.deepEqual(u.getTypes(), [tBool, tInt, tString, tReal, tReal])
-          assert.lengthOf(u.bindings, 1)
-          assert.strictEqual(u.bindings[0][0], "'Args")
-          assert.deepEqual(u.bindings[0][2], [tInt, tString, tReal, tReal])
-        })
+        const u = unify(st, t0s, t1s)
+        assert.isTrue(u.wasSuccessful())
+        assert.deepEqual(u.getTypes(), [tBool, tInt, tString, tReal, tReal])
+        assert.lengthOf(u.leftBindings, 1)
+        assert.strictEqual(u.leftBindings[0][0], "'Args")
+        assert.deepEqual(u.leftBindings[0][2], [tInt, tString, tReal, tReal])
       })
 
       it('unifies an existing splat binding', function () {
@@ -414,11 +444,10 @@ describe('Type', function () {
         const t0s = [tBool, makeType("'Args").splat(), tString]
         const t1s = [tBool, tInt, tBool, tBool, tString]
 
-        unifyBothWays(t0s, t1s, u => {
-          assert.isTrue(u.wasSuccessful())
-          assert.deepEqual(u.getTypes(), [tBool, tInt, tBool, tBool, tString])
-          assert.lengthOf(u.bindings, 0)
-        })
+        const u = unify(st, t0s, t1s)
+        assert.isTrue(u.wasSuccessful())
+        assert.deepEqual(u.getTypes(), [tBool, tInt, tBool, tBool, tString])
+        assert.lengthOf(u.leftBindings, 0)
       })
 
       it('fails to unify with a conflicting splat binding', function () {
