@@ -4,6 +4,7 @@ function commonMethods (t, rt, mr) {
   mr.register(rt, '*', [rt], rt, ({receiver}, operand) => receiver * operand)
   mr.register(rt, '/', [rt], t.Real, ({receiver}, operand) => receiver / operand)
   mr.register(rt, '//', [rt], t.Int, ({receiver}, operand) => Math.floor(receiver / operand))
+  mr.register(rt, '%', [rt], t.Int, ({receiver}, operand) => receiver % operand)
   mr.register(rt, '^', [rt], rt, ({receiver}, operand) => Math.pow(receiver, operand))
 
   mr.register(rt, '==', [rt], t.Bool, ({receiver}, operand) => receiver === operand)
