@@ -93,8 +93,8 @@ assert.equal(results9_3, list(100, 200))
 let results10_0 = intList.reduce(0, { acc: Int, each: Int | acc + each })
 assert.equal(results10_0, 10)
 
-# let results10_1 = intList.reduce(list(0), { acc: List(Int), each: Int | acc << each << each + 10 })
-# assert.equal(results10_1, list(0, 1, 11, 4, 14, 2, 12, 3, 13))
+let results10_1 = intList.reduce(list(0), { acc: List(Int), each: Int | acc << each << each + 10 })
+assert.equal(results10_1, list(0, 1, 11, 4, 14, 2, 12, 3, 13))
 
 ## 11. List#fold()
 
