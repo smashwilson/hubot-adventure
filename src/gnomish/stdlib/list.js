@@ -68,6 +68,10 @@ module.exports = {
         return receiver
       })
 
+    methodRegistry.register(
+      tListA, '+', [tListA], tListA,
+      ({receiver}, otherList) => receiver.concat(otherList))
+
     // Iteration
 
     const doBody = ({receiver, interpreter}, blk) => {
