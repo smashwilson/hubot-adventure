@@ -287,6 +287,16 @@ describe('Gnomish expressions', function () {
       `)
     })
 
+    it('can be chained together', function () {
+      assertSexp('r.methodOne(3, 4).methodTwo("yes")', `
+        (exprlist
+          (call
+            (call (var r) methodOne (3) (4))
+            methodTwo
+            ("yes")))
+      `)
+    })
+
     it('parses a method call with an implicit receiver', function () {
       assertSexp('methodname(3, 4)', `
         (exprlist

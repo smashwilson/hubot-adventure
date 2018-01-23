@@ -72,8 +72,8 @@ oppow "exponentiation-like operator application"
 
 // "<receiver>.method()" or "method()". Unary.
 methodcall "method invocation"
-  = receiver:atom '.' name:identifier args:methodargs
-    { return new CallNode({receiver, name, args}) }
+  = receiver:atom calls:( '.' name:identifier args:methodargs { return {name, args} } )+
+    { return calls.reduce((r, {name, args}) => new CallNode({receiver: r, name, args}), receiver) }
   / name:identifier args:methodargs
     { return new CallNode({receiver: new VarNode({name: 'this'}), name, args}) }
   / atom
