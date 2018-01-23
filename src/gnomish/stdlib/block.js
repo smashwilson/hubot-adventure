@@ -1,3 +1,5 @@
+const {makeType} = require('../type')
+
 class Block {
   constructor (argNodes, bodyNode) {
     this.argNodes = argNodes
@@ -11,6 +13,10 @@ class Block {
 
   getSlot (frame, slot) {
     return this.captures.get(frame)[slot]
+  }
+
+  setSlot (frame, slot, value) {
+    this.captures.get(frame)[slot] = value
   }
 
   getArgNodes () { return this.argNodes }
@@ -30,6 +36,12 @@ module.exports = {
   },
 
   registerMethods (t, symbolTable, methodRegistry) {
-    //
+    const tR = makeType("'R")
+    const tArgsStar = makeType("'Args").splat()
+    const tBlockRArgs = makeType(t.Block, [tR, tArgsStar])
+
+    methodRegistry.register(
+      tBlockRArgs, 'evaluate', [tArgsStar], tR,
+      ({receiver, interpreter}, ...args) => receiver.evaluate(interpreter, args))
   }
 }

@@ -6,14 +6,25 @@ class Interpreter extends Visitor {
   constructor () {
     super()
     this.stack = new Map()
+    this.currentBlock = null
   }
 
   setSlot (frame, slot, value) {
-    this.stack.get(frame)[slot] = value
+    const f = this.stack.get(frame)
+    if (f) {
+      f[slot] = value
+    } else {
+      this.currentBlock.setSlot(frame, slot, value)
+    }
   }
 
   getSlot (frame, slot) {
-    return this.stack.get(frame)[slot]
+    const f = this.stack.get(frame)
+    if (f) {
+      return f[slot]
+    } else {
+      return this.currentBlock.getSlot(frame, slot)
+    }
   }
 
   visitExprList (node) {
@@ -102,6 +113,8 @@ class Interpreter extends Visitor {
   }
 
   evaluateBlock (block, args) {
+    const lastBlock = this.currentBlock
+    this.currentBlock = block
     const bodyNode = block.getBodyNode()
     this.stack.set(bodyNode, [])
 
@@ -111,7 +124,9 @@ class Interpreter extends Visitor {
       this.setSlot(argNodes[i].getFrame(), argNodes[i].getSlot(), argValue)
     }
 
-    return this.visit(bodyNode)
+    const r = this.visit(bodyNode)
+    this.currentBlock = lastBlock
+    return r
   }
 }
 
