@@ -303,6 +303,15 @@ describe('Gnomish expressions', function () {
           (call (var this) methodname (3) (4)))
       `)
     })
+
+    it('chains after implicit calls', function () {
+      assertSexp('methodname(3).other(7)', `
+        (exprlist
+          (call
+            (call (var this) methodname (3))
+            other (7)))
+      `)
+    })
   })
 
   describe('comments', function () {

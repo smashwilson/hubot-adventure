@@ -74,8 +74,11 @@ oppow "exponentiation-like operator application"
 methodcall "method invocation"
   = receiver:atom calls:( '.' name:identifier args:methodargs { return {name, args} } )+
     { return calls.reduce((r, {name, args}) => new CallNode({receiver: r, name, args}), receiver) }
-  / name:identifier args:methodargs
-    { return new CallNode({receiver: new VarNode({name: 'this'}), name, args}) }
+  / name:identifier args:methodargs calls:( '.' n:identifier as:methodargs { return {name: n, args: as} } )*
+    {
+      const implicit = new CallNode({receiver: new VarNode({name: 'this'}), name, args})
+      return calls.reduce((r, {name, args}) => new CallNode({receiver: r, name, args}), implicit)
+    }
   / atom
 
 atom "literal or parenthesized subexpression"
