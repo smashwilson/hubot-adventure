@@ -37,4 +37,16 @@ describe("Option('A)", {
     let r0 = s0.map({ i: Int | i + 1 })
     assert.isTrue(r0 == some(4))
   })
+
+  it("+", {
+    let s0 = some(10)
+    let s1 = some(5)
+
+    assert.equal(s0 + s1, list(10, 5))
+    assert.equal(s0 + none, list(10))
+    assert.equal(none + none, list())
+
+    assert.equal(s1 + list(7, 2), list(5, 7, 2))
+    assert.equal(none + list(3, 3, 3), list(3, 3, 3))
+  })
 })

@@ -36,6 +36,7 @@ module.exports = {
     const tA = makeType("'A")
     const tB = makeType("'B")
     const tOptionA = makeType(t.Option, [tA])
+    const tListA = makeType(t.List, [tA])
 
     // Construction
 
@@ -86,6 +87,27 @@ module.exports = {
           return new Some(blk.evaluate(interpreter, [receiver.getValue()]))
         } else {
           return none
+        }
+      })
+
+    // Concatenation
+
+    methodRegistry.register(
+      tOptionA, '+', [tOptionA], tListA,
+      ({receiver}, other) => {
+        const result = []
+        if (receiver.hasValue()) result.push(receiver.getValue())
+        if (other.hasValue()) result.push(other.getValue())
+        return result
+      })
+
+    methodRegistry.register(
+      tOptionA, '+', [tListA], tListA,
+      ({receiver}, list) => {
+        if (receiver.hasValue()) {
+          return [receiver.getValue()].concat(list)
+        } else {
+          return list
         }
       })
   }

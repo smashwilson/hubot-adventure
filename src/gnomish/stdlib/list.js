@@ -72,6 +72,16 @@ module.exports = {
       tListA, '+', [tListA], tListA,
       ({receiver}, otherList) => receiver.concat(otherList))
 
+    methodRegistry.register(
+      tListA, '+', [tOptionA], tListA,
+      ({receiver}, option) => {
+        if (option.hasValue()) {
+          return receiver.concat([option.getValue()])
+        } else {
+          return receiver
+        }
+      })
+
     // Iteration
 
     const doBody = ({receiver, interpreter}, blk) => {

@@ -38,6 +38,9 @@ describe("List('A)", {
     let two = list(2, 2, 2, 2)
 
     assert.equal(one + two, list(1, 1, 1, 2, 2, 2, 2))
+
+    assert.equal(one + some(10), list(1, 1, 1, 10))
+    assert.equal(two + none, two)
   })
 
   it("at()", {
