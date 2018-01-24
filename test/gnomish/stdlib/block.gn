@@ -1,0 +1,37 @@
+describe("Block", {
+  describe("evaluate()", {
+    it("executes the block and returns its return value", {
+      let b = {3 + 4}
+      assert.equal(b.evaluate(), 7)
+    })
+
+    it("typechecks and passes arguments", {
+      let b = { x: Int, y: String | x + 10 }
+      assert.equal(b.evaluate(5, "foo"), 15)
+    })
+
+    it("captures bindings from the surrounding scope", {
+      let b = {
+        let x = 0
+
+        let setit = { n: Int | x = n }
+
+        let getit = { x }
+
+        pair(setit, getit)
+      }
+
+      # TODO doesn't parse:
+      # blks.right().evaluate()
+
+      let blks = b.evaluate()
+      let setit = blks.left()
+      let getit = blks.right()
+
+      assert.equal(getit.evaluate(), 0)
+
+      setit.evaluate(5)
+      assert.equal(getit.evaluate(), 5)
+    })
+  })
+})

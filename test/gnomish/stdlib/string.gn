@@ -1,0 +1,20 @@
+describe("String", {
+  it("length()", {
+    assert.equal("".length(), 0)
+    assert.equal("abc".length(), 3)
+  })
+
+  it("empty()", {
+    assert.isTrue("".empty())
+    assert.isFalse("abc".empty())
+  })
+
+  it("substring()", {
+    assert.equal("aabbbccc".substring(2, 3), "bbb")
+    assert.equal("zzaaa".substring(2), "aaa")
+  })
+
+  it("+", {
+    assert.equal("aaa" + "bbb", "aaabbb")
+  })
+})

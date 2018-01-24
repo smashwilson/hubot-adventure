@@ -1,0 +1,17 @@
+describe("Map", {
+  it("construction and access", {
+    let m = map(1 => "one", 2 => "two", 3 => "three")
+
+    assert.equal(m.at(1), some("one"))
+    assert.equal(m.at(2), some("two"))
+    assert.equal(m.at(7), none)
+
+    assert.equal(m.get(3), "three")
+  })
+
+  it("mutation", {
+    let m = map("a" => "x")
+    m.put("b", "y")
+    assert.equal(m.at("b"), some("y"))
+  })
+})

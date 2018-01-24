@@ -76,6 +76,14 @@ class SymbolTable {
     return this.binding(name).entry
   }
 
+  all () {
+    const r = this.parent ? this.parent.all() : []
+    for (const [name, entry] of this.symbols) {
+      r.push({name, entry})
+    }
+    return r
+  }
+
   allocateSlot (name, type) {
     const e = new SlotEntry(type, this.getNextSlot())
     this.symbols.set(name, e)

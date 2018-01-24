@@ -1,0 +1,15 @@
+# Tests for methods that are available on any type
+
+describe("'A methods", {
+  it("getType()", {
+    assert.equal(1.getType(), Int)
+    assert.equal(3.0.getType(), Real)
+  })
+
+  it("==", {
+    assert.isTrue(1 == 1)
+    assert.isTrue("foo" == "foo")
+    assert.isFalse(1 == 7)
+    assert.isFalse("no" == "nope")
+  })
+})

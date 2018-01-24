@@ -1,0 +1,13 @@
+describe("Pair('A, 'B)", {
+  it("accesses the left and right members", {
+    let p = pair(1, "one")
+    assert.equal(p.left(), 1)
+    assert.equal(p.right(), "one")
+  })
+
+  it("can be constructed with =>", {
+    let p = "no" => 3.0
+    assert.equal(p.left(), "no")
+    assert.equal(p.right(), 3.0)
+  })
+})

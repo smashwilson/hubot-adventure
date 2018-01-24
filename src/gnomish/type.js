@@ -166,12 +166,18 @@ class CompoundType extends Type {
       acc.push(...p.resolveRecursively(symbolTable))
       return acc
     }, [])
-    const changed = nParams.length !== this.params.length || nParams.some((np, i) => np !== this.params[i])
-    if (!changed && t === this) {
-      return [this]
-    } else {
+
+    const bChanged = t !== this
+    const pChanged = nParams.length !== this.params.length || nParams.some((np, i) => np !== this.params[i])
+
+    if (bChanged) {
       t.params = nParams
       return [t]
+    } else if (pChanged) {
+      const n = new CompoundType(this.base, nParams)
+      return [n]
+    } else {
+      return [this]
     }
   }
 

@@ -1,0 +1,57 @@
+describe("Option('A)", {
+  let s0 = if {true} then {3}
+  let n0 = if {false} then {3}
+
+  it("==", {
+    let s1 = some(3)
+    let s2 = some(4)
+    let n1 = none
+
+    assert.isTrue(s0 == s1)
+    assert.isFalse(s0 == s2)
+    assert.isFalse(s0 == n1)
+
+    assert.isTrue(n0 == n1)
+  })
+
+  it("or()", {
+    # Default values, computed directly...
+
+    assert.equal(s0.or(7), 3)
+    assert.equal(n0.or(7), 7)
+
+    # ... or with a block.
+
+    let count0 = 0
+    let blk0 = {
+      count0 = count0 + 1
+      4 + 5
+    }
+
+    assert.equal(s0.or(blk0), 3)
+    assert.equal(n0.or(blk0), 9)
+    assert.equal(count0, 1)
+  })
+
+  it("map()", {
+    let r0 = s0.map({ i: Int | i + 1 })
+    assert.isTrue(r0 == some(4))
+  })
+
+  it("+", {
+    let s0 = some(10)
+    let s1 = some(5)
+
+    assert.equal(s0 + s1, list(10, 5))
+    assert.equal(s0 + none, list(10))
+    assert.equal(none + none, list())
+
+    assert.equal(s1 + list(7, 2), list(5, 7, 2))
+    assert.equal(none + list(3, 3, 3), list(3, 3, 3))
+  })
+
+  it("toList", {
+    assert.equal(some(10).toList(), list(10))
+    assert.equal(none.toList(), list())
+  })
+})

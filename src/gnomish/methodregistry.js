@@ -98,6 +98,13 @@ class MethodRegistry {
       this.bySelector.set(selector, signatures)
     }
 
+    if (receiverType === undefined || !argTypes.every(Boolean) || retType === undefined) {
+      console.error({
+        receiverType, argTypes, retType
+      })
+      throw new Error('boom')
+    }
+
     const addedSignature = new Signature(receiverType, argTypes, callback, retType)
     signatures.push(addedSignature)
   }
@@ -146,6 +153,16 @@ class MethodRegistry {
     }
 
     return priority[0]
+  }
+
+  inspect () {
+    const ks = [...this.bySelector.keys()]
+    ks.sort()
+
+    return ks.map(k => {
+      const signatures = this.bySelector.get(k)
+      return signatures.map(s => `${k}: ${s}`).join('\n')
+    }).join('\n')
   }
 }
 

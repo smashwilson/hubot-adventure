@@ -6,18 +6,29 @@ class Interpreter extends Visitor {
   constructor () {
     super()
     this.stack = new Map()
+    this.currentBlock = null
   }
 
   setSlot (frame, slot, value) {
-    this.stack.get(frame)[slot] = value
+    const f = this.stack.get(frame)
+    if (f) {
+      f[slot] = value
+    } else {
+      this.currentBlock.setSlot(frame, slot, value)
+    }
   }
 
   getSlot (frame, slot) {
-    return this.stack.get(frame)[slot]
+    const f = this.stack.get(frame)
+    if (f) {
+      return f[slot]
+    } else {
+      return this.currentBlock.getSlot(frame, slot)
+    }
   }
 
   visitExprList (node) {
-    this.stack.set(node, [])
+    if (!this.stack.has(node)) this.stack.set(node, [])
     const result = super.visitExprList(node)
     this.stack.delete(node)
     return result
@@ -76,7 +87,8 @@ class Interpreter extends Visitor {
     return node.getCallback()({
       receiver,
       selector: node.getName(),
-      interpreter: this
+      interpreter: this,
+      astNode: node
     }, ...args)
   }
 
@@ -98,6 +110,23 @@ class Interpreter extends Visitor {
     } else {
       return this.getSlot(node.getFrame(), node.getSlot())
     }
+  }
+
+  evaluateBlock (block, args) {
+    const lastBlock = this.currentBlock
+    this.currentBlock = block
+    const bodyNode = block.getBodyNode()
+    this.stack.set(bodyNode, [])
+
+    const argNodes = block.getArgNodes()
+    for (let i = 0; i < argNodes.length; i++) {
+      const argValue = args[i] !== undefined ? args[i] : this.visit(argNodes[i].getDefault())
+      this.setSlot(argNodes[i].getFrame(), argNodes[i].getSlot(), argValue)
+    }
+
+    const r = this.visit(bodyNode)
+    this.currentBlock = lastBlock
+    return r
   }
 }
 
