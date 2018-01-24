@@ -110,5 +110,13 @@ module.exports = {
           return list
         }
       })
+
+    // Conversion
+
+    methodRegistry.register(
+      tOptionA, 'toList', [], tListA,
+      ({receiver}) => {
+        return receiver.hasValue() ? [receiver.getValue()] : []
+      })
   }
 }

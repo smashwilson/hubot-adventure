@@ -49,4 +49,9 @@ describe("Option('A)", {
     assert.equal(s1 + list(7, 2), list(5, 7, 2))
     assert.equal(none + list(3, 3, 3), list(3, 3, 3))
   })
+
+  it("toList", {
+    assert.equal(some(10).toList(), list(10))
+    assert.equal(none.toList(), list())
+  })
 })
