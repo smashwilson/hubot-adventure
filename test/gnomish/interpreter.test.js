@@ -98,7 +98,28 @@ describe('Interpreter', function () {
       assert.strictEqual(result, 40)
     })
 
-    it('passes the current implicit receiver')
+    it('prunes calls that have been completed statically', function () {
+      let staticCall = false
+      let runtimeCall = false
+
+      mr.register(
+        tInt, 'selector', [tInt], tInt,
+        ({receiver}, operand) => {
+          runtimeCall = true
+          return receiver + operand
+        }
+      ).setStaticCallback(
+        ({astNode}) => {
+          staticCall = true
+          astNode.setStaticValue(10)
+        }
+      )
+
+      const program = parse('1.selector(2)').analyze(st, mr)
+      const {result} = program.interpret()
+
+      assert.strictEqual(result, 10)
+    })
   })
 
   describe('if statements', function () {
