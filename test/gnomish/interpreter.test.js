@@ -119,6 +119,8 @@ describe('Interpreter', function () {
       const {result} = program.interpret()
 
       assert.strictEqual(result, 10)
+      assert.isTrue(staticCall)
+      assert.isFalse(runtimeCall)
     })
   })
 
