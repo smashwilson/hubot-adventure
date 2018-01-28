@@ -1,5 +1,7 @@
 const {Visitor} = require('./visitor')
 const {makeType, unify} = require('./type')
+const {Block} = require('./stdlib/block')
+const {none, Some} = require('./stdlib/option')
 
 // Static analysis phase, to be performed immediately after parsing an AST, but before interpreting it. Responsible for:
 //
@@ -32,6 +34,10 @@ class Analyzer extends Visitor {
     super.visitExprList(node)
     node.setType(node.getLastExpr().getType())
 
+    if (node.getExprs().every(node => node.hasStaticValue())) {
+      node.setStaticValue(node.getLastExpr().getStaticValue())
+    }
+
     if (needsPush) {
       this.symbolTable = this.symbolTable.pop()
     }
@@ -52,6 +58,27 @@ class Analyzer extends Visitor {
     } else {
       const optionType = makeType(this.tOption, [thType.getParams()[0]])
       node.setType(optionType)
+    }
+
+    if (node.getCondition().getBody().hasStaticValue()) {
+      const cond = node.getCondition().getBody().getStaticValue()
+      const hasTh = node.getThen().getBody().hasStaticValue()
+
+      if (node.getElse()) {
+        const hasElse = node.getElse().getBody().hasStaticValue()
+
+        if (cond && hasTh) {
+          node.setStaticValue(node.getThen().getBody().getStaticValue())
+        }
+
+        if (!cond && hasElse) {
+          node.setStaticValue(node.getElse().getBody().getStaticValue())
+        }
+      } else {
+        if (hasTh) {
+          node.setStaticValue(cond ? new Some(node.getThen().getBody().getStaticValue()) : none)
+        }
+      }
     }
   }
 
@@ -103,7 +130,12 @@ class Analyzer extends Visitor {
       ...node.getArgs().map(arg => arg.getType())
     ]))
 
-    node.captureFrames(this.symbolTable.getCaptures())
+    if (this.symbolTable.getCaptures().size > 0) {
+      node.captureFrames(this.symbolTable.getCaptures())
+    } else {
+      const b = new Block(node.getArgs(), node.getBody())
+      node.setStaticValue(b)
+    }
     this.symbolTable = this.symbolTable.pop()
   }
 
@@ -133,6 +165,13 @@ class Analyzer extends Visitor {
       node.getName(),
       node.getArgs().map(a => a.getType())
     )
+
+    signature.getStaticCallback()({
+      astNode: node,
+      symbolTable: this.symbolTable,
+      methodRegistery: this.methodRegistry
+    })
+
     node.setType(signature.getReturnType())
     node.setCallback(signature.getCallback())
   }

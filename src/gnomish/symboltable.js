@@ -63,7 +63,9 @@ class SymbolTable {
     if (v === undefined) {
       if (this.parent) {
         const inherited = this.parent.binding(name)
-        this.captures.add(inherited.frame)
+        if (!inherited.entry.isStatic()) {
+          this.captures.add(inherited.frame)
+        }
         return inherited
       } else {
         throw new Error(`Identifier "${name}" not found`)

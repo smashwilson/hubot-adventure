@@ -42,7 +42,7 @@ module.exports = {
 
     methodRegistry.register(t.World, 'some', [tA], tOptionA, (_, value) => {
       return new Some(value)
-    })
+    }).markPure()
 
     symbolTable.setStatic('none', tOptionA, none)
 
@@ -58,7 +58,7 @@ module.exports = {
       } else {
         return true
       }
-    })
+    }).markPure()
 
     // Direct form
     methodRegistry.register(tOptionA, 'or', [tA], tA, ({receiver}, alt) => {
@@ -67,7 +67,7 @@ module.exports = {
       } else {
         return alt
       }
-    })
+    }).markPure()
 
     // Block form
     methodRegistry.register(tOptionA, 'or', [makeType(t.Block, [tA])], tA, ({receiver, interpreter}, blk) => {
@@ -99,7 +99,7 @@ module.exports = {
         if (receiver.hasValue()) result.push(receiver.getValue())
         if (other.hasValue()) result.push(other.getValue())
         return result
-      })
+      }).markPure()
 
     methodRegistry.register(
       tOptionA, '+', [tListA], tListA,

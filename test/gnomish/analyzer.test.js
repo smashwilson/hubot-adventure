@@ -403,18 +403,15 @@ describe('Analyzer', function () {
         const frame2 = block2.getBody()
         const block3 = frame2.getExprs()[0]
 
-        assert.strictEqual(block1.getCaptures().size, 1)
-        assert.isTrue(block1.getCaptures().has(GLOBAL))
+        assert.strictEqual(block1.getCaptures().size, 0)
 
-        assert.strictEqual(block2.getCaptures().size, 2)
+        assert.strictEqual(block2.getCaptures().size, 1)
         assert.isFalse(block2.getCaptures().has(frame0))
         assert.isTrue(block2.getCaptures().has(frame1))
-        assert.isTrue(block2.getCaptures().has(GLOBAL))
 
-        assert.strictEqual(block3.getCaptures().size, 2)
+        assert.strictEqual(block3.getCaptures().size, 1)
         assert.isFalse(block3.getCaptures().has(frame0))
         assert.isTrue(block3.getCaptures().has(frame1))
-        assert.isTrue(block3.getCaptures().has(GLOBAL))
       })
     })
 
@@ -453,18 +450,15 @@ describe('Analyzer', function () {
         const frame2 = block2.getBody()
         const block3 = frame2.getExprs()[0]
 
-        assert.strictEqual(block1.getCaptures().size, 1)
-        assert.isTrue(block1.getCaptures().has(GLOBAL))
+        assert.strictEqual(block1.getCaptures().size, 0)
 
-        assert.strictEqual(block2.getCaptures().size, 2)
+        assert.strictEqual(block2.getCaptures().size, 1)
         assert.isFalse(block2.getCaptures().has(frame0))
         assert.isTrue(block2.getCaptures().has(frame1))
-        assert.isTrue(block2.getCaptures().has(GLOBAL))
 
-        assert.strictEqual(block3.getCaptures().size, 2)
+        assert.strictEqual(block3.getCaptures().size, 1)
         assert.isFalse(block3.getCaptures().has(frame0))
         assert.isTrue(block3.getCaptures().has(frame1))
-        assert.isTrue(block3.getCaptures().has(GLOBAL))
       })
     })
 
@@ -519,6 +513,164 @@ describe('Analyzer', function () {
       const callNode = root.node.getExprs()[0]
 
       assert.strictEqual(callNode.getCallback(), right)
+    })
+  })
+
+  describe('static value derivation', function () {
+    it('assigns Int literals', function () {
+      const program = parse('1').analyze(st, mr)
+      const intNode = program.node.getLastExpr()
+
+      assert.isTrue(intNode.hasStaticValue())
+      assert.equal(intNode.getStaticValue(), 1)
+    })
+
+    it('assigns Real literals', function () {
+      const program = parse('1.0').analyze(st, mr)
+      const intNode = program.node.getLastExpr()
+
+      assert.isTrue(intNode.hasStaticValue())
+      assert.equal(intNode.getStaticValue(), 1.0)
+    })
+
+    it('assigns String literals', function () {
+      const program = parse('"boo"').analyze(st, mr)
+      const stringNode = program.node.getLastExpr()
+
+      assert.isTrue(stringNode.hasStaticValue())
+      assert.equal(stringNode.getStaticValue(), 'boo')
+    })
+
+    describe('VarNode', function () {
+      it('assigns a static value if the var references a static entry', function () {
+        st.setStatic('box', tInt, 10)
+
+        const program = parse('box').analyze(st, mr)
+        const varNode = program.node.getLastExpr()
+
+        assert.isTrue(varNode.hasStaticValue())
+        assert.equal(varNode.getStaticValue(), 10)
+      })
+
+      it('has no static value if the var references a frame slot', function () {
+        st.allocateSlot('box', tString)
+
+        const program = parse('box').analyze(st, mr)
+        const varNode = program.node.getLastExpr()
+
+        assert.isFalse(varNode.hasStaticValue())
+      })
+    })
+
+    it('never assigns a static value to an ArgNode', function () {
+      const program = parse('{ x: Int | x }').analyze(st, mr)
+
+      const blockNode = program.node.getLastExpr()
+      const argNode = blockNode.getArgs()[0]
+      assert.isFalse(argNode.hasStaticValue())
+    })
+
+    describe('BlockNode', function () {
+      it('assigns a static value if the block captures no variables', function () {
+        mr.register(tInt, '+', [tInt], tInt, () => {})
+
+        const program = parse('{ x: Int | x + 4 }').analyze(st, mr)
+
+        const blockNode = program.node.getLastExpr()
+        assert.isTrue(blockNode.hasStaticValue())
+        const block = blockNode.getStaticValue()
+        assert.lengthOf(block.argNodes, 1)
+        assert.strictEqual(block.argNodes[0], blockNode.getArgs()[0])
+        assert.strictEqual(block.bodyNode, blockNode.getBody())
+      })
+
+      it('does not assign a static value if the block has one or more captures', function () {
+        mr.register(tInt, '+', [tInt], tInt, () => {})
+
+        const program = parse(`
+          let outer = 1
+          { y: Int | y + outer }
+        `).analyze(st, mr)
+
+        const blockNode = program.node.getLastExpr()
+        assert.isFalse(blockNode.hasStaticValue())
+      })
+    })
+
+    describe('IfNode', function () {
+      it('assigns a static value if the condition and body both have static values', function () {
+        const program = parse('if {false} then {3} else {4}').analyze(st, mr)
+
+        const ifNode = program.node.getLastExpr()
+        assert.isTrue(ifNode.hasStaticValue())
+        assert.strictEqual(ifNode.getStaticValue(), 4)
+      })
+
+      it('does not assign a static value if the condition is non-static', function () {
+        st.allocateSlot('cond', tBool)
+
+        const program = parse('if {cond} then {3} else {4}')
+
+        const ifNode = program.node.getLastExpr()
+        assert.isFalse(ifNode.hasStaticValue())
+      })
+
+      it('does not assign a static value if the body is non-static', function () {
+        st.allocateSlot('value', tInt)
+
+        const program = parse('if {true} then {3} else {value}')
+
+        const ifNode = program.node.getLastExpr()
+        assert.isFalse(ifNode.hasStaticValue())
+      })
+    })
+
+    it('never assigns a static value to a WhileNode', function () {
+      const program = parse('while {false} do {4}').analyze(st, mr)
+
+      const whileNode = program.node.getLastExpr()
+      assert.isFalse(whileNode.hasStaticValue())
+    })
+
+    it('never assigns a static value to an AssignNode', function () {
+      st.allocateSlot('x', tInt)
+
+      const program = parse('x = 4').analyze(st, mr)
+
+      const assignNode = program.node.getLastExpr()
+      assert.isFalse(assignNode.hasStaticValue())
+    })
+
+    it('never assigns a static value to a LetNode', function () {
+      const program = parse('let y = 4').analyze(st, mr)
+
+      const letNode = program.node.getLastExpr()
+      assert.isFalse(letNode.hasStaticValue())
+    })
+
+    describe('CallNode', function () {
+      it("invokes the method's static callbacks", function () {
+        let called = false
+
+        const signature = mr.register(tInt, 'something', [], tInt, () => {})
+        signature.setStaticCallback(() => { called = true })
+
+        const program = parse('1.something()').analyze(st, mr)
+        assert.isFalse(program.node.getLastExpr().hasStaticValue())
+        assert.isTrue(called)
+      })
+
+      it("may compute the call's value statically", function () {
+        mr.register(
+          tInt, 'something', [tInt], tInt,
+          (_, arg) => arg + 1
+        ).markPure()
+
+        const program = parse('2.something(3)').analyze(st, mr)
+        const callNode = program.node.getLastExpr()
+        assert.isTrue(callNode.hasStaticValue())
+        assert.strictEqual(callNode.getStaticValue(), 4)
+      })
     })
   })
 })

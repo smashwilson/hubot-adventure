@@ -9,6 +9,14 @@ class Interpreter extends Visitor {
     this.currentBlock = null
   }
 
+  visit (node) {
+    if (node.hasStaticValue()) {
+      return node.getStaticValue()
+    }
+
+    return super.visit(node)
+  }
+
   setSlot (frame, slot, value) {
     const f = this.stack.get(frame)
     if (f) {
@@ -92,24 +100,8 @@ class Interpreter extends Visitor {
     }, ...args)
   }
 
-  visitInt (node) {
-    return node.getStaticValue()
-  }
-
-  visitReal (node) {
-    return node.getStaticValue()
-  }
-
-  visitString (node) {
-    return node.getStaticValue()
-  }
-
   visitVar (node) {
-    if (node.hasStaticValue()) {
-      return node.getStaticValue()
-    } else {
-      return this.getSlot(node.getFrame(), node.getSlot())
-    }
+    return this.getSlot(node.getFrame(), node.getSlot())
   }
 
   evaluateBlock (block, args) {

@@ -1,8 +1,7 @@
-const STATIC = Symbol('static')
-
 class Node {
-  constructor () {
+  constructor (staticValue = null) {
     this.type = null
+    this.staticValue = staticValue
   }
 
   setType (type) {
@@ -17,13 +16,24 @@ class Node {
   }
 
   hasStaticValue () {
-    return false
+    return this.staticValue !== null
+  }
+
+  setStaticValue (value) {
+    this.staticValue = value
+  }
+
+  getStaticValue () {
+    if (this.staticValue === null) {
+      throw new Error(`${this.constructor.name} has not been assigned a static value`)
+    }
+    return this.staticValue
   }
 }
 
 class SlotNode extends Node {
-  constructor () {
-    super()
+  constructor (value = null) {
+    super(value)
     this.frame = null
     this.slot = null
   }
@@ -31,11 +41,6 @@ class SlotNode extends Node {
   setSlot (frame, slot) {
     this.frame = frame
     this.slot = slot
-  }
-
-  setStaticValue (value) {
-    this.frame = STATIC
-    this.slot = value
   }
 
   getFrame () {
@@ -48,17 +53,6 @@ class SlotNode extends Node {
   getSlot () {
     if (this.slot === null) {
       throw new Error(`${this.constructor.name} has not been assigned a slot index yet`)
-    }
-    return this.slot
-  }
-
-  hasStaticValue () {
-    return this.frame === STATIC
-  }
-
-  getStaticValue () {
-    if (this.frame !== STATIC) {
-      throw new Error(`${this.constructor.name} is not a static value`)
     }
     return this.slot
   }
@@ -240,16 +234,7 @@ class ArgNode extends SlotNode {
 
 class IntNode extends Node {
   constructor ({minus, digits}) {
-    super()
-    this.value = parseInt((minus || '') + digits.join(''), 10)
-  }
-
-  hasStaticValue () {
-    return true
-  }
-
-  getStaticValue () {
-    return this.value
+    super(parseInt((minus || '') + digits.join(''), 10))
   }
 
   visitBy (visitor) {
@@ -259,16 +244,7 @@ class IntNode extends Node {
 
 class RealNode extends Node {
   constructor ({minus, whole, fraction}) {
-    super()
-    this.value = parseFloat((minus || '') + whole.join('') + '.' + fraction.join(''))
-  }
-
-  hasStaticValue () {
-    return true
-  }
-
-  getStaticValue () {
-    return this.value
+    super(parseFloat((minus || '') + whole.join('') + '.' + fraction.join('')))
   }
 
   visitBy (visitor) {
@@ -278,16 +254,7 @@ class RealNode extends Node {
 
 class StringNode extends Node {
   constructor ({chars}) {
-    super()
-    this.value = chars.join('')
-  }
-
-  hasStaticValue () {
-    return true
-  }
-
-  getStaticValue () {
-    return this.value
+    super(chars.join(''))
   }
 
   visitBy (visitor) {

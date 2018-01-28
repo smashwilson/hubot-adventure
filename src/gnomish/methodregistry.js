@@ -6,6 +6,8 @@ class Signature {
     this.argTypes = argTypes
     this.callback = callback
     this.retType = retType
+
+    this.staticCallback = () => {}
   }
 
   match (symbolTable, receiverType, callArgTypes) {
@@ -23,8 +25,33 @@ class Signature {
     return this.callback
   }
 
+  getStaticCallback () {
+    return this.staticCallback
+  }
+
   getReturnType () {
     return this.retType
+  }
+
+  setStaticCallback (cb) {
+    this.staticCallback = cb
+  }
+
+  markPure () {
+    this.setStaticCallback(({astNode}) => {
+      if (!astNode.getReceiver().hasStaticValue()) return
+      if (!astNode.getArgs().every(argNode => argNode.hasStaticValue())) return
+
+      const args = astNode.getArgs().map(argNode => argNode.getStaticValue())
+      const value = this.getCallback()({
+        receiver: astNode.getReceiver().getStaticValue(),
+        selector: astNode.getName(),
+        interpreter: Symbol('static'),
+        astNode
+      }, ...args)
+      astNode.setStaticValue(value)
+    })
+    return this
   }
 
   toString () {
@@ -46,6 +73,10 @@ class Match {
 
   getCallback () {
     return this.signature.getCallback()
+  }
+
+  getStaticCallback () {
+    return this.signature.getStaticCallback()
   }
 
   getReturnType () {
@@ -107,6 +138,7 @@ class MethodRegistry {
 
     const addedSignature = new Signature(receiverType, argTypes, callback, retType)
     signatures.push(addedSignature)
+    return addedSignature
   }
 
   lookup (symbolTable, receiverType, selector, argTypes) {

@@ -92,15 +92,15 @@ class SexpVisitor extends Visitor {
   }
 
   visitInt (node) {
-    this.result += `(${node.value})`
+    this.result += `(${node.getStaticValue()})`
   }
 
   visitReal (node) {
-    this.result += `(${node.value})`
+    this.result += `(${node.getStaticValue()})`
   }
 
   visitString (node) {
-    const escaped = node.value.replace(/[\\"]/g, '\\$&')
+    const escaped = node.getStaticValue().replace(/[\\"]/g, '\\$&')
     this.result += `("${escaped}")`
   }
 

@@ -7,7 +7,14 @@ module.exports = {
     symbolTable.setStatic('true', t.Bool, true)
     symbolTable.setStatic('false', t.Bool, false)
 
-    methodRegistry.register(t.Bool, '&&', [t.Bool], t.Bool, ({receiver}, operand) => receiver && operand)
-    methodRegistry.register(t.Bool, '||', [t.Bool], t.Bool, ({receiver}, operand) => receiver || operand)
+    methodRegistry.register(
+      t.Bool, '&&', [t.Bool], t.Bool,
+      ({receiver}, operand) => receiver && operand
+    ).markPure()
+
+    methodRegistry.register(
+      t.Bool, '||', [t.Bool], t.Bool,
+      ({receiver}, operand) => receiver || operand
+    ).markPure()
   }
 }
