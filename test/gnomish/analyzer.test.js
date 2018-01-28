@@ -650,17 +650,14 @@ describe('Analyzer', function () {
 
     describe('CallNode', function () {
       it("invokes the method's static callbacks", function () {
-        let before = false
-        let after = false
+        let called = false
 
         const signature = mr.register(tInt, 'something', [], tInt, () => {})
-        signature.setStaticPreCallback(() => { before = true })
-        signature.setStaticPostCallback(() => { after = true })
+        signature.setStaticCallback(() => { called = true })
 
         const program = parse('1.something()').analyze(st, mr)
         assert.isFalse(program.node.getLastExpr().hasStaticValue())
-        assert.isTrue(before)
-        assert.isTrue(after)
+        assert.isTrue(called)
       })
     })
   })

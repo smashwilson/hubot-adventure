@@ -165,6 +165,13 @@ class Analyzer extends Visitor {
       node.getName(),
       node.getArgs().map(a => a.getType())
     )
+
+    signature.getStaticCallback()({
+      astNode: node,
+      symbolTable: this.symbolTable,
+      methodRegistery: this.methodRegistry
+    })
+
     node.setType(signature.getReturnType())
     node.setCallback(signature.getCallback())
   }
