@@ -22,11 +22,11 @@ module.exports = {
 
   registerMethods (t, symbolTable, methodRegistry) {
     commonMethods(t, t.Int, methodRegistry)
-    methodRegistry.register(t.Int, 'toReal', [], t.Real, ({receiver}) => receiver)
+    methodRegistry.register(t.Int, 'toReal', [], t.Real, ({receiver}) => receiver).markPure()
 
     commonMethods(t, t.Real, methodRegistry)
-    methodRegistry.register(t.Real, 'round', [], t.Int, ({receiver}) => Math.round(receiver))
-    methodRegistry.register(t.Real, 'floor', [], t.Int, ({receiver}) => Math.floor(receiver))
-    methodRegistry.register(t.Real, 'ceiling', [], t.Int, ({receiver}) => Math.ceil(receiver))
+    methodRegistry.register(t.Real, 'round', [], t.Int, ({receiver}) => Math.round(receiver)).markPure()
+    methodRegistry.register(t.Real, 'floor', [], t.Int, ({receiver}) => Math.floor(receiver)).markPure()
+    methodRegistry.register(t.Real, 'ceiling', [], t.Int, ({receiver}) => Math.ceil(receiver)).markPure()
   }
 }

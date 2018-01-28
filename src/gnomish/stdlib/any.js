@@ -11,13 +11,13 @@ module.exports = {
 
     methodRegistry.register(
       tA, 'getType', [], t.Type,
-      ({receiver, astNode}) => {
-        return astNode.getReceiver().getType()
-      })
+      ({receiver, astNode}) => astNode.getReceiver().getType()
+    ).markPure()
 
     methodRegistry.register(
       tA, '==', [tA], t.Bool,
-      ({receiver}, arg) => receiver === arg)
+      ({receiver}, arg) => receiver === arg
+    ).markPure()
 
     methodRegistry.register(
       tA, 'debug', [], tA,
@@ -25,6 +25,7 @@ module.exports = {
         const type = astNode ? astNode.getReceiver().getType() : '<unknown>'
         console.log(`${util.inspect(receiver, {breakLength: 100})}: ${type}`)
         return receiver
-      })
+      }
+    ).markPure()
   }
 }

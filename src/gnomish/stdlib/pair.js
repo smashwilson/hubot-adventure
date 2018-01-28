@@ -24,20 +24,24 @@ module.exports = {
     // Construction
     methodRegistry.register(
       t.World, 'pair', [tA, tB], tPairAB,
-      (_, l, r) => new Pair(l, r))
+      (_, l, r) => new Pair(l, r)
+    ).markPure()
 
     methodRegistry.register(
       tA, '=>', [tB], tPairAB,
-      ({receiver}, r) => new Pair(receiver, r))
+      ({receiver}, r) => new Pair(receiver, r)
+    ).markPure()
 
     // Accessors
 
     methodRegistry.register(
       tPairAB, 'left', [], tA,
-      ({receiver}) => receiver.getLeft())
+      ({receiver}) => receiver.getLeft()
+    ).markPure()
 
     methodRegistry.register(
       tPairAB, 'right', [], tB,
-      ({receiver}) => receiver.getRight())
+      ({receiver}) => receiver.getRight()
+    ).markPure()
   }
 }
