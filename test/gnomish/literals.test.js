@@ -13,13 +13,13 @@ describe('Gnomish literals', function () {
   describe('integers', function () {
     it('parses positive integers', function () {
       const root = parse('42')
-      assert.equal(onlyExpr(root.node).value, 42)
+      assert.equal(onlyExpr(root.node).getStaticValue(), 42)
       assert.equal(root.sexp(), '(exprlist (42))')
     })
 
     it('parses negative integers', function () {
       const root = parse('-12')
-      assert.equal(onlyExpr(root.node).value, -12)
+      assert.equal(onlyExpr(root.node).getStaticValue(), -12)
       assert.equal(root.sexp(), '(exprlist (-12))')
     })
   })
@@ -27,19 +27,19 @@ describe('Gnomish literals', function () {
   describe('reals', function () {
     it('parses real numbers', function () {
       const root = parse('123.456')
-      assert.equal(onlyExpr(root.node).value, 123.456)
+      assert.equal(onlyExpr(root.node).getStaticValue(), 123.456)
       assert.equal(root.sexp(), '(exprlist (123.456))')
     })
 
     it('parses real numbers between -1 and 1', function () {
       const root = parse('0.344')
-      assert.equal(onlyExpr(root.node).value, 0.344)
+      assert.equal(onlyExpr(root.node).getStaticValue(), 0.344)
       assert.equal(root.sexp(), '(exprlist (0.344))')
     })
 
     it('parses negative real numbers', function () {
       const root = parse('-5.34')
-      assert.equal(onlyExpr(root.node).value, -5.34)
+      assert.equal(onlyExpr(root.node).getStaticValue(), -5.34)
       assert.equal(root.sexp(), '(exprlist (-5.34))')
     })
   })
@@ -47,13 +47,13 @@ describe('Gnomish literals', function () {
   describe('strings', function () {
     it('parses double-quote delimited strings', function () {
       const root = parse('"hi"')
-      assert.equal(onlyExpr(root.node).value, 'hi')
+      assert.equal(onlyExpr(root.node).getStaticValue(), 'hi')
       assert.equal(root.sexp(), '(exprlist ("hi"))')
     })
 
     it('allows escaped internal quotes', function () {
       const root = parse('"foo \\" bar"')
-      assert.equal(onlyExpr(root.node).value, 'foo " bar')
+      assert.equal(onlyExpr(root.node).getStaticValue(), 'foo " bar')
       assert.equal(root.sexp(), '(exprlist ("foo \\" bar"))')
     })
 

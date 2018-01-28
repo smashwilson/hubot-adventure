@@ -1,7 +1,7 @@
 class Node {
-  constructor (value = null) {
+  constructor (staticValue = null) {
     this.type = null
-    this.value = value
+    this.staticValue = staticValue
   }
 
   setType (type) {
@@ -16,24 +16,24 @@ class Node {
   }
 
   hasStaticValue () {
-    return this.value !== null
+    return this.staticValue !== null
   }
 
   setStaticValue (value) {
-    this.value = value
+    this.staticValue = value
   }
 
   getStaticValue () {
-    if (this.value === null) {
+    if (this.staticValue === null) {
       throw new Error(`${this.constructor.name} has not been assigned a static value`)
     }
-    return this.value
+    return this.staticValue
   }
 }
 
 class SlotNode extends Node {
-  constructor () {
-    super()
+  constructor (value = null) {
+    super(value)
     this.frame = null
     this.slot = null
   }
