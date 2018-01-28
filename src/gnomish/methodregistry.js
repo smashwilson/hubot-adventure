@@ -37,6 +37,23 @@ class Signature {
     this.staticCallback = cb
   }
 
+  markPure () {
+    this.setStaticCallback(({astNode}) => {
+      if (!astNode.getReceiver().hasStaticValue()) return
+      if (!astNode.getArgs().every(argNode => argNode.hasStaticValue())) return
+
+      const args = astNode.getArgs().map(argNode => argNode.getStaticValue())
+      const value = this.getCallback()({
+        receiver: astNode.getReceiver().getStaticValue(),
+        selector: astNode.getName(),
+        interpreter: Symbol('static'),
+        astNode
+      }, ...args)
+      astNode.setStaticValue(value)
+    })
+    return this
+  }
+
   toString () {
     let r = this.receiverType.toString()
     r += '#('

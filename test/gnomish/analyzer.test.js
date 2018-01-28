@@ -659,6 +659,18 @@ describe('Analyzer', function () {
         assert.isFalse(program.node.getLastExpr().hasStaticValue())
         assert.isTrue(called)
       })
+
+      it("may compute the call's value statically", function () {
+        mr.register(
+          tInt, 'something', [tInt], tInt,
+          (_, arg) => arg + 1
+        ).markPure()
+
+        const program = parse('2.something(3)').analyze(st, mr)
+        const callNode = program.node.getLastExpr()
+        assert.isTrue(callNode.hasStaticValue())
+        assert.strictEqual(callNode.getStaticValue(), 4)
+      })
     })
   })
 })
