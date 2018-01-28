@@ -136,9 +136,9 @@ describe('Gnomish expressions', function () {
     })
 
     it('is left-associative', function () {
-      assertSexp('a == b < c', `
+      assertSexp('a != b < c', `
         (exprlist
-          (call (call (var a) == (var b)) < (var c)))
+          (call (call (var a) != (var b)) < (var c)))
       `)
     })
   })
@@ -272,6 +272,29 @@ describe('Gnomish expressions', function () {
     })
   })
 
+  describe('unary not', function () {
+    it('parses a unary not operator', function () {
+      assertSexp('!true', `
+        (exprlist
+          (call (var true) !))
+      `)
+    })
+
+    it('is nestable', function () {
+      assertSexp('!!false', `
+        (exprlist
+          (call (call (var false) !) !))
+      `)
+    })
+
+    it('has higher precedence than exponentiation', function () {
+      assertSexp('! 2 ^ 3', `
+        (exprlist
+          (call (call (2) !) ^ (3)))
+      `)
+    })
+  })
+
   describe('method calls', function () {
     it('parses a method call with an explicit receiver', function () {
       assertSexp('receiver.methodname(3, "x", true)', `
@@ -310,6 +333,13 @@ describe('Gnomish expressions', function () {
           (call
             (call (var this) methodname (3))
             other (7)))
+      `)
+    })
+
+    it('binds tighter than unary not', function () {
+      assertSexp('!r.somecall()', `
+        (exprlist
+          (call (call (var r) somecall) !))
       `)
     })
   })
