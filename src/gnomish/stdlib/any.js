@@ -22,7 +22,7 @@ module.exports = {
     methodRegistry.register(
       tA, '!=', [tA], t.Bool,
       ({receiver, interpreter, astNode}, arg) => {
-        const rType = receiver.getType()
+        const rType = astNode.getReceiver().getType()
         const aTypes = astNode.getArgs().map(argNode => argNode.getType())
 
         const equals = methodRegistry.lookup(symbolTable, rType, '==', aTypes)
