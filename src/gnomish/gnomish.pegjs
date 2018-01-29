@@ -66,8 +66,13 @@ opmult "multiplication-like operator application"
 
 // "^". Right-associative.
 oppow "exponentiation-like operator application"
-  = receiver:methodcall _ op:powlike _ arg:oppow
+  = receiver:unarynot _ op:powlike _ arg:oppow
     { return new CallNode({receiver, name: op, args: [arg]}) }
+  / unarynot
+
+unarynot "unary negation"
+  = '!' _ receiver:unarynot
+    { return new CallNode({receiver, name: '!', args: []}) }
   / methodcall
 
 // "<receiver>.method()" or "method()". Unary.
@@ -111,7 +116,7 @@ identifier
   = $ ( [a-zA-Z'_] [0-9a-zA-Z'_]* )
 
 opstem "operator stem"
-  = [*/%+&|<>=^-]+
+  = [*/%+&|<>=!^-]+
 
 powlike "exponentiation operator"
   = $ ( '^' opstem? )
@@ -129,9 +134,9 @@ andlike "logical and"
 orlike "logical or"
   = $ ( '|' opstem )
 
-// Note that a single "=" on its own is reserved for assignment and "let".
+// Note that a single "=" on its own is reserved for assignment and "let", and a single "!" is reserved for unary not.
 complike "comparison operator"
-  = $ ( ( '<' / '>' ) opstem? / '=' opstem )
+  = $ ( ( '<' / '>' ) opstem? / ( '=' / '!' ) opstem )
 
 typeexpr "type expression"
   = name:identifier params:typeparams? attr:( '*' / '...' )?
