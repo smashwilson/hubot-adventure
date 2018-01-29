@@ -12,4 +12,9 @@ describe("'A methods", {
     assert.isFalse(1 == 7)
     assert.isFalse("no" == "nope")
   })
+
+  it("!=", {
+    assert.isTrue(1 != 2)
+    assert.isFalse(1 != 1)
+  })
 })

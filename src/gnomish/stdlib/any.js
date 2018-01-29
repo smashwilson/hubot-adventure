@@ -20,6 +20,22 @@ module.exports = {
     ).markPure()
 
     methodRegistry.register(
+      tA, '!=', [tA], t.Bool,
+      ({receiver, interpreter, astNode}, arg) => {
+        const rType = receiver.getType()
+        const aTypes = astNode.getArgs().map(argNode => argNode.getType())
+
+        const equals = methodRegistry.lookup(symbolTable, rType, '==', aTypes)
+        return !equals.getCallback()({
+          receiver,
+          selector: '==',
+          interpreter,
+          astNode: null
+        }, arg)
+      }
+    )
+
+    methodRegistry.register(
       tA, 'debug', [], tA,
       ({receiver, astNode}) => {
         const type = astNode ? astNode.getReceiver().getType() : '<unknown>'

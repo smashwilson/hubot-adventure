@@ -12,4 +12,9 @@ describe("Bool", {
     assert.equal(false || true, true)
     assert.equal(false || false, false)
   })
+
+  it("unary !", {
+    assert.equal(!true, false)
+    assert.equal(!false, true)
+  })
 })
