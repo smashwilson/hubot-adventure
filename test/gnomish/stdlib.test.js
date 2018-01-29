@@ -2,6 +2,7 @@
 
 const fs = require('fs-extra')
 const path = require('path')
+const chai = require('chai')
 const assert = require('./lib/assertion')
 const {parse} = require('./helper')
 const stdlib = require('../../src/gnomish/stdlib')
@@ -17,7 +18,13 @@ describe('Gnomish standard library', function () {
   function executeTestFile (testPath) {
     const testSource = fs.readFileSync(testPath, {encoding: 'utf8'})
     const normalized = testSource.replace(/\r\n/g, '\n')
-    parse(normalized).analyze(symbolTable, methodRegistry).interpret()
+    try {
+      parse(normalized).analyze(symbolTable, methodRegistry).interpret()
+    } catch (e) {
+      it(`cannot parse ${testPath}`, function () {
+        chai.assert.fail(null, null, e.message)
+      })
+    }
   }
 
   const testDir = path.join(__dirname, 'stdlib')
