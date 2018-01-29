@@ -16,5 +16,10 @@ module.exports = {
       t.Bool, '||', [t.Bool], t.Bool,
       ({receiver}, operand) => receiver || operand
     ).markPure()
+
+    methodRegistry.register(
+      t.Bool, '!', [], t.Bool,
+      ({receiver}) => !receiver
+    ).markPure()
   }
 }
