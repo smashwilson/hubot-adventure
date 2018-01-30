@@ -7,10 +7,6 @@
 # hubot adventure load https://github.com/smashwilson/hubot-adventure/examples/gnomicorn.gn
 # ```
 
-defineAttribute("strength", 0, 10)
-defineAttribute("dexterity", 0, 10)
-defineAttribute("intelligence", 0, 10)
-
 defineEnum("Keys", "amethyst", "ruby", "sapphire")
 
 # -- Courtyard --
