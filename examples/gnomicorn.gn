@@ -1,0 +1,96 @@
+# A full example World for hubot-adventure.
+#
+# To load:
+#
+# ```
+# hubot adventure world create Gnomicorn
+# hubot adventure load https://github.com/smashwilson/hubot-adventure/examples/gnomicorn.gn
+# ```
+
+defineAttribute("strength", 0, 10)
+defineAttribute("dexterity", 0, 10)
+defineAttribute("intelligence", 0, 10)
+
+defineEnum("Keys", "amethyst", "ruby", "sapphire")
+
+# -- Courtyard --
+
+let courtyard = defineRoom("courtyard", "Dilapidated Courtyard", {
+  letroom fountainFlowing = false
+  letroom keysPlaced = map(amethyst => false, ruby => false, sapphire => false)
+  letroom doorOpen = false
+})
+
+courtyard.command("look", {
+  let s = "
+    You stand in an overgrown courtyard. Ivy curls up the walls and across the broken flagstones underfoot. A cracked
+    stone fountain stands {if {!fountainFlowing} then {"dry"}} in the center of the space.
+  ".builder()
+
+  if {fountainFlowing} then {
+    s << "Water flows from the fountain and runs through shallow stone channels across the ground, gurgling to unseen
+     depths beneath cracks in the north wall."
+  }
+  s.endParagraph()
+
+  s << "An imposing, solid door of solid metal stands in the north wall. "
+  if {doorOpen} then {
+    s << "It stands open. Pitch blackness beckons within. "
+  }
+  s << "Clear, grassy paths lead through breaks in the crumbling walls to the east and west."
+
+  say(s.toString())
+})
+
+let door = courtyard.defineNoun("door")
+door.command("look", {
+  say(if {doorOpen} then {
+    "The keys are now locked firmly in place within the door's sockets. The doors stand open."
+  } else {
+    let s = "
+      The door is two meters of tarnished but solid metal. Three sockets are inset in the door's threshold: one
+      square, one hexagonal, and one octagonal.
+    ".builder()
+
+    if {keysPlaced.get(amethyst)} then {s << " The amethyst key sits in the square socket."}
+    if {keysPlaced.get(ruby)} then {s << " The ruby key sits in the hexagonal socket."}
+    if {keysPlaced.get(sapphire)} then {s << " The sapphire key sits in the octagonal socket."}
+
+    s.toString()
+  })
+})
+
+let fountain = courtyard.defineNoun("fountain")
+fountain.command("look", {
+  say(if {fountainFlowing} then {
+    "Water gurgles from unseen depths through ancient channels to spill from the fountain's spout. The water pools in
+    the cracked basin, then tumbles in lazy rivulets to the north."
+  } else {
+    "A statue once stood at the fountain's peak, but time has long since worn it to unrecognizability. The fountain
+    stands dry and empty, its basin cracked and crumbling."
+  })
+})
+
+# -- Ravine --
+
+let ravine = defineRoom("ravine", "Misty Ravine", {
+  letroom bridgeUp = true
+})
+
+courtyard.join("west", ravine)
+
+ravine.command("look", {
+  s = "
+    A steep ravine cuts across the path. The tops of evergreen trees are just visible poking above the mist far below.
+  ".builder()
+
+  if {bridgeUp} then {
+    s << "A rickety wooden bridge spans the gap to the west, swaying lazily in the breeze. "
+  } else {
+    s << "The remains of a wooden bridge dangle aimlessly below. "
+  }
+
+  s << "A grassy path meanders to the east."
+
+  say(s.toString())
+})
