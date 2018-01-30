@@ -15,11 +15,11 @@ defineEnum("Keys", "amethyst", "ruby", "sapphire")
 
 # -- Courtyard --
 
-let courtyard = defineRoom("courtyard", "Dilapidated Courtyard", {
-  letroom fountainFlowing = false
-  letroom keysPlaced = map(amethyst => false, ruby => false, sapphire => false)
-  letroom doorOpen = false
-})
+letgame fountainFlowing = false
+letgame keysPlaced = map(amethyst => false, ruby => false, sapphire => false)
+letgame doorOpen = false
+
+let courtyard = defineRoom("courtyard", "Dilapidated Courtyard")
 
 courtyard.command("look", {
   let s = "
@@ -31,15 +31,15 @@ courtyard.command("look", {
     s << "Water flows from the fountain and runs through shallow stone channels across the ground, gurgling to unseen
      depths beneath cracks in the north wall."
   }
-  s.endParagraph()
+  s.sep()
 
-  s << "An imposing, solid door of solid metal stands in the north wall. "
+  s << "An imposing, solid door of solid metal stands in the north wall."
   if {doorOpen} then {
-    s << "It stands open. Pitch blackness beckons within. "
+    s << "It stands open. Pitch blackness beckons within."
   }
   s << "Clear, grassy paths lead through breaks in the crumbling walls to the east and west."
 
-  say(s.toString())
+  say(s)
 })
 
 let door = courtyard.defineNoun("door")
@@ -56,9 +56,11 @@ door.command("look", {
     if {keysPlaced.get(ruby)} then {s << " The ruby key sits in the hexagonal socket."}
     if {keysPlaced.get(sapphire)} then {s << " The sapphire key sits in the octagonal socket."}
 
-    s.toString()
+    s
   })
 })
+door.command("kick", "Congratulations! You now have a stubbed toe.")
+door.command("break", "Nothing you're holding lets you accomplish that.")
 
 let fountain = courtyard.defineNoun("fountain")
 fountain.command("look", {
@@ -71,26 +73,15 @@ fountain.command("look", {
   })
 })
 
-# -- Ravine --
+# -- Cliffside --
 
-let ravine = defineRoom("ravine", "Misty Ravine", {
-  letroom bridgeUp = true
-})
+let cliff = defineRoom("cliff", "Cliffside")
 
-courtyard.join("west", ravine)
+link(courtyard, "east", "west", cliff)
 
-ravine.command("look", {
-  s = "
-    A steep ravine cuts across the path. The tops of evergreen trees are just visible poking above the mist far below.
-  ".builder()
+ravine.command("look", "
+  A worn and dusty footpath from the east ends abruptly at a steep cliff face. Over the edge, the tops of evergreen
+  trees are just visible poking above the mist far below.
 
-  if {bridgeUp} then {
-    s << "A rickety wooden bridge spans the gap to the west, swaying lazily in the breeze. "
-  } else {
-    s << "The remains of a wooden bridge dangle aimlessly below. "
-  }
-
-  s << "A grassy path meanders to the east."
-
-  say(s.toString())
-})
+  A narrow band of ground that extends to the north and south along the cliff's edge is free from dense vegetation.
+")
