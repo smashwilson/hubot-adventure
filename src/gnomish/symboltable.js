@@ -1,3 +1,6 @@
+const ROOT = Symbol('Root')
+const GAME = Symbol('Game')
+
 class Entry {
   constructor (type) {
     this.type = type
@@ -35,6 +38,14 @@ class SymbolTable {
     this.symbols = new Map()
     this.captures = new Set()
     this.nextSlot = 0
+  }
+
+  static root () {
+    return new SymbolTable(ROOT)
+  }
+
+  static game (parent) {
+    return new SymbolTable(GAME, parent)
   }
 
   getNextSlot () {
@@ -107,6 +118,20 @@ class SymbolTable {
       throw new Error('Attempt to pop root symbol table')
     }
     return this.parent
+  }
+
+  getGame () {
+    if (this.frame === GAME) {
+      return this
+    } else if (this.parent) {
+      return this.parent.getGame()
+    } else {
+      throw new Error('No Game-level symbol table available')
+    }
+  }
+
+  getRoot () {
+    return this.parent ? this.parent.getRoot() : this
   }
 }
 
