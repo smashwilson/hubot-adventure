@@ -1,6 +1,7 @@
 const {TypeRegistry} = require('../typeregistry')
 const builtins = [
-  './world', './any', './bool', './numbers', './string', './block', './option', './pair', './list', './map'
+  './world', './any', './bool', './numbers', './string', './block', './option', './pair', './list', './map',
+  './type'
 ].map(p => require(p))
 
 module.exports = {

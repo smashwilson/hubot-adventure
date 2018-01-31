@@ -1,0 +1,17 @@
+defineEnum("Color", "red", "blue", "green")
+
+describe("Type", {
+  describe("enumerations", {
+    it("== and !=", {
+      assert.isTrue(red == red)
+      assert.isFalse(red == blue)
+      assert.isTrue(red != blue)
+      assert.isFalse(red != red)
+    })
+
+    it("toString", {
+      assert.equal(red.toString(), "red")
+      assert.equal(blue.toString(), "blue")
+    })
+  })
+})
