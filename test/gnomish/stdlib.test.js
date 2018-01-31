@@ -9,7 +9,7 @@ const stdlib = require('../../src/gnomish/stdlib')
 const {SymbolTable} = require('../../src/gnomish/symboltable')
 const {MethodRegistry} = require('../../src/gnomish/methodregistry')
 
-const symbolTable = new SymbolTable(Symbol('global'))
+const rootTable = SymbolTable.root()
 const methodRegistry = new MethodRegistry()
 stdlib.register(symbolTable, methodRegistry)
 assert.register(symbolTable, methodRegistry)
@@ -18,8 +18,10 @@ describe('Gnomish standard library', function () {
   function executeTestFile (testPath) {
     const testSource = fs.readFileSync(testPath, {encoding: 'utf8'})
     const normalized = testSource.replace(/\r\n/g, '\n')
+
+    const gameTable = SymbolTable.game(rootTable)
     try {
-      parse(normalized).analyze(symbolTable, methodRegistry).interpret()
+      parse(normalized).analyze(gameTable, methodRegistry).interpret()
     } catch (e) {
       it(`cannot parse ${testPath}`, function () {
         chai.assert.fail(null, null, e.message)

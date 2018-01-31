@@ -15,30 +15,30 @@ module.exports = {
     methodRegistry.register(
       t.World, 'defineEnum', [t.String, t.String.repeatable()], t.Type,
       (_, enumName, ...enumValues) => {
+        const gameTable = symbolTable.getGame()
         let enumType
-        if (symbolTable.has(enumName)) {
-          enumType = symbolTable.at(enumName)
+        if (gameTable.has(enumName)) {
+          enumType = gameTable.at(enumName).getValue()
         } else {
           enumType = makeType(enumName)
-          // TODO define on game symbol table
-          symbolTable.setStatic(enumName, t.Type, enumType)
+          gameTable.setStatic(enumName, t.Type, enumType)
           installEnumMethods(enumType, methodRegistry)
         }
 
         for (let i = 0; i < enumValues.length; i++) {
           const value = { name: enumValues[i], ordinal: i }
-          symbolTable.setStatic(enumValues[i], enumType, value)
+          gameTable.setStatic(enumValues[i], enumType, value)
         }
 
         return enumType
       }
     ).setStaticCallback(({astNode, symbolTable, methodRegistry}) => {
-      if (!astNode.getArgs().every(argNode => argNode.hasStaticValue())) return
+      if (!astNode.getArgs()[0].hasStaticValue()) return
+      const gameTable = symbolTable.getGame()
 
       const enumName = astNode.getArgs()[0].getStaticValue()
       const enumType = makeType(enumName)
-      // TODO define on game symbol table
-      symbolTable.setStatic(enumName, t.Type, enumType)
+      gameTable.setStatic(enumName, t.Type, enumType)
       installEnumMethods(enumType, methodRegistry)
 
       for (let i = 1; i < astNode.getArgs().length; i++) {
@@ -48,7 +48,7 @@ module.exports = {
         }
 
         const value = { name: argNode.getStaticValue(), ordinal: i }
-        symbolTable.setStatic(argNode.getStaticValue(), enumType, value)
+        gameTable.setStatic(argNode.getStaticValue(), enumType, value)
       }
 
       astNode.setStaticValue(enumType)
