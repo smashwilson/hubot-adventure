@@ -169,7 +169,7 @@ class Analyzer extends Visitor {
     signature.getStaticCallback()({
       astNode: node,
       symbolTable: this.symbolTable,
-      methodRegistery: this.methodRegistry
+      methodRegistry: this.methodRegistry
     })
 
     node.setType(signature.getReturnType())
