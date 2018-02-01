@@ -118,7 +118,8 @@ function comparePriority (a, b) {
 }
 
 class MethodRegistry {
-  constructor () {
+  constructor (parent = null) {
+    this.parent = parent
     this.bySelector = new Map()
   }
 
@@ -141,9 +142,21 @@ class MethodRegistry {
     return addedSignature
   }
 
+  localSignatures (selector) {
+    return this.bySelector.get(selector) || []
+  }
+
+  allSignatures (selector) {
+    const signatures = this.localSignatures(selector)
+    if (this.parent) {
+      signatures.push(...this.parent.allSignatures(selector))
+    }
+    return signatures
+  }
+
   lookup (symbolTable, receiverType, selector, argTypes) {
-    const signatures = this.bySelector.get(selector)
-    if (!signatures) {
+    const signatures = this.allSignatures(selector)
+    if (signatures.length === 0) {
       throw new Error(`Type ${receiverType.toString()} has no method "${selector}"`)
     }
 
@@ -185,6 +198,10 @@ class MethodRegistry {
     }
 
     return priority[0]
+  }
+
+  push () {
+    return new MethodRegistry(this)
   }
 
   inspect () {

@@ -133,4 +133,26 @@ describe('MethodRegistry', function () {
   it('throws when no method is found', function () {
     assert.throws(() => registry.lookup(st, tString, 'unknown', []), /Type String has no method "unknown"/)
   })
+
+  describe('inheritance', function () {
+    it('finds methods in a parent registry', function () {
+      const parent = new MethodRegistry()
+      parent.register(tInt, 'even', [], tBool, right)
+
+      const child = parent.push()
+      const match = child.lookup(st, tInt, 'even', [])
+      assert.strictEqual(match.getCallback(), right)
+    })
+
+    it('collects all methods from the parent and local registries to find a match', function () {
+      const parent = new MethodRegistry()
+      parent.register(tInt, 'toString', [], tBool, right)
+
+      const child = parent.push()
+      parent.register(makeType("'A"), 'toString', [], tBool, wrong)
+
+      const match = child.lookup(st, tInt, 'toString', [])
+      assert.strictEqual(match.getCallback(), right)
+    })
+  })
 })
