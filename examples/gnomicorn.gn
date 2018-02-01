@@ -21,7 +21,7 @@ courtyard.command("look", {
   let s = "
     You stand in an overgrown courtyard. Ivy curls up the walls and across the broken flagstones underfoot. A cracked
     stone fountain stands {if {!fountainFlowing} then {"dry"}} in the center of the space.
-  ".builder()
+  ".compose()
 
   if {fountainFlowing} then {
     s << "Water flows from the fountain and runs through shallow stone channels across the ground, gurgling to unseen
@@ -46,7 +46,7 @@ door.command("look", {
     let s = "
       The door is two meters of tarnished but solid metal. Three sockets are inset in the door's threshold: one
       square, one hexagonal, and one octagonal.
-    ".builder()
+    ".compose()
 
     if {keysPlaced.get(amethyst)} then {s << " The amethyst key sits in the square socket."}
     if {keysPlaced.get(ruby)} then {s << " The ruby key sits in the hexagonal socket."}
