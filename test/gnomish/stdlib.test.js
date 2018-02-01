@@ -11,8 +11,8 @@ const {MethodRegistry} = require('../../src/gnomish/methodregistry')
 
 const rootTable = SymbolTable.root()
 const methodRegistry = new MethodRegistry()
-stdlib.register(symbolTable, methodRegistry)
-assert.register(symbolTable, methodRegistry)
+stdlib.register(rootTable, methodRegistry)
+assert.register(rootTable, methodRegistry)
 
 describe('Gnomish standard library', function () {
   function executeTestFile (testPath) {
