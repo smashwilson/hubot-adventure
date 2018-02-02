@@ -204,11 +204,23 @@ class MethodRegistry {
     return new MethodRegistry(this)
   }
 
+  toString () {
+    let r = 'MethodRegistry(x' + this.bySelector.size
+    let current = this.parent
+    while (current) {
+      r += ' -> x' + current.bySelector.size
+      current = current.parent
+    }
+    return r + ')'
+  }
+
   inspect () {
+    const prefix = this.toString()
+
     const ks = [...this.bySelector.keys()]
     ks.sort()
 
-    return ks.map(k => {
+    return prefix + '\n' + ks.map(k => {
       const signatures = this.bySelector.get(k)
       return signatures.map(s => `${k}: ${s}`).join('\n')
     }).join('\n')
