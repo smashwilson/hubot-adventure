@@ -130,11 +130,12 @@ class AssignNode extends SlotNode {
 }
 
 class LetNode extends SlotNode {
-  constructor ({name, type, value}) {
+  constructor ({name, type, value, game = false}) {
     super()
     this.name = name
     this.typeNode = type
     this.value = value
+    this.game = game
   }
 
   getName () { return this.name }
@@ -142,6 +143,8 @@ class LetNode extends SlotNode {
   getTypeNode () { return this.typeNode }
 
   getValue () { return this.value }
+
+  isGame () { return this.game }
 
   visitBy (visitor) {
     return visitor.visitLet(this)
