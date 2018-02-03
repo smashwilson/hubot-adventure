@@ -14,8 +14,11 @@ class Program {
     return this
   }
 
-  interpret () {
+  interpret (frame, slots) {
     const interpreter = new Interpreter()
+    if (frame && slots) {
+      interpreter.addFrame(frame, slots)
+    }
     const result = interpreter.visit(this.node)
     return {result, interpreter}
   }
