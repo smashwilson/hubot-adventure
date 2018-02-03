@@ -9,6 +9,10 @@ class Interpreter extends Visitor {
     this.currentBlock = null
   }
 
+  addFrame (frame, slots) {
+    this.stack.set(frame, slots)
+  }
+
   visit (node) {
     if (node.hasStaticValue()) {
       return node.getStaticValue()
