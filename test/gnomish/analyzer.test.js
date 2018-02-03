@@ -361,6 +361,24 @@ describe('Analyzer', function () {
         assert.strictEqual(ccNode.getFrame(), rootFrame)
         assert.strictEqual(ccNode.getSlot(), 1)
       })
+
+      it('assigns game-wide slots on the game scope', function () {
+        const gSt = SymbolTable.game(st)
+        const program = parse(`
+          letgame x = 12
+        `).analyze(gSt, mr)
+
+        assert.isTrue(gSt.has('x'))
+        const entry = gSt.at('x')
+        assert.isFalse(entry.isStatic())
+        assert.strictEqual(entry.getType(), tInt)
+        assert.strictEqual(entry.getSlot(), 0)
+
+        const letNode = program.node.getExprs()[0]
+        assert.strictEqual(letNode.getType(), tInt)
+        assert.strictEqual(letNode.getFrame(), gSt.getFrame())
+        assert.strictEqual(letNode.getSlot(), 0)
+      })
     })
 
     describe('VarNode', function () {

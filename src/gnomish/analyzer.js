@@ -115,8 +115,10 @@ class Analyzer extends Visitor {
       node.setType(node.getValue().getType())
     }
 
-    const slotEntry = this.symbolTable.allocateSlot(node.getName(), node.getType())
-    node.setSlot(this.symbolTable.getFrame(), slotEntry.getSlot())
+    const st = node.isGame() ? this.symbolTable.getGame() : this.symbolTable
+
+    const slotEntry = st.allocateSlot(node.getName(), node.getType())
+    node.setSlot(st.getFrame(), slotEntry.getSlot())
   }
 
   visitBlock (node) {
