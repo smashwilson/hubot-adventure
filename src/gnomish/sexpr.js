@@ -44,7 +44,9 @@ class SexpVisitor extends Visitor {
   }
 
   visitLet (node) {
-    this.result += `(let ${node.getName()} : `
+    this.result += `(let`
+    if (node.isGame()) this.result += 'game'
+    this.result += ` ${node.getName()} : `
     if (node.getTypeNode()) {
       this.visit(node.getTypeNode())
     } else {
