@@ -11,6 +11,10 @@ describe('World', function () {
     assert.isTrue(st.has('Int'))
     assert.isTrue(st.has('String'))
     assert.isTrue(st.has('Type'))
+
+    const tInt = st.at('Int').getValue()
+    const binding = w.getMethodRegistry().lookup(st, tInt, 'toReal', [])
+    assert.strictEqual(binding.getCallback()({receiver: 1}), 1.0)
   })
 
   it('shares stdlib bindings and method registry', function () {
@@ -33,17 +37,56 @@ describe('World', function () {
     assert.strictEqual(w1.getSymbolTable().at('this').getValue(), w1)
   })
 
-  it('creates a Game with a child symbol table and method registry', function () {
+  it('creates a Game with its symbol table and method registry', function () {
     const w = new World()
     const g = w.createGame('C1234')
 
     assert.deepEqual(w.getGames(), [g])
+    assert.strictEqual(w.getGame('C1234'), g)
 
     const gSt = g.getSymbolTable()
-    assert.strictEqual(gSt.pop(), w.getSymbolTable())
-    assert.strictEqual(gSt.getGame(), gSt)
+    assert.strictEqual(gSt.getGame(), w.getSymbolTable())
 
-    assert.notStrictEqual(g.getMethodRegistry(), w.getMethodRegistry())
-    assert.strictEqual(g.getMethodRegistry().parent, w.getMethodRegistry())
+    assert.strictEqual(g.getMethodRegistry(), w.getMethodRegistry())
   })
+
+  it('compiles and executes Gnomish code with a prototypical game slot frame', function () {
+    const w = new World()
+
+    assert.lengthOf(w.prototypeSlots, 0)
+
+    const {result: result0} = w.execute(`
+      letgame x = 1
+      letgame y = "yes"
+
+      x
+    `)
+    assert.strictEqual(result0, 1)
+
+    const st = w.getSymbolTable()
+    assert.isFalse(st.at('x').isStatic())
+    assert.strictEqual(st.at('x').getSlot(), 0)
+    assert.isFalse(st.at('y').isStatic())
+    assert.strictEqual(st.at('y').getSlot(), 1)
+
+    assert.lengthOf(w.prototypeSlots, 2)
+    assert.strictEqual(w.prototypeSlots[0], 1)
+    assert.strictEqual(w.prototypeSlots[1], 'yes')
+
+    const {result: result1} = w.execute(`
+      letgame z = x + 10
+      z * 5
+    `)
+    assert.strictEqual(result1, 55)
+
+    assert.isFalse(st.at('z').isStatic())
+    assert.strictEqual(st.at('z').getSlot(), 2)
+
+    assert.lengthOf(w.prototypeSlots, 3)
+    assert.strictEqual(w.prototypeSlots[0], 1)
+    assert.strictEqual(w.prototypeSlots[1], 'yes')
+    assert.strictEqual(w.prototypeSlots[2], 11)
+  })
+
+  it('constructs Games with a copy of a game slot frame')
 })
