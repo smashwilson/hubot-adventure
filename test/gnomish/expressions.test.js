@@ -87,6 +87,22 @@ describe('Gnomish expressions', function () {
     })
   })
 
+  describe('letgame', function () {
+    it('parses a letgame expression', function () {
+      assertSexp('letgame x: Int = 42', `
+        (exprlist
+          (letgame x : (type Int) = (42)))
+      `)
+    })
+
+    it('parses a letgame expression with an inferred type', function () {
+      assertSexp('letgame x = 37', `
+        (exprlist
+          (letgame x : <inferred> = (37)))
+      `)
+    })
+  })
+
   describe('assignment', function () {
     it('parses assignments to variables', function () {
       assertSexp('foo = 3', `
