@@ -88,5 +88,16 @@ describe('World', function () {
     assert.strictEqual(w.prototypeSlots[2], 11)
   })
 
-  it('constructs Games with a copy of a game slot frame')
+  it('constructs Games with a new game slot frame', function () {
+    const w = new World()
+
+    w.execute('letgame x = 10')
+
+    const g = w.createGame('C123')
+    const {result: gResult} = g.execute('x = x * 2 ; x')
+    assert.strictEqual(gResult, 20)
+
+    const {result: wResult} = w.execute('x')
+    assert.strictEqual(wResult, 10)
+  })
 })

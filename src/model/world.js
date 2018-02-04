@@ -27,6 +27,10 @@ class World {
 
   getMethodRegistry () { return this.methodRegistry }
 
+  createGameSlots () {
+    return this.prototypeSlots.slice()
+  }
+
   createGame (channel) {
     const g = new Game(this, channel)
     this.games.set(channel, g)
