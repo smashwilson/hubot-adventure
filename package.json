@@ -35,7 +35,7 @@
     "cross-env": "^5.1.3",
     "fs-extra": "^5.0.0",
     "hubot-test-helper": "1.8.1",
-    "mocha": "5.0.3",
+    "mocha": "5.0.4",
     "pegjs-backtrace": "^0.1.1",
     "standard": "11.0.0"
   },
