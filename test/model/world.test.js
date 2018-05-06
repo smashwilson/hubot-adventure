@@ -14,7 +14,7 @@ describe('World', function () {
 
     const tInt = st.at('Int').getValue()
     const binding = w.getMethodRegistry().lookup(st, tInt, 'toReal', [])
-    assert.strictEqual(binding.getCallback()({receiver: 1}), 1.0)
+    assert.strictEqual(binding.invoke({receiver: 1}), 1.0)
   })
 
   it('shares stdlib bindings and method registry', function () {

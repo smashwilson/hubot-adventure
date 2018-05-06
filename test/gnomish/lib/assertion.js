@@ -47,12 +47,11 @@ module.exports = {
 
     methodRegistry.register(
       t.Assert, 'equal', [tA, tA], t.Option,
-      ({astNode, interpreter}, lhs, rhs) => {
-        const lType = astNode.getArgs()[0].getType()
-        const rType = astNode.getArgs()[0].getType()
+      ({argumentTypes, interpreter}, lhs, rhs) => {
+        const [lType, rType] = argumentTypes
 
         const m = methodRegistry.lookup(symbolTable, lType, '==', [rType])
-        const result = m.getCallback()({
+        const result = m.invoke({
           receiver: lhs,
           selector: '==',
           interpreter,

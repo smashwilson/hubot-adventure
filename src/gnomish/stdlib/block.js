@@ -43,5 +43,10 @@ module.exports = {
     methodRegistry.register(
       tBlockRArgs, 'evaluate', [tArgsStar], tR,
       ({receiver, interpreter}, ...args) => receiver.evaluate(interpreter, args))
+
+    methodRegistry.register(
+      tBlockRArgs, 'copy', [], tBlockRArgs,
+      ({receiver, interpreter}) => receiver
+    )
   }
 }

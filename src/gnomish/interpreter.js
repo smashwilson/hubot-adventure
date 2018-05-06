@@ -96,7 +96,7 @@ class Interpreter extends Visitor {
     const receiver = this.visit(node.getReceiver())
     const args = node.getArgs().map(arg => this.visit(arg))
 
-    return node.getCallback()({
+    return node.getMatch().invoke({
       receiver,
       selector: node.getName(),
       interpreter: this,

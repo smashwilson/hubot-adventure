@@ -157,7 +157,7 @@ class CallNode extends Node {
     this.name = name
     this.receiver = receiver
     this.args = args || []
-    this.callback = null
+    this.match = null
   }
 
   getName () { return this.name }
@@ -166,15 +166,15 @@ class CallNode extends Node {
 
   getArgs () { return this.args }
 
-  setCallback (cb) {
-    this.callback = cb
+  setMatch (match) {
+    this.match = match
   }
 
-  getCallback () {
-    if (this.callback === null) {
+  getMatch () {
+    if (this.match === null) {
       throw new Error(`${this.constructor.name} has not been resolved yet`)
     }
-    return this.callback
+    return this.match
   }
 
   visitBy (visitor) {

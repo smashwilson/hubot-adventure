@@ -44,6 +44,8 @@ class Signature {
 
       const args = astNode.getArgs().map(argNode => argNode.getStaticValue())
       const value = this.getCallback()({
+        receiverType: astNode.getReceiver().getType(),
+        argumentTypes: astNode.getArgs().map(arg => arg.getType),
         receiver: astNode.getReceiver().getStaticValue(),
         selector: astNode.getName(),
         interpreter: Symbol('static'),
@@ -71,8 +73,10 @@ class Match {
     this.retType = retType
   }
 
-  getCallback () {
-    return this.signature.getCallback()
+  invoke (meta = {}, ...args) {
+    meta.receiverType = this.unification.getTypes()[0]
+    meta.argumentTypes = this.unification.getTypes().slice(1)
+    return this.signature.getCallback()(meta, ...args)
   }
 
   getStaticCallback () {

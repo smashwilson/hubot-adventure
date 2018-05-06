@@ -508,8 +508,11 @@ describe('Analyzer', function () {
   })
 
   describe('method lookup', function () {
-    const right = () => {}
-    const wrong = () => {}
+    const RIGHT = Symbol('right')
+    const right = () => RIGHT
+
+    const WRONG = Symbol('wrong')
+    const wrong = () => WRONG
 
     it('recalls the callback assocated with the discovered method', function () {
       mr.register(tInt, '+', [tInt], tInt, right)
@@ -518,7 +521,7 @@ describe('Analyzer', function () {
       const root = parse('3 + 4').analyze(st, mr)
       const callNode = root.node.getExprs()[0]
 
-      assert.strictEqual(callNode.getCallback(), right)
+      assert.strictEqual(callNode.getMatch().invoke(), RIGHT)
     })
 
     it('uses the "this" binding as an implicit receiver', function () {
@@ -530,7 +533,7 @@ describe('Analyzer', function () {
       const root = parse('selector(1)').analyze(st, mr)
       const callNode = root.node.getExprs()[0]
 
-      assert.strictEqual(callNode.getCallback(), right)
+      assert.strictEqual(callNode.getMatch().invoke(), RIGHT)
     })
   })
 

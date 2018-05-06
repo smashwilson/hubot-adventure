@@ -161,21 +161,21 @@ class Analyzer extends Visitor {
   visitCall (node) {
     super.visitCall(node)
 
-    const signature = this.methodRegistry.lookup(
+    const match = this.methodRegistry.lookup(
       this.symbolTable,
       node.getReceiver().getType(),
       node.getName(),
       node.getArgs().map(a => a.getType())
     )
 
-    signature.getStaticCallback()({
+    match.getStaticCallback()({
       astNode: node,
       symbolTable: this.symbolTable,
       methodRegistry: this.methodRegistry
     })
 
-    node.setType(signature.getReturnType())
-    node.setCallback(signature.getCallback())
+    node.setType(match.getReturnType())
+    node.setMatch(match)
   }
 
   visitInt (node) {
