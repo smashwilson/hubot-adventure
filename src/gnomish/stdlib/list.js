@@ -50,7 +50,19 @@ module.exports = {
 
     methodRegistry.register(
       tListA, '==', [tListA], t.Bool,
-      ({receiver}, arg) => receiver.length === arg.length && receiver.every((l, i) => l === arg[i]))
+      ({receiver, receiverType, interpreter}, arg) => {
+        if (receiver.length !== arg.length) {
+          return false
+        }
+
+        if (receiver.length === 0 && arg.length === 0) {
+          return true
+        }
+
+        const memberType = receiverType.getParams()[0]
+        const m = methodRegistry.lookup(symbolTable, memberType, '==', [memberType])
+        return receiver.every((l, i) => m.invoke({receiver: l, selector: '==', interpreter}, arg[i]))
+      })
 
     // Mutation
 
