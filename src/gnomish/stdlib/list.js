@@ -184,5 +184,22 @@ module.exports = {
     methodRegistry.register(
       tListA, 'filter', [makeType(t.Block, [t.Bool, tA, t.Int])], tListA,
       filterBody)
+
+    methodRegistry.register(
+      tListA, 'copy', [], tListA,
+      ({receiver, receiverType, interpreter}) => {
+        const recArgType = receiverType.getParams()[0]
+        const m = methodRegistry.lookup(symbolTable, recArgType, 'copy', [])
+
+        return receiver.map((each, i) => {
+          return m.invoke({
+            receiver: each,
+            selector: 'copy',
+            interpreter,
+            astNode: null
+          })
+        })
+      }
+    )
   }
 }
