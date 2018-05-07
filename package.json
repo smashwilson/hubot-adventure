@@ -8,7 +8,8 @@
   },
   "scripts": {
     "prepare": "npm run peg",
-    "test": "npm run lint && npm run peg && mocha --recursive",
+    "mocha": "mocha --recursive",
+    "test": "npm run lint && npm run peg && npm run mocha",
     "test:trace": "npm run lint && npm run peg:trace && cross-env GNOMISH_TRACE=on mocha --recursive",
     "peg": "pegjs src/gnomish/gnomish.pegjs",
     "peg:trace": "pegjs --trace src/gnomish/gnomish.pegjs",
