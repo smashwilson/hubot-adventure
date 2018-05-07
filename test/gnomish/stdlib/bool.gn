@@ -17,4 +17,9 @@ describe("Bool", {
     assert.equal(!true, false)
     assert.equal(!false, true)
   })
+
+  it("copies by identity", {
+    assert.equal(true.copy(), true)
+    assert.equal(false.copy(), false)
+  })
 })

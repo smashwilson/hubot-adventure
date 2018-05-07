@@ -12,6 +12,8 @@ function commonMethods (t, rt, mr) {
   mr.register(rt, '<=', [rt], t.Bool, ({receiver}, operand) => receiver <= operand)
   mr.register(rt, '>', [rt], t.Bool, ({receiver}, operand) => receiver > operand)
   mr.register(rt, '>=', [rt], t.Bool, ({receiver}, operand) => receiver >= operand)
+
+  mr.register(rt, 'copy', [], rt, ({receiver}) => receiver)
 }
 
 module.exports = {

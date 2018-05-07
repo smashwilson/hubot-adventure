@@ -31,4 +31,8 @@ describe("Int", {
     assert.isTrue(10 >= 10)
     assert.isFalse(0 >= 10)
   })
+
+  it("copies by identity", {
+    assert.equal(3.copy(), 3)
+  })
 })

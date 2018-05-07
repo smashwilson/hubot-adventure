@@ -17,4 +17,9 @@ describe("String", {
   it("+", {
     assert.equal("aaa" + "bbb", "aaabbb")
   })
+
+  it("copy()", {
+    let original = "aaa"
+    assert.equal(original.copy(), original)
+  })
 })

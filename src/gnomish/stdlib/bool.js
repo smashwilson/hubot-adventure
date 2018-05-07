@@ -21,5 +21,10 @@ module.exports = {
       t.Bool, '!', [], t.Bool,
       ({receiver}) => !receiver
     ).markPure()
+
+    methodRegistry.register(
+      t.Bool, 'copy', [], t.Bool,
+      ({receiver}) => receiver
+    )
   }
 }

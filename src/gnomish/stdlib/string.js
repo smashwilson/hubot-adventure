@@ -29,5 +29,10 @@ module.exports = {
       t.String, '+', [t.String], t.String,
       ({receiver}, operand) => receiver + operand
     ).markPure()
+
+    methodRegistry.register(
+      t.String, 'copy', [], t.String,
+      ({receiver}) => receiver
+    )
   }
 }

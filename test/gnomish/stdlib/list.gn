@@ -116,4 +116,16 @@ describe("List('A)", {
     let r = intList.filter({ each: Int | each % 2 == 0 })
     assert.equal(r, list(4, 2))
   })
+
+  it("copy()", {
+    let original = list(list(1), list(2))
+    let dup = original.copy()
+    assert.different(original, dup)
+
+    original.at(1).map({ sub: List(Int) | sub << 20 })
+    dup.at(0).map({ sub: List(Int) | sub << 10 })
+
+    assert.equal(original, list(list(1), list(2, 20)))
+    assert.equal(dup, list(list(1, 10), list(2)))
+  })
 })
