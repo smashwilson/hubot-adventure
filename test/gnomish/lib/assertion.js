@@ -23,9 +23,27 @@ module.exports = {
       })
 
     methodRegistry.register(
+      t.World, 'describeonly', [t.String, makeType(t.Block, [tA])], t.World,
+      ({receiver, interpreter}, message, blk) => {
+        describe.only(message, function () {
+          blk.evaluate(interpreter)
+        })
+        return receiver
+      })
+
+    methodRegistry.register(
       t.World, 'it', [t.String, makeType(t.Block, [tA])], t.World,
       ({receiver, interpreter}, message, blk) => {
         it(message, function () {
+          blk.evaluate(interpreter)
+        })
+        return receiver
+      })
+
+    methodRegistry.register(
+      t.World, 'itonly', [t.String, makeType(t.Block, [tA])], t.World,
+      ({receiver, interpreter}, message, blk) => {
+        it.only(message, function () {
           blk.evaluate(interpreter)
         })
         return receiver
