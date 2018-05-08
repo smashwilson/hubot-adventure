@@ -14,4 +14,30 @@ describe("Map", {
     m.put("b", "y")
     assert.equal(m.at("b"), some("y"))
   })
+
+  it("==", {
+    let m = map("a" => 1)
+
+    assert.isTrue(m == map("a" => 1))
+    assert.isFalse(m == map("a" => 1, "b" => 2))
+    assert.isFalse(m == map("a" => 2))
+    assert.isFalse(m == map())
+
+    assert.isTrue(map() == map())
+  })
+
+  it("copy()", {
+    let original = map("a" => list(5))
+    let dup = original.copy()
+    assert.different(original, dup)
+
+    original.get("a") << 4
+    original.put("b", list(10))
+
+    dup.get("a") << 6
+    dup.put("b", list(20))
+
+    assert.equal(original, map("a" => list(5, 4), "b" => list(10)))
+    assert.equal(dup, map("a" => list(5, 6), "b" => list(20)))
+  })
 })
