@@ -188,6 +188,10 @@ module.exports = {
     methodRegistry.register(
       tListA, 'copy', [], tListA,
       ({receiver, receiverType, interpreter}) => {
+        if (receiver.length === 0) {
+          return []
+        }
+
         const recArgType = receiverType.getParams()[0]
         const m = methodRegistry.lookup(symbolTable, recArgType, 'copy', [])
 
