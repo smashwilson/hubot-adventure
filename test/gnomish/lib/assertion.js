@@ -83,7 +83,7 @@ module.exports = {
         return none
       })
 
-      methodRegistry.register(
+    methodRegistry.register(
         t.Assert, 'same', [tA, tA], t.Option,
         ({argumentTypes, interpreter}, lhs, rhs) => {
           const [lType, rType] = argumentTypes
@@ -95,7 +95,7 @@ module.exports = {
           return none
         })
 
-      methodRegistry.register(
+    methodRegistry.register(
         t.Assert, 'different', [tA, tA], t.Option,
         ({argumentTypes, interpreter}, lhs, rhs) => {
           const [lType, rType] = argumentTypes
