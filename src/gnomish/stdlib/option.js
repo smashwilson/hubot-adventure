@@ -48,17 +48,24 @@ module.exports = {
 
     // Comparison
 
-    methodRegistry.register(tOptionA, '==', [tOptionA], t.Bool, ({receiver}, operand) => {
-      if (receiver.hasValue() !== operand.hasValue()) {
-        return false
-      }
+    methodRegistry.register(tOptionA, '==', [tOptionA], t.Bool,
+      ({receiver, receiverType, interpreter}, operand) => {
+        if (receiver.hasValue() !== operand.hasValue()) {
+          return false
+        }
 
-      if (receiver.hasValue()) {
-        return receiver.getValue() === operand.getValue()
-      } else {
-        return true
-      }
-    }).markPure()
+        const recArgType = receiverType.getParams()[0]
+        if (receiver.hasValue()) {
+          const m = methodRegistry.lookup(symbolTable, recArgType, '==', [recArgType])
+          return m.invoke({
+            receiver: receiver.getValue(),
+            selector: '==',
+            interpreter
+          }, operand.getValue())
+        } else {
+          return true
+        }
+      }).markPure()
 
     // Direct form
     methodRegistry.register(tOptionA, 'or', [tA], tA, ({receiver}, alt) => {
@@ -118,5 +125,25 @@ module.exports = {
       ({receiver}) => {
         return receiver.hasValue() ? [receiver.getValue()] : []
       })
+
+    // Copying
+
+    methodRegistry.register(
+      tOptionA, 'copy', [], tOptionA,
+      ({receiver, receiverType, interpreter}) => {
+        if (!receiver.hasValue()) {
+          return receiver
+        }
+
+        const recArgType = receiverType.getParams()[0]
+        const m = methodRegistry.lookup(symbolTable, recArgType, 'copy', [])
+
+        return new Some(m.invoke({
+          receiver: receiver.getValue(),
+          selector: 'copy',
+          interpreter
+        }))
+      }
+    )
   }
 }
