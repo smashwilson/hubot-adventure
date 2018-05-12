@@ -10,6 +10,10 @@ module.exports = {
       methodRegistry.register(
         enumType, 'toString', [], t.String,
         ({receiver}) => receiver.name)
+
+      methodRegistry.register(
+        enumType, 'copy', [], enumType,
+        ({receiver}) => receiver)
     }
 
     methodRegistry.register(

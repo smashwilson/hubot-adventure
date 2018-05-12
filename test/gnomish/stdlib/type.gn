@@ -13,5 +13,10 @@ describe("Type", {
       assert.equal(red.toString(), "red")
       assert.equal(blue.toString(), "blue")
     })
+
+    it("copy", {
+      assert.equal(red.copy(), red)
+      assert.equal(blue.copy(), blue)
+    })
   })
 })
