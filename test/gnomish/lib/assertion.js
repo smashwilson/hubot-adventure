@@ -84,27 +84,27 @@ module.exports = {
       })
 
     methodRegistry.register(
-        t.Assert, 'same', [tA, tA], t.Option,
-        ({argumentTypes, interpreter}, lhs, rhs) => {
-          const [lType, rType] = argumentTypes
+      t.Assert, 'same', [tA, tA], t.Option,
+      ({argumentTypes, interpreter}, lhs, rhs) => {
+        const [lType, rType] = argumentTypes
 
-          if (lhs !== rhs) {
-            const message = `${lhs}:${lType} and ${rhs}:${rType} are not equal`
-            assert.fail(lhs, rhs, message, 'same')
-          }
-          return none
-        })
+        if (lhs !== rhs) {
+          const message = `${lhs}:${lType} and ${rhs}:${rType} are not equal`
+          assert.fail(lhs, rhs, message, 'same')
+        }
+        return none
+      })
 
     methodRegistry.register(
-        t.Assert, 'different', [tA, tA], t.Option,
-        ({argumentTypes, interpreter}, lhs, rhs) => {
-          const [lType, rType] = argumentTypes
+      t.Assert, 'different', [tA, tA], t.Option,
+      ({argumentTypes, interpreter}, lhs, rhs) => {
+        const [lType, rType] = argumentTypes
 
-          if (lhs === rhs) {
-            const message = `${lhs}:${lType} and ${rhs}:${rType} are not equal`
-            assert.fail(lhs, rhs, message, 'different')
-          }
-          return none
-        })
+        if (lhs === rhs) {
+          const message = `${lhs}:${lType} and ${rhs}:${rType} are not equal`
+          assert.fail(lhs, rhs, message, 'different')
+        }
+        return none
+      })
   }
 }
