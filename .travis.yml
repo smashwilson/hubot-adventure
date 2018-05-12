@@ -1,3 +1,11 @@
 language: node_js
 node_js:
-- '8.9.1'
+- lts/*
+- node
+env:
+  global:
+    secure: U4Qg3yMjatqKVXivOpvwSb3fqaK0g2JsLpLTdUgb+/sZ6s3x/EzehGX1Tb/3hGCqkJOcpuhQMDA+LZK0JUj1eDLYeznk7dUf2gbEwdOHjICAIjw3TFODGMJOzJ/+v5ZHnKCzKTPRjlFs85C5DfybMOQThdrMurpaHpRwzZMOhsYsbRaPSKHudvIjR1E8fQ5G+p5SpkchF2C5+kEcFtrV2ypWVJm3dLfT8pvkQu8Y3JueDM/5kyVc07epdl7rSERm3ZGAJBVf6XVjbWmbBPRmw0o4g8rS/GbPCk/6pwU3oJa/681iy+Qu1eBooXvgFyy4JyyrSQlA4eY/PIXnJ21j/I5Tz9OHRt4JWXv9ZbbwGOqWzHUCoDp6noPgSKsmWfoQEipiat5YaUv5O/Gg+9jAgtoAxdMj5GTU5ylmTXH3NnasjzGL1JvP2M0qHXVshexBKNIlF32K5nH6pBIrpsemVFCcgoNcFH3l8Wi5OHv2UNWPZX5K17qeFAoeOhA2wcnpRqtYLen+UJh4ZE0V8EfiViRfdvesTRkfcfOf+tSdCvn2PTl0pLM+LhuNzIfqVEARDbjtxSIQGKKFlR8ezc62Hk98NBe2zWo3n4rMr5A7fK7anAmp1ktQL/VpjgCCficF4aQJ6VTjba8481jIaqEwDnjoQIEB27mFg6WPPGnZJFg=
+before_install:
+- npm install -g npm@latest greenkeeper-lockfile@1
+before_script: greenkeeper-lockfile-update
+after_script: greenkeeper-lockfile-upload
