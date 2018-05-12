@@ -43,5 +43,34 @@ module.exports = {
       tPairAB, 'right', [], tB,
       ({receiver}) => receiver.getRight()
     ).markPure()
+
+    // Comparison
+
+    methodRegistry.register(
+      tPairAB, '==', [tPairAB], t.Bool,
+      ({receiver, receiverType, interpreter}, operand) => {
+        const [a, b] = receiverType.getParams()
+        const aEq = methodRegistry.lookup(symbolTable, a, '==', [a])
+        const bEq = methodRegistry.lookup(symbolTable, b, '==', [b])
+
+        const left = aEq.invoke({receiver: receiver.getLeft(), interpreter}, operand.getLeft())
+        const right = bEq.invoke({receiver: receiver.getRight(), interpreter}, operand.getRight())
+        return left && right
+      })
+
+    // Duplication
+
+    methodRegistry.register(
+      tPairAB, 'copy', [], tPairAB,
+      ({receiver, receiverType, interpreter}) => {
+        const [a, b] = receiverType.getParams()
+        const aCopy = methodRegistry.lookup(symbolTable, a, 'copy', [])
+        const bCopy = methodRegistry.lookup(symbolTable, b, 'copy', [])
+
+        return new Pair(
+          aCopy.invoke({receiver: receiver.getLeft(), interpreter}),
+          bCopy.invoke({receiver: receiver.getRight(), interpreter})
+        )
+      })
   }
 }

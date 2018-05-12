@@ -10,4 +10,24 @@ describe("Pair('A, 'B)", {
     assert.equal(p.left(), "no")
     assert.equal(p.right(), 3.0)
   })
+
+  it("can be compared with ==", {
+    let p0 = 0 => "yes"
+
+    assert.isTrue(p0 == pair(0, "yes"))
+    assert.isFalse(p0 == pair(0, "no"))
+    assert.isFalse(p0 == pair(1, "yes"))
+    assert.isTrue(p0 != pair(0, "no"))
+  })
+
+  it("can be copied", {
+    let original = pair(list(1), list("one"))
+    let dup = original.copy()
+
+    original.left() << 2
+    dup.right() << "two"
+
+    assert.equal(original, list(1, 2) => list("one"))
+    assert.equal(dup, list(1) => list("one", "two"))
+  })
 })
