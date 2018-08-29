@@ -1,6 +1,6 @@
 /* eslint-env mocha */
 
-const {assertSexp} = require('./helper')
+const { assertSexp } = require('./helper')
 
 describe('Gnomish expressions', function () {
   describe('anomalies', function () {

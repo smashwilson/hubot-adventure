@@ -67,4 +67,4 @@ class Visitor {
   }
 }
 
-module.exports = {Visitor}
+module.exports = { Visitor }

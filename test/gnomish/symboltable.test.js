@@ -1,8 +1,8 @@
 /* eslint-env mocha */
 
-const {assert} = require('chai')
-const {SymbolTable} = require('../../src/gnomish/symboltable')
-const {makeType} = require('../../src/gnomish/type')
+const { assert } = require('chai')
+const { SymbolTable } = require('../../src/gnomish/symboltable')
+const { makeType } = require('../../src/gnomish/type')
 
 describe('SymbolTable', function () {
   const ROOT = Symbol('root')
@@ -43,9 +43,9 @@ describe('SymbolTable', function () {
       assert.strictEqual(e2.getSlot(), 0)
       assert.strictEqual(e3.getSlot(), 1)
 
-      assert.deepEqual(child.binding('inherited'), {entry: e0, frame: ROOT})
-      assert.deepEqual(child.binding('shadowed'), {entry: e2, frame: CHILD})
-      assert.deepEqual(child.binding('local'), {entry: e3, frame: CHILD})
+      assert.deepEqual(child.binding('inherited'), { entry: e0, frame: ROOT })
+      assert.deepEqual(child.binding('shadowed'), { entry: e2, frame: CHILD })
+      assert.deepEqual(child.binding('local'), { entry: e3, frame: CHILD })
     })
 
     it('restores its parent table', function () {

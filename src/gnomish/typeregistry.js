@@ -1,4 +1,4 @@
-const {makeType} = require('./type')
+const { makeType } = require('./type')
 
 class TypeRegistry {
   constructor (symbolTable) {
@@ -11,7 +11,7 @@ class TypeRegistry {
       this.Type = this.st.at('Type').getValue()
     }
 
-    for (const {entry} of this.st.all()) {
+    for (const { entry } of this.st.all()) {
       if (entry.isStatic() && entry.getType() === this.Type) {
         const t = entry.getValue()
         this[t.getName()] = t
@@ -31,4 +31,4 @@ class TypeRegistry {
   }
 }
 
-module.exports = {TypeRegistry}
+module.exports = { TypeRegistry }

@@ -1,8 +1,8 @@
 /* eslint-env mocha */
 
-const {assert} = require('chai')
-const {makeType, unify} = require('../../src/gnomish/type')
-const {SymbolTable} = require('../../src/gnomish/symboltable')
+const { assert } = require('chai')
+const { makeType, unify } = require('../../src/gnomish/type')
+const { SymbolTable } = require('../../src/gnomish/symboltable')
 
 describe('Type', function () {
   let st, tType, tInt, tString, tReal, tBool, tBlock, tList

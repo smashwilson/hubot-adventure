@@ -9,17 +9,17 @@ module.exports = {
 
     methodRegistry.register(
       t.Bool, '&&', [t.Bool], t.Bool,
-      ({receiver}, operand) => receiver && operand
+      ({ receiver }, operand) => receiver && operand
     ).markPure()
 
     methodRegistry.register(
       t.Bool, '||', [t.Bool], t.Bool,
-      ({receiver}, operand) => receiver || operand
+      ({ receiver }, operand) => receiver || operand
     ).markPure()
 
     methodRegistry.register(
       t.Bool, '!', [], t.Bool,
-      ({receiver}) => !receiver
+      ({ receiver }) => !receiver
     ).markPure()
   }
 }

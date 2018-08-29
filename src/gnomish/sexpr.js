@@ -1,6 +1,6 @@
 // Visitor that renders a Gnomish AST as S-expressions.
 
-const {Visitor} = require('./visitor')
+const { Visitor } = require('./visitor')
 
 class SexpVisitor extends Visitor {
   constructor () {
@@ -120,4 +120,4 @@ class SexpVisitor extends Visitor {
   }
 }
 
-module.exports = {SexpVisitor}
+module.exports = { SexpVisitor }
