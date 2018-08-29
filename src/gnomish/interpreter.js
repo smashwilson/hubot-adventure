@@ -1,6 +1,6 @@
-const {Visitor} = require('./visitor')
-const {Block} = require('./stdlib/block')
-const {Some, none} = require('./stdlib/option')
+const { Visitor } = require('./visitor')
+const { Block } = require('./stdlib/block')
+const { Some, none } = require('./stdlib/option')
 
 class Interpreter extends Visitor {
   constructor () {
@@ -122,4 +122,4 @@ class Interpreter extends Visitor {
   }
 }
 
-module.exports = {Interpreter}
+module.exports = { Interpreter }

@@ -1,8 +1,8 @@
 /* eslint-env mocha */
 
-const {assert} = require('chai')
-const {parse} = require('../../src/gnomish')
-const {assertSexp} = require('./helper')
+const { assert } = require('chai')
+const { parse } = require('../../src/gnomish')
+const { assertSexp } = require('./helper')
 
 function onlyExpr (node) {
   assert.lengthOf(node.exprs, 1)

@@ -4,10 +4,10 @@ const fs = require('fs-extra')
 const path = require('path')
 const chai = require('chai')
 const assert = require('./lib/assertion')
-const {parse} = require('./helper')
+const { parse } = require('./helper')
 const stdlib = require('../../src/gnomish/stdlib')
-const {SymbolTable} = require('../../src/gnomish/symboltable')
-const {MethodRegistry} = require('../../src/gnomish/methodregistry')
+const { SymbolTable } = require('../../src/gnomish/symboltable')
+const { MethodRegistry } = require('../../src/gnomish/methodregistry')
 
 const rootTable = SymbolTable.root()
 const methodRegistry = new MethodRegistry()
@@ -16,7 +16,7 @@ assert.register(rootTable, methodRegistry)
 
 describe('Gnomish standard library', function () {
   function executeTestFile (testPath) {
-    const testSource = fs.readFileSync(testPath, {encoding: 'utf8'})
+    const testSource = fs.readFileSync(testPath, { encoding: 'utf8' })
     const normalized = testSource.replace(/\r\n/g, '\n')
 
     const gameTable = SymbolTable.game(rootTable)

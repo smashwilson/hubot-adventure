@@ -1,5 +1,5 @@
-const {makeType} = require('../type')
-const {Some, none} = require('./option')
+const { makeType } = require('../type')
+const { Some, none } = require('./option')
 
 module.exports = {
   registerTypes (t, symbolTable, methodRegistry) {
@@ -28,14 +28,14 @@ module.exports = {
 
     methodRegistry.register(
       tMapAB, 'at', [tA], makeType(t.Option, [tB]),
-      ({receiver}, key) => {
+      ({ receiver }, key) => {
         const v = receiver.get(key)
         return v === undefined ? none : new Some(v)
       })
 
     methodRegistry.register(
       tMapAB, 'get', [tA], tB,
-      ({receiver}, key) => {
+      ({ receiver }, key) => {
         const v = receiver.get(key)
         if (v === undefined) throw new Error(`Map key ${key} not present`)
         return v
@@ -43,7 +43,7 @@ module.exports = {
 
     methodRegistry.register(
       tMapAB, 'put', [tA, tB], tMapAB,
-      ({receiver}, key, value) => {
+      ({ receiver }, key, value) => {
         receiver.set(key, value)
         return receiver
       })

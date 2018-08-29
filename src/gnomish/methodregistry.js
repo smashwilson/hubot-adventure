@@ -1,4 +1,4 @@
-const {unify} = require('./type')
+const { unify } = require('./type')
 
 class Signature {
   constructor (receiverType, argTypes, callback, retType) {
@@ -38,7 +38,7 @@ class Signature {
   }
 
   markPure () {
-    this.setStaticCallback(({astNode}) => {
+    this.setStaticCallback(({ astNode }) => {
       if (!astNode.getReceiver().hasStaticValue()) return
       if (!astNode.getArgs().every(argNode => argNode.hasStaticValue())) return
 
@@ -215,4 +215,4 @@ class MethodRegistry {
   }
 }
 
-module.exports = {MethodRegistry}
+module.exports = { MethodRegistry }

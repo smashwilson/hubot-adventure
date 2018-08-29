@@ -1,5 +1,5 @@
-const {makeType} = require('../type')
-const {Some, none} = require('./option')
+const { makeType } = require('../type')
+const { Some, none } = require('./option')
 
 module.exports = {
   registerTypes (t, symbolTable, methodRegistry) {
@@ -25,56 +25,56 @@ module.exports = {
 
     methodRegistry.register(
       tListA, 'length', [], t.Int,
-      ({receiver}) => receiver.length)
+      ({ receiver }) => receiver.length)
 
     methodRegistry.register(
       tListA, 'empty', [], t.Bool,
-      ({receiver}) => receiver.length === 0)
+      ({ receiver }) => receiver.length === 0)
 
     methodRegistry.register(
       tListA, 'at', [t.Int], tOptionA,
-      ({receiver}, arg) => {
+      ({ receiver }, arg) => {
         const v = receiver[arg]
         return v ? new Some(v) : none
       })
 
     methodRegistry.register(
       tListA, 'first', [], tOptionA,
-      ({receiver}, arg) => receiver.length > 0 ? new Some(receiver[0]) : none)
+      ({ receiver }, arg) => receiver.length > 0 ? new Some(receiver[0]) : none)
 
     methodRegistry.register(
       tListA, 'last', [], tOptionA,
-      ({receiver}, arg) => receiver.length > 0 ? new Some(receiver[receiver.length - 1]) : none)
+      ({ receiver }, arg) => receiver.length > 0 ? new Some(receiver[receiver.length - 1]) : none)
 
     // Comparison
 
     methodRegistry.register(
       tListA, '==', [tListA], t.Bool,
-      ({receiver}, arg) => receiver.length === arg.length && receiver.every((l, i) => l === arg[i]))
+      ({ receiver }, arg) => receiver.length === arg.length && receiver.every((l, i) => l === arg[i]))
 
     // Mutation
 
     methodRegistry.register(
       tListA, '<<', [tA], tListA,
-      ({receiver}, arg) => {
+      ({ receiver }, arg) => {
         receiver.push(arg)
         return receiver
       })
 
     methodRegistry.register(
       tListA, 'put', [t.Int, tA], tListA,
-      ({receiver}, index, arg) => {
+      ({ receiver }, index, arg) => {
         receiver[index] = arg
         return receiver
       })
 
     methodRegistry.register(
       tListA, '+', [tListA], tListA,
-      ({receiver}, otherList) => receiver.concat(otherList))
+      ({ receiver }, otherList) => receiver.concat(otherList))
 
     methodRegistry.register(
       tListA, '+', [tOptionA], tListA,
-      ({receiver}, option) => {
+      ({ receiver }, option) => {
         if (option.hasValue()) {
           return receiver.concat([option.getValue()])
         } else {
@@ -84,7 +84,7 @@ module.exports = {
 
     // Iteration
 
-    const doBody = ({receiver, interpreter}, blk) => {
+    const doBody = ({ receiver, interpreter }, blk) => {
       for (let i = 0; i < receiver.length; i++) {
         blk.evaluate(interpreter, [receiver[i], i])
       }
@@ -98,7 +98,7 @@ module.exports = {
       tListA, 'do', [makeType(t.Block, [tR, tA, t.Int])], tListA,
       doBody)
 
-    const mapBody = ({receiver, interpreter}, blk) => {
+    const mapBody = ({ receiver, interpreter }, blk) => {
       return receiver.map((each, index) => blk.evaluate(interpreter, [each, index]))
     }
 
@@ -109,7 +109,7 @@ module.exports = {
       tListA, 'map', [makeType(t.Block, [tB, tA, t.Int])], tListB,
       mapBody)
 
-    const flatMapListBody = ({receiver, interpreter}, blk) => {
+    const flatMapListBody = ({ receiver, interpreter }, blk) => {
       return receiver.reduce((acc, each, index) => {
         acc.push(...blk.evaluate(interpreter, [each, index]))
         return acc
@@ -123,7 +123,7 @@ module.exports = {
       tListA, 'flatMap', [makeType(t.Block, [tListB, tA, t.Int])], tListB,
       flatMapListBody)
 
-    const flatMapOptionBody = ({receiver, interpreter}, blk) => {
+    const flatMapOptionBody = ({ receiver, interpreter }, blk) => {
       return receiver.reduce((acc, each, index) => {
         const v = blk.evaluate(interpreter, [each, index])
         if (v.hasValue()) {
@@ -140,7 +140,7 @@ module.exports = {
       tListA, 'flatMap', [makeType(t.Block, [tOptionB, tA, t.Int])], tListB,
       flatMapOptionBody)
 
-    const reduceBody = ({receiver, interpreter}, initial, blk) => {
+    const reduceBody = ({ receiver, interpreter }, initial, blk) => {
       return receiver.reduce((acc, each, index) => blk.evaluate(interpreter, [acc, each, index]), initial)
     }
 
@@ -151,7 +151,7 @@ module.exports = {
       tListA, 'reduce', [tB, makeType(t.Block, [tB, tB, tA, t.Int])], tB,
       reduceBody)
 
-    const foldBody = ({receiver, interpreter}, blk) => {
+    const foldBody = ({ receiver, interpreter }, blk) => {
       return receiver.reduce((acc, each, index) => blk.evaluate(interpreter, [acc, each, index]))
     }
 
@@ -162,7 +162,7 @@ module.exports = {
       tListA, 'fold', [makeType(t.Block, [tA, tA, t.Int])], tA,
       foldBody)
 
-    const filterBody = ({receiver, interpreter}, blk) => {
+    const filterBody = ({ receiver, interpreter }, blk) => {
       return receiver.filter((each, index) => blk.evaluate(interpreter, [each, index]))
     }
 

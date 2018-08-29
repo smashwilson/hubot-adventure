@@ -14,7 +14,7 @@ class Unification {
   constructor (types, leftBindings, counts) {
     this.types = types
     this.leftBindings = leftBindings
-    this.counts = Object.assign({exact: 0, multis: 0}, counts)
+    this.counts = Object.assign({ exact: 0, multis: 0 }, counts)
   }
 
   wasSuccessful () { return this.types !== null }
@@ -330,12 +330,12 @@ function unify (symbolTable, lTypes, rTypes) {
 
   function assignLeftParameterList (param, values) {
     lSt.setStatic(param.getName(), tTypeList, values)
-    return Unification.successful(values, [[param.getName(), tTypeList, values]], {multis: values.length})
+    return Unification.successful(values, [[param.getName(), tTypeList, values]], { multis: values.length })
   }
 
   function assignRightParameterList (param, values) {
     rSt.setStatic(param.getName(), tTypeList, values)
-    return Unification.successful(values, [], {multis: values.length})
+    return Unification.successful(values, [], { multis: values.length })
   }
 
   function resolveInPlace (sideSt, types, i) {
@@ -344,7 +344,7 @@ function unify (symbolTable, lTypes, rTypes) {
     if (results.length !== 1 || replaced) {
       types.splice(i, 1, ...results)
     }
-    return {replaced, type: types[i]}
+    return { replaced, type: types[i] }
   }
 
   function unifySingle (lType, rType, replaced, multi) {
@@ -388,8 +388,8 @@ function unify (symbolTable, lTypes, rTypes) {
     const result = Unification.base()
 
     while (li < lTypes.length && ri < rTypes.length) {
-      const {replaced: lReplaced, type: lType} = resolveInPlace(lSt, lTypes, li)
-      const {replaced: rReplaced, type: rType} = resolveInPlace(rSt, rTypes, ri)
+      const { replaced: lReplaced, type: lType } = resolveInPlace(lSt, lTypes, li)
+      const { replaced: rReplaced, type: rType } = resolveInPlace(rSt, rTypes, ri)
 
       if (lType.isSplat()) {
         lSplat = lType
@@ -465,4 +465,4 @@ function unify (symbolTable, lTypes, rTypes) {
   return unifyMulti(lTypes, rTypes)
 }
 
-module.exports = {makeType, unify}
+module.exports = { makeType, unify }

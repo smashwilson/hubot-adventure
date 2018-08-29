@@ -79,7 +79,7 @@ class ExprListNode extends Node {
 }
 
 class IfNode extends Node {
-  constructor ({condition, thenb, elseb}) {
+  constructor ({ condition, thenb, elseb }) {
     super()
     this.condition = condition
     this.thenb = thenb
@@ -98,7 +98,7 @@ class IfNode extends Node {
 }
 
 class WhileNode extends Node {
-  constructor ({condition, action}) {
+  constructor ({ condition, action }) {
     super()
     this.condition = condition
     this.action = action
@@ -114,7 +114,7 @@ class WhileNode extends Node {
 }
 
 class AssignNode extends SlotNode {
-  constructor ({name, value}) {
+  constructor ({ name, value }) {
     super()
     this.name = name
     this.value = value
@@ -130,7 +130,7 @@ class AssignNode extends SlotNode {
 }
 
 class LetNode extends SlotNode {
-  constructor ({name, type, value}) {
+  constructor ({ name, type, value }) {
     super()
     this.name = name
     this.typeNode = type
@@ -149,7 +149,7 @@ class LetNode extends SlotNode {
 }
 
 class CallNode extends Node {
-  constructor ({receiver, name, args}) {
+  constructor ({ receiver, name, args }) {
     super()
     this.name = name
     this.receiver = receiver
@@ -180,7 +180,7 @@ class CallNode extends Node {
 }
 
 class BlockNode extends Node {
-  constructor ({args, body}) {
+  constructor ({ args, body }) {
     super()
     this.args = args || []
     this.body = body || new ExprListNode([])
@@ -211,7 +211,7 @@ class BlockNode extends Node {
 }
 
 class ArgNode extends SlotNode {
-  constructor ({name, type, repeatable, def}) {
+  constructor ({ name, type, repeatable, def }) {
     super()
     this.name = name
     this.typeNode = type
@@ -233,7 +233,7 @@ class ArgNode extends SlotNode {
 }
 
 class IntNode extends Node {
-  constructor ({minus, digits}) {
+  constructor ({ minus, digits }) {
     super(parseInt((minus || '') + digits.join(''), 10))
   }
 
@@ -243,7 +243,7 @@ class IntNode extends Node {
 }
 
 class RealNode extends Node {
-  constructor ({minus, whole, fraction}) {
+  constructor ({ minus, whole, fraction }) {
     super(parseFloat((minus || '') + whole.join('') + '.' + fraction.join('')))
   }
 
@@ -253,7 +253,7 @@ class RealNode extends Node {
 }
 
 class StringNode extends Node {
-  constructor ({chars}) {
+  constructor ({ chars }) {
     super(chars.join(''))
   }
 
@@ -263,7 +263,7 @@ class StringNode extends Node {
 }
 
 class VarNode extends SlotNode {
-  constructor ({name}) {
+  constructor ({ name }) {
     super()
     this.name = name
   }
@@ -276,7 +276,7 @@ class VarNode extends SlotNode {
 }
 
 class TypeNode extends Node {
-  constructor ({name, params, attr}) {
+  constructor ({ name, params, attr }) {
     super()
     this.name = name
     this.params = params || []

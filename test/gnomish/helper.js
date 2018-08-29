@@ -1,14 +1,14 @@
-const {assert} = require('chai')
+const { assert } = require('chai')
 const Tracer = require('pegjs-backtrace')
 
-const {parse} = require('../../src/gnomish')
+const { parse } = require('../../src/gnomish')
 
 function tracedParse (text, shouldParse = true) {
   const tracer = new Tracer(text, {
     showTrace: process.env.GNOMISH_TRACE === 'on'
   })
   try {
-    const root = parse(text, {tracer})
+    const root = parse(text, { tracer })
     if (!shouldParse) {
       assert.fail(null, null, `Should not parse ${text}`)
     }
@@ -31,4 +31,4 @@ function assertSexp (text, expected, shouldParse = true) {
   assert.equal(normalize(actual), normalize(expected))
 }
 
-module.exports = {parse: tracedParse, assertSexp}
+module.exports = { parse: tracedParse, assertSexp }

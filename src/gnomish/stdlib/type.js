@@ -1,4 +1,4 @@
-const {makeType} = require('../type')
+const { makeType } = require('../type')
 
 module.exports = {
   registerTypes (t, symbolTable, methodRegistry) {
@@ -9,7 +9,7 @@ module.exports = {
     const installEnumMethods = (enumType, methodRegistry) => {
       methodRegistry.register(
         enumType, 'toString', [], t.String,
-        ({receiver}) => receiver.name)
+        ({ receiver }) => receiver.name)
     }
 
     methodRegistry.register(
@@ -32,7 +32,7 @@ module.exports = {
 
         return enumType
       }
-    ).setStaticCallback(({astNode, symbolTable, methodRegistry}) => {
+    ).setStaticCallback(({ astNode, symbolTable, methodRegistry }) => {
       if (!astNode.getArgs()[0].hasStaticValue()) return
       const gameTable = symbolTable.getGame()
 

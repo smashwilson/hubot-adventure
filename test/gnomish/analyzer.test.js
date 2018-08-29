@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 
-const {assert} = require('chai')
-const {parse} = require('./helper')
-const {makeType} = require('../../src/gnomish/type')
-const {SymbolTable} = require('../../src/gnomish/symboltable')
-const {MethodRegistry} = require('../../src/gnomish/methodregistry')
+const { assert } = require('chai')
+const { parse } = require('./helper')
+const { makeType } = require('../../src/gnomish/type')
+const { SymbolTable } = require('../../src/gnomish/symboltable')
+const { MethodRegistry } = require('../../src/gnomish/methodregistry')
 
 describe('Analyzer', function () {
   let st, mr
