@@ -82,7 +82,7 @@ class SymbolTable {
         throw new Error(`Identifier "${name}" not found`)
       }
     }
-    return {entry: v, frame: this.frame}
+    return { entry: v, frame: this.frame }
   }
 
   at (name) {
@@ -92,7 +92,7 @@ class SymbolTable {
   all () {
     const r = this.parent ? this.parent.all() : []
     for (const [name, entry] of this.symbols) {
-      r.push({name, entry})
+      r.push({ name, entry })
     }
     return r
   }
@@ -135,4 +135,4 @@ class SymbolTable {
   }
 }
 
-module.exports = {SymbolTable}
+module.exports = { SymbolTable }

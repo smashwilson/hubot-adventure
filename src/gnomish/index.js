@@ -1,7 +1,7 @@
 const parser = require('./gnomish')
-const {SexpVisitor} = require('./sexpr')
-const {Analyzer} = require('./analyzer')
-const {Interpreter} = require('./interpreter')
+const { SexpVisitor } = require('./sexpr')
+const { Analyzer } = require('./analyzer')
+const { Interpreter } = require('./interpreter')
 
 class Program {
   constructor (node) {
@@ -20,7 +20,7 @@ class Program {
       interpreter.addFrame(frame, slots)
     }
     const result = interpreter.visit(this.node)
-    return {result, interpreter}
+    return { result, interpreter }
   }
 
   sexp () {

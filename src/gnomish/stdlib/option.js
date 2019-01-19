@@ -1,4 +1,4 @@
-const {makeType} = require('../type')
+const { makeType } = require('../type')
 
 class Some {
   constructor (value) {
@@ -49,7 +49,7 @@ module.exports = {
     // Comparison
 
     methodRegistry.register(tOptionA, '==', [tOptionA], t.Bool,
-      ({receiver, receiverType, interpreter}, operand) => {
+      ({ receiver, receiverType, interpreter }, operand) => {
         if (receiver.hasValue() !== operand.hasValue()) {
           return false
         }
@@ -68,7 +68,7 @@ module.exports = {
       }).markPure()
 
     // Direct form
-    methodRegistry.register(tOptionA, 'or', [tA], tA, ({receiver}, alt) => {
+    methodRegistry.register(tOptionA, 'or', [tA], tA, ({ receiver }, alt) => {
       if (receiver.hasValue()) {
         return receiver.getValue()
       } else {
@@ -77,7 +77,7 @@ module.exports = {
     }).markPure()
 
     // Block form
-    methodRegistry.register(tOptionA, 'or', [makeType(t.Block, [tA])], tA, ({receiver, interpreter}, blk) => {
+    methodRegistry.register(tOptionA, 'or', [makeType(t.Block, [tA])], tA, ({ receiver, interpreter }, blk) => {
       if (receiver.hasValue()) {
         return receiver.getValue()
       } else {
@@ -89,7 +89,7 @@ module.exports = {
 
     methodRegistry.register(
       tOptionA, 'map', [makeType(t.Block, [tB, tA])], makeType(t.Option, [tB]),
-      ({receiver, interpreter}, blk) => {
+      ({ receiver, interpreter }, blk) => {
         if (receiver.hasValue()) {
           return new Some(blk.evaluate(interpreter, [receiver.getValue()]))
         } else {
@@ -101,7 +101,7 @@ module.exports = {
 
     methodRegistry.register(
       tOptionA, '+', [tOptionA], tListA,
-      ({receiver}, other) => {
+      ({ receiver }, other) => {
         const result = []
         if (receiver.hasValue()) result.push(receiver.getValue())
         if (other.hasValue()) result.push(other.getValue())
@@ -110,7 +110,7 @@ module.exports = {
 
     methodRegistry.register(
       tOptionA, '+', [tListA], tListA,
-      ({receiver}, list) => {
+      ({ receiver }, list) => {
         if (receiver.hasValue()) {
           return [receiver.getValue()].concat(list)
         } else {
@@ -122,7 +122,7 @@ module.exports = {
 
     methodRegistry.register(
       tOptionA, 'toList', [], tListA,
-      ({receiver}) => {
+      ({ receiver }) => {
         return receiver.hasValue() ? [receiver.getValue()] : []
       })
 

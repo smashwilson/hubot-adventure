@@ -1,9 +1,9 @@
 /* eslint-env mocha */
 
-const {assert} = require('chai')
-const {MethodRegistry} = require('../../src/gnomish/methodregistry')
-const {SymbolTable} = require('../../src/gnomish/symboltable')
-const {makeType} = require('../../src/gnomish/type')
+const { assert } = require('chai')
+const { MethodRegistry } = require('../../src/gnomish/methodregistry')
+const { SymbolTable } = require('../../src/gnomish/symboltable')
+const { makeType } = require('../../src/gnomish/type')
 
 describe('MethodRegistry', function () {
   const tInt = makeType('Int')

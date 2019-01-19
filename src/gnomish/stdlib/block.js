@@ -1,4 +1,4 @@
-const {makeType} = require('../type')
+const { makeType } = require('../type')
 
 class Block {
   constructor (argNodes, bodyNode) {
@@ -42,11 +42,11 @@ module.exports = {
 
     methodRegistry.register(
       tBlockRArgs, 'evaluate', [tArgsStar], tR,
-      ({receiver, interpreter}, ...args) => receiver.evaluate(interpreter, args))
+      ({ receiver, interpreter }, ...args) => receiver.evaluate(interpreter, args))
 
     methodRegistry.register(
       tBlockRArgs, 'copy', [], tBlockRArgs,
-      ({receiver, interpreter}) => receiver
+      ({ receiver }) => receiver
     )
   }
 }

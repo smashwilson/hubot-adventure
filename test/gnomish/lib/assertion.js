@@ -1,9 +1,9 @@
 /* eslint-env mocha */
 
-const {TypeRegistry} = require('../../../src/gnomish/typeregistry')
-const {makeType} = require('../../../src/gnomish/type')
-const {none} = require('../../../src/gnomish/stdlib/option')
-const {assert} = require('chai')
+const { TypeRegistry } = require('../../../src/gnomish/typeregistry')
+const { makeType } = require('../../../src/gnomish/type')
+const { none } = require('../../../src/gnomish/stdlib/option')
+const { assert } = require('chai')
 
 module.exports = {
   register (symbolTable, methodRegistry) {
@@ -15,7 +15,7 @@ module.exports = {
 
     methodRegistry.register(
       t.World, 'describe', [t.String, makeType(t.Block, [tA])], t.World,
-      ({receiver, interpreter}, message, blk) => {
+      ({ receiver, interpreter }, message, blk) => {
         describe(message, function () {
           blk.evaluate(interpreter)
         })
@@ -33,7 +33,7 @@ module.exports = {
 
     methodRegistry.register(
       t.World, 'it', [t.String, makeType(t.Block, [tA])], t.World,
-      ({receiver, interpreter}, message, blk) => {
+      ({ receiver, interpreter }, message, blk) => {
         it(message, function () {
           blk.evaluate(interpreter)
         })
@@ -65,7 +65,7 @@ module.exports = {
 
     methodRegistry.register(
       t.Assert, 'equal', [tA, tA], t.Option,
-      ({argumentTypes, interpreter}, lhs, rhs) => {
+      ({ argumentTypes, interpreter }, lhs, rhs) => {
         const [lType, rType] = argumentTypes
 
         const m = methodRegistry.lookup(symbolTable, lType, '==', [rType])

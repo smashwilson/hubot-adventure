@@ -1,7 +1,7 @@
-const {Visitor} = require('./visitor')
-const {makeType, unify} = require('./type')
-const {Block} = require('./stdlib/block')
-const {none, Some} = require('./stdlib/option')
+const { Visitor } = require('./visitor')
+const { makeType, unify } = require('./type')
+const { Block } = require('./stdlib/block')
+const { none, Some } = require('./stdlib/option')
 
 // Static analysis phase, to be performed immediately after parsing an AST, but before interpreting it. Responsible for:
 //
@@ -94,7 +94,7 @@ class Analyzer extends Visitor {
   visitAssign (node) {
     super.visitAssign(node)
 
-    const {entry, frame} = this.symbolTable.binding(node.getName())
+    const { entry, frame } = this.symbolTable.binding(node.getName())
 
     const u = this.unifyTypes(entry.getType(), node.getValue().getType())
     node.setType(u.getType())
@@ -191,7 +191,7 @@ class Analyzer extends Visitor {
   }
 
   visitVar (node) {
-    const {entry, frame} = this.symbolTable.binding(node.getName())
+    const { entry, frame } = this.symbolTable.binding(node.getName())
     node.setType(entry.getType())
     if (entry.isStatic()) {
       node.setStaticValue(entry.getValue())
@@ -235,4 +235,4 @@ class Analyzer extends Visitor {
   }
 }
 
-module.exports = {Analyzer}
+module.exports = { Analyzer }

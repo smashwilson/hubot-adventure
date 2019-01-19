@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 
-const {assert} = require('chai')
-const {parse} = require('./helper')
-const {makeType} = require('../../src/gnomish/type')
-const {SymbolTable} = require('../../src/gnomish/symboltable')
-const {MethodRegistry} = require('../../src/gnomish/methodregistry')
+const { assert } = require('chai')
+const { parse } = require('./helper')
+const { makeType } = require('../../src/gnomish/type')
+const { SymbolTable } = require('../../src/gnomish/symboltable')
+const { MethodRegistry } = require('../../src/gnomish/methodregistry')
 
 describe('Interpreter', function () {
   let st, mr
@@ -36,7 +36,7 @@ describe('Interpreter', function () {
     st.setStatic('false', tBool, false)
 
     mr = new MethodRegistry()
-    mr.register(tInt, '+', [tInt], tInt, ({receiver}, operand) => {
+    mr.register(tInt, '+', [tInt], tInt, ({ receiver }, operand) => {
       return receiver + operand
     })
   })
@@ -44,7 +44,7 @@ describe('Interpreter', function () {
   it('interprets Ints as numbers', function () {
     const program = parse('3')
     program.analyze(st, mr)
-    const {result} = program.interpret()
+    const { result } = program.interpret()
 
     assert.strictEqual(result, 3)
   })
@@ -52,7 +52,7 @@ describe('Interpreter', function () {
   it('interprets Reals as numbers', function () {
     const program = parse('-4.2')
     program.analyze(st, mr)
-    const {result} = program.interpret()
+    const { result } = program.interpret()
 
     assert.strictEqual(result, -4.2)
   })
@@ -60,7 +60,7 @@ describe('Interpreter', function () {
   it('interprets Strings as strings', function () {
     const program = parse('"wat"')
     program.analyze(st, mr)
-    const {result} = program.interpret()
+    const { result } = program.interpret()
 
     assert.strictEqual(result, 'wat')
   })
@@ -70,7 +70,7 @@ describe('Interpreter', function () {
       let x = 42
       x
     `).analyze(st, mr)
-    const {result} = program.interpret()
+    const { result } = program.interpret()
 
     assert.strictEqual(result, 42)
   })
@@ -81,19 +81,19 @@ describe('Interpreter', function () {
       x = 2
       x
     `).analyze(st, mr)
-    const {result} = program.interpret()
+    const { result } = program.interpret()
 
     assert.strictEqual(result, 2)
   })
 
   describe('method calls', function () {
     it('executes a bound callback', function () {
-      mr.register(tInt, '*', [tInt], tInt, ({receiver}, operand) => {
+      mr.register(tInt, '*', [tInt], tInt, ({ receiver }, operand) => {
         return receiver * operand
       })
 
       const program = parse('10 * 4').analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       assert.strictEqual(result, 40)
     })
@@ -104,19 +104,19 @@ describe('Interpreter', function () {
 
       mr.register(
         tInt, 'selector', [tInt], tInt,
-        ({receiver}, operand) => {
+        ({ receiver }, operand) => {
           runtimeCall = true
           return receiver + operand
         }
       ).setStaticCallback(
-        ({astNode}) => {
+        ({ astNode }) => {
           staticCall = true
           astNode.setStaticValue(10)
         }
       )
 
       const program = parse('1.selector(2)').analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       assert.strictEqual(result, 10)
       assert.isTrue(staticCall)
@@ -129,7 +129,7 @@ describe('Interpreter', function () {
       const program = parse(`
         if {true} then {1} else {2}
       `).analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       assert.strictEqual(result, 1)
     })
@@ -138,7 +138,7 @@ describe('Interpreter', function () {
       const program = parse(`
         if {false} then {1} else {2}
       `).analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       assert.strictEqual(result, 2)
     })
@@ -147,7 +147,7 @@ describe('Interpreter', function () {
       const program = parse(`
         if {true} then {7}
       `).analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       assert.isTrue(result.hasValue())
       assert.strictEqual(result.getValue(), 7)
@@ -157,7 +157,7 @@ describe('Interpreter', function () {
       const program = parse(`
         if {false} then {"nope"}
       `).analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       assert.isFalse(result.hasValue())
     })
@@ -165,7 +165,7 @@ describe('Interpreter', function () {
 
   describe('while loops', function () {
     beforeEach(function () {
-      mr.register(tInt, '<', [tInt], tBool, ({receiver}, operand) => {
+      mr.register(tInt, '<', [tInt], tBool, ({ receiver }, operand) => {
         return receiver < operand
       })
     })
@@ -179,7 +179,7 @@ describe('Interpreter', function () {
           y = y + 2
         }
       `).analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       assert.isTrue(result.hasValue())
       assert.strictEqual(result.getValue(), 21)
@@ -192,7 +192,7 @@ describe('Interpreter', function () {
           x = x + 1
         }
       `).analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       assert.isFalse(result.hasValue())
     })
@@ -201,7 +201,7 @@ describe('Interpreter', function () {
   describe('blocks', function () {
     it('creates a new Block with the appropriate AST nodes', function () {
       const program = parse(`{x: Int, y: Int | x + y + 1}`).analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       const blockNode = program.node.getExprs()[0]
 
@@ -217,7 +217,7 @@ describe('Interpreter', function () {
         let outer = 7
         { outer + 1 }
       `).analyze(st, mr)
-      const {result} = program.interpret()
+      const { result } = program.interpret()
 
       const rootFrame = program.node
       assert.strictEqual(result.getSlot(rootFrame, 0), 7)

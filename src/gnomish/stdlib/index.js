@@ -1,4 +1,4 @@
-const {TypeRegistry} = require('../typeregistry')
+const { TypeRegistry } = require('../typeregistry')
 const builtins = [
   './world', './any', './bool', './numbers', './string', './block', './option', './pair', './list', './map',
   './type'
