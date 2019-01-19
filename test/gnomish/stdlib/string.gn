@@ -22,4 +22,29 @@ describe("String", {
     let original = "aaa"
     assert.equal(original.copy(), original)
   })
+
+  describe("compose()", {
+    it("accumulates words with <<", {
+      let s = "aaa".compose()
+      s << "bbb"
+      s << "
+        ccc ddd eee
+      "
+
+      assert.equal(s.string(), "aaa bbb ccc ddd eee")
+    })
+
+    it("creates paragraphs with sep", {
+      let s = "
+        This is the first sentence.
+      ".compose()
+      s << "This is a second sentence."
+      s.sep()
+      s << "This is a third sentence in a new paragraph."
+
+      assert.equal(s.string(), "This is the first sentence. This is a second sentence.
+
+This is a third sentence in a new paragraph.")
+    })
+  })
 })
