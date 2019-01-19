@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
-const {assert} = require('chai')
-const {World} = require('../../src/model/world')
+const { assert } = require('chai')
+const { World } = require('../../src/model/world')
 
 describe('World', function () {
   it('bootstraps a symbol table and method registry with the standard library', function () {
@@ -14,7 +14,7 @@ describe('World', function () {
 
     const tInt = st.at('Int').getValue()
     const binding = w.getMethodRegistry().lookup(st, tInt, 'toReal', [])
-    assert.strictEqual(binding.invoke({receiver: 1}), 1.0)
+    assert.strictEqual(binding.invoke({ receiver: 1 }), 1.0)
   })
 
   it('shares stdlib bindings and method registry', function () {
@@ -55,7 +55,7 @@ describe('World', function () {
 
     assert.lengthOf(w.prototypeSlots, 0)
 
-    const {result: result0} = w.execute(`
+    const { result: result0 } = w.execute(`
       letgame x = 1
       letgame y = "yes"
 
@@ -73,7 +73,7 @@ describe('World', function () {
     assert.strictEqual(w.prototypeSlots[0], 1)
     assert.strictEqual(w.prototypeSlots[1], 'yes')
 
-    const {result: result1} = w.execute(`
+    const { result: result1 } = w.execute(`
       letgame z = x + 10
       z * 5
     `)
@@ -94,10 +94,10 @@ describe('World', function () {
     w.execute('letgame x = 10')
 
     const g = w.createGame('C123')
-    const {result: gResult} = g.execute('x = x * 2 ; x')
+    const { result: gResult } = g.execute('x = x * 2 ; x')
     assert.strictEqual(gResult, 20)
 
-    const {result: wResult} = w.execute('x')
+    const { result: wResult } = w.execute('x')
     assert.strictEqual(wResult, 10)
   })
 })

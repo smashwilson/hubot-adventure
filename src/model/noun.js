@@ -2,4 +2,4 @@ class Noun {
 
 }
 
-module.exports = {Noun}
+module.exports = { Noun }

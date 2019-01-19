@@ -1,5 +1,5 @@
-const {parse} = require('../gnomish')
-const {Interpreter} = require('../gnomish/interpreter')
+const { parse } = require('../gnomish')
+const { Interpreter } = require('../gnomish/interpreter')
 
 class Game {
   constructor (world, channel) {
@@ -25,8 +25,8 @@ class Game {
   execute (source) {
     const program = parse(source).analyze(this.getSymbolTable(), this.getMethodRegistry())
     const interpreter = this.createInterpreter()
-    return {result: interpreter.visit(program.node)}
+    return { result: interpreter.visit(program.node) }
   }
 }
 
-module.exports = {Game}
+module.exports = { Game }

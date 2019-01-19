@@ -24,7 +24,7 @@ module.exports = {
 
     methodRegistry.register(
       t.Bool, 'copy', [], t.Bool,
-      ({receiver}) => receiver
+      ({ receiver }) => receiver
     )
   }
 }

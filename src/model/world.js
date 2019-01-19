@@ -1,7 +1,7 @@
-const {SymbolTable} = require('../gnomish/symboltable')
-const {MethodRegistry} = require('../gnomish/methodregistry')
-const {parse} = require('../gnomish')
-const {Game} = require('./game')
+const { SymbolTable } = require('../gnomish/symboltable')
+const { MethodRegistry } = require('../gnomish/methodregistry')
+const { parse } = require('../gnomish')
+const { Game } = require('./game')
 
 const stdlib = require('../gnomish/stdlib')
 
@@ -60,4 +60,4 @@ stdlib.register(rootTable, rootRegistry)
 World.prototype.rootTable = rootTable
 World.prototype.rootRegistry = rootRegistry
 
-module.exports = {World}
+module.exports = { World }

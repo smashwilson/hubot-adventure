@@ -130,7 +130,7 @@ module.exports = {
 
     methodRegistry.register(
       tOptionA, 'copy', [], tOptionA,
-      ({receiver, receiverType, interpreter}) => {
+      ({ receiver, receiverType, interpreter }) => {
         if (!receiver.hasValue()) {
           return receiver
         }

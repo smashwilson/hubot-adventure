@@ -32,7 +32,7 @@ module.exports = {
 
     methodRegistry.register(
       t.String, 'copy', [], t.String,
-      ({receiver}) => receiver
+      ({ receiver }) => receiver
     )
   }
 }

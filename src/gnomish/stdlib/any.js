@@ -35,7 +35,7 @@ module.exports = {
     methodRegistry.register(
       tA, 'debug', [], tA,
       ({ receiver, receiverType }) => {
-        console.log(`${util.inspect(receiver, {breakLength: 100})}: ${receiverType}`)
+        console.log(`${util.inspect(receiver, { breakLength: 100 })}: ${receiverType}`)
         return receiver
       }
     ).markPure()

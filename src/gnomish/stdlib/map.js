@@ -52,7 +52,7 @@ module.exports = {
 
     methodRegistry.register(
       tMapAB, '==', [tMapAB], t.Bool,
-      ({receiver, receiverType, argumentTypes, interpreter}, arg) => {
+      ({ receiver, receiverType, argumentTypes, interpreter }, arg) => {
         console.log(`comparing ${Array.from(receiver).join(', ')} to ${Array.from(arg).join(', ')}`)
 
         if (receiver.size !== arg.size) {
@@ -92,15 +92,15 @@ module.exports = {
 
     methodRegistry.register(
       tMapAB, 'copy', [], tMapAB,
-      ({receiver, receiverType, interpreter}) => {
+      ({ receiver, receiverType, interpreter }) => {
         const [keyType, valueType] = receiverType.getParams()
         const keyCopy = methodRegistry.lookup(symbolTable, keyType, 'copy', [])
         const valueCopy = methodRegistry.lookup(symbolTable, valueType, 'copy', [])
 
         const dup = new Map()
         for (const [key, value] of receiver) {
-          const keyDup = keyCopy.invoke({receiver: key, selector: 'copy', interpreter})
-          const valueDup = valueCopy.invoke({receiver: value, selector: 'copy', interpreter})
+          const keyDup = keyCopy.invoke({ receiver: key, selector: 'copy', interpreter })
+          const valueDup = valueCopy.invoke({ receiver: value, selector: 'copy', interpreter })
           dup.set(keyDup, valueDup)
         }
         return dup

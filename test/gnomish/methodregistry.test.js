@@ -177,7 +177,7 @@ describe('MethodRegistry', function () {
       r.register(tInt, 'somethingCool', [tInt, makeType("'A")], tString, cb)
 
       const match = r.lookup(st, tInt, 'somethingCool', [tInt, tReal])
-      match.invoke({extra: true})
+      match.invoke({ extra: true })
 
       assert.strictEqual(arg.receiverType, tInt)
       assert.deepEqual(arg.argumentTypes, [tInt, tReal])
