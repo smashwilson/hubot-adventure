@@ -37,67 +37,87 @@ describe('World', function () {
     assert.strictEqual(w1.getSymbolTable().at('this').getValue(), w1)
   })
 
-  it('creates a Game with its symbol table and method registry', function () {
-    const w = new World()
-    const g = w.createGame('C1234')
+  describe('Games', function () {
+    it('creates a Game with its symbol table and method registry', function () {
+      const w = new World()
+      const g = w.createGame('C1234')
 
-    assert.deepEqual(w.getGames(), [g])
-    assert.strictEqual(w.getGame('C1234'), g)
+      assert.deepEqual(w.getGames(), [g])
+      assert.strictEqual(w.getGame('C1234'), g)
 
-    const gSt = g.getSymbolTable()
-    assert.strictEqual(gSt.getGame(), w.getSymbolTable())
+      const gSt = g.getSymbolTable()
+      assert.strictEqual(gSt.getGame(), w.getSymbolTable())
 
-    assert.strictEqual(g.getMethodRegistry(), w.getMethodRegistry())
+      assert.strictEqual(g.getMethodRegistry(), w.getMethodRegistry())
+    })
+
+    it('compiles and executes Gnomish code with a prototypical game slot frame', function () {
+      const w = new World()
+
+      assert.lengthOf(w.prototypeSlots, 0)
+
+      const { result: result0 } = w.execute(`
+        letgame x = 1
+        letgame y = "yes"
+
+        x
+      `)
+      assert.strictEqual(result0, 1)
+
+      const st = w.getSymbolTable()
+      assert.isFalse(st.at('x').isStatic())
+      assert.strictEqual(st.at('x').getSlot(), 0)
+      assert.isFalse(st.at('y').isStatic())
+      assert.strictEqual(st.at('y').getSlot(), 1)
+
+      assert.lengthOf(w.prototypeSlots, 2)
+      assert.strictEqual(w.prototypeSlots[0], 1)
+      assert.strictEqual(w.prototypeSlots[1], 'yes')
+
+      const { result: result1 } = w.execute(`
+        letgame z = x + 10
+        z * 5
+      `)
+      assert.strictEqual(result1, 55)
+
+      assert.isFalse(st.at('z').isStatic())
+      assert.strictEqual(st.at('z').getSlot(), 2)
+
+      assert.lengthOf(w.prototypeSlots, 3)
+      assert.strictEqual(w.prototypeSlots[0], 1)
+      assert.strictEqual(w.prototypeSlots[1], 'yes')
+      assert.strictEqual(w.prototypeSlots[2], 11)
+    })
+
+    it('constructs Games with a new game slot frame', function () {
+      const w = new World()
+
+      w.execute('letgame x = 10')
+
+      const g = w.createGame('C123')
+      const { result: gResult } = g.execute('x = x * 2 ; x')
+      assert.strictEqual(gResult, 20)
+
+      const { result: wResult } = w.execute('x')
+      assert.strictEqual(wResult, 10)
+    })
+
+    it('deletes Games', function () {
+      const w = new World()
+
+      const g0 = w.createGame('A123')
+      const g1 = w.createGame('B456')
+
+      assert.deepEqual(w.getGames(), [g0, g1])
+
+      assert.isTrue(w.deleteGame('B456'))
+      assert.isFalse(w.deleteGame('C000'))
+
+      assert.deepEqual(w.getGames(), [g0])
+    })
   })
 
-  it('compiles and executes Gnomish code with a prototypical game slot frame', function () {
-    const w = new World()
 
-    assert.lengthOf(w.prototypeSlots, 0)
 
-    const { result: result0 } = w.execute(`
-      letgame x = 1
-      letgame y = "yes"
-
-      x
-    `)
-    assert.strictEqual(result0, 1)
-
-    const st = w.getSymbolTable()
-    assert.isFalse(st.at('x').isStatic())
-    assert.strictEqual(st.at('x').getSlot(), 0)
-    assert.isFalse(st.at('y').isStatic())
-    assert.strictEqual(st.at('y').getSlot(), 1)
-
-    assert.lengthOf(w.prototypeSlots, 2)
-    assert.strictEqual(w.prototypeSlots[0], 1)
-    assert.strictEqual(w.prototypeSlots[1], 'yes')
-
-    const { result: result1 } = w.execute(`
-      letgame z = x + 10
-      z * 5
-    `)
-    assert.strictEqual(result1, 55)
-
-    assert.isFalse(st.at('z').isStatic())
-    assert.strictEqual(st.at('z').getSlot(), 2)
-
-    assert.lengthOf(w.prototypeSlots, 3)
-    assert.strictEqual(w.prototypeSlots[0], 1)
-    assert.strictEqual(w.prototypeSlots[1], 'yes')
-    assert.strictEqual(w.prototypeSlots[2], 11)
-  })
-
-  it('constructs Games with a new game slot frame', function () {
-    const w = new World()
-
-    w.execute('letgame x = 10')
-
-    const g = w.createGame('C123')
-    const { result: gResult } = g.execute('x = x * 2 ; x')
-    assert.strictEqual(gResult, 20)
-
-    const { result: wResult } = w.execute('x')
-    assert.strictEqual(wResult, 10)
   })
 })

@@ -49,6 +49,10 @@ class World {
     return this.games.get(room)
   }
 
+  deleteGame (channel) {
+    return this.games.delete(channel)
+  }
+
   execute (source) {
     const program = parse(source).analyze(this.symbolTable, this.methodRegistry)
     return program.interpret(this.symbolTable.getFrame(), this.prototypeSlots)
