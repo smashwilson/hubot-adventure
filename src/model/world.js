@@ -24,6 +24,7 @@ class World {
     this.prototypeSlots = []
 
     this.games = new Map()
+    this.rooms = new Map()
   }
 
   getSymbolTable () { return this.symbolTable }
@@ -54,6 +55,26 @@ class World {
 
   deleteGame (channel) {
     return this.games.delete(channel)
+  }
+
+  createRoom (id, name) {
+    const existing = this.rooms.get(id)
+    if (existing) {
+      existing.setName(name)
+      return existing
+    } else {
+      const created = new Room(id, name)
+      this.rooms.set(id, created)
+      return created
+    }
+  }
+
+  getRooms () {
+    return Array.from(this.rooms.values())
+  }
+
+  deleteRoom (id) {
+    return this.rooms.delete(id)
   }
 
   execute (source) {
