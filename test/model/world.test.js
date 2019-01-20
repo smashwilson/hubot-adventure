@@ -4,13 +4,16 @@ const { assert } = require('chai')
 const { World } = require('../../src/model/world')
 
 describe('World', function () {
-  it('bootstraps a symbol table and method registry with the standard library', function () {
+  it('bootstraps a symbol table and method registry with the standard library and the model library', function () {
     const w = new World()
 
     const st = w.getSymbolTable()
     assert.isTrue(st.has('Int'))
     assert.isTrue(st.has('String'))
     assert.isTrue(st.has('Type'))
+
+    assert.isTrue(st.has('Room'))
+    assert.isTrue(st.has('Noun'))
 
     const tInt = st.at('Int').getValue()
     const binding = w.getMethodRegistry().lookup(st, tInt, 'toReal', [])
