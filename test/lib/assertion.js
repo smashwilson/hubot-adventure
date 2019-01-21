@@ -50,6 +50,26 @@ module.exports = {
       })
 
     methodRegistry.register(
+      t.World, 'beforeEach', [makeType(t.Block, [tA])], t.World,
+      ({ receiver, interpreter }, blk) => {
+        beforeEach(function () {
+          blk.evaluate(interpreter)
+        })
+        return receiver
+      }
+    )
+
+    methodRegistry.register(
+      t.World, 'afterEach', [makeType(t.Block, [tA])], t.World,
+      ({ receiver, interpreter }, blk) => {
+        afterEach(function () {
+          blk.evaluate(interpreter)
+        })
+        return receiver
+      }
+    )
+
+    methodRegistry.register(
       t.Assert, 'isTrue', [t.Bool], t.Option,
       (_, cond) => {
         assert.isTrue(cond)
