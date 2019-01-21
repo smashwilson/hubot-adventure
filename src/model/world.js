@@ -137,9 +137,9 @@ class World {
     methodRegistry.register(
       t.World, 'say', [t.String], t.Option,
       ({ interpreter }, text) => {
-        const { say } = interpreter.getContext()
-        if (say) {
-          say(text)
+        const context = interpreter.getContext()
+        if (context.say) {
+          context.say(text)
         } else {
           console.log(text)
         }
