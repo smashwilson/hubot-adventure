@@ -108,8 +108,33 @@ describe('Room', function () {
   })
 
   describe('description', function () {
-    it('is used in the output of the generated "look" command')
+    it('is omitted from "look" output by default', function () {
+      const said = []
+      const i = new Interpreter({ say (line) { said.push(line) } })
 
-    it('automatically puts nouns in all caps')
+      r.executeCommand('look', i)
+      assert.deepEqual(said, ['**Name**'])
+    })
+
+    it('is used in the output of the generated "look" command', function () {
+      r.setDescription('Contains some stuff.')
+
+      const said = []
+      const i = new Interpreter({ say (line) { said.push(line) } })
+
+      r.executeCommand('look', i)
+      assert.deepEqual(said, ['**Name**\n\nContains some stuff.'])
+    })
+
+    it('automatically puts nouns in all caps', function () {
+      r.setDescription('Contains some stuff.')
+      r.defineNoun('stuff')
+
+      const said = []
+      const i = new Interpreter({ say (line) { said.push(line) } })
+
+      r.executeCommand('look', i)
+      assert.deepEqual(said, ['**Name**\n\nContains some STUFF.'])
+    })
   })
 })

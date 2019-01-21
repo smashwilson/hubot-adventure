@@ -5,6 +5,7 @@ class Room {
     this.world = world
     this.id = id
     this.name = name
+    this.description = ''
 
     this.fallThroughCommand = null
     this.localCommands = new Map()
@@ -24,6 +25,10 @@ class Room {
     this.name = name
   }
 
+  setDescription (description) {
+    this.description = description
+  }
+
   defineCommand (command, block) {
     this.localCommands.set(command, block)
   }
@@ -41,6 +46,27 @@ class Room {
   }
 
   executeCommand (command, interpreter) {
+    if (command === 'look') {
+      let lookCommand
+
+      const finalName = this.name.replace(/"/g, '\\"')
+      if (this.description.length > 0) {
+        const nounsRx = new RegExp(
+          Array.from(this.nouns.keys(), rxSafe).join('|'),
+          'g'
+        )
+        const finalDescription = this.description
+          .replace(nounsRx, match => match.toUpperCase())
+          .replace(/"/g, '\\"')
+
+        lookCommand = this.world.execute(`{ say("**${finalName}**\n\n${finalDescription}") }`).result
+      } else {
+        lookCommand = this.world.execute(`{ say("**${finalName}**") }`).result
+      }
+
+      return lookCommand.evaluate(interpreter, [])
+    }
+
     const localBlock = this.localCommands.get(command)
     if (localBlock) {
       return localBlock.evaluate(interpreter, [])
@@ -82,6 +108,10 @@ class Room {
   static registerMethods (t, symbolTable, methodRegistry) {
     //
   }
+}
+
+function rxSafe (input) {
+  return input.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
 }
 
 module.exports = { Room }
