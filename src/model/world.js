@@ -68,7 +68,7 @@ class World {
       existing.setName(name)
       return existing
     } else {
-      const created = new Room(id, name)
+      const created = new Room(this, id, name)
       this.rooms.set(id, created)
       return created
     }
