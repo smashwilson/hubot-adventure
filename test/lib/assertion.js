@@ -1,8 +1,8 @@
 /* eslint-env mocha */
 
-const { TypeRegistry } = require('../../../src/gnomish/typeregistry')
-const { makeType } = require('../../../src/gnomish/type')
-const { none } = require('../../../src/gnomish/stdlib/option')
+const { TypeRegistry } = require('../../src/gnomish/typeregistry')
+const { makeType } = require('../../src/gnomish/type')
+const { none } = require('../../src/gnomish/stdlib/option')
 const { assert } = require('chai')
 
 module.exports = {

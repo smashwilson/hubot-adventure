@@ -3,7 +3,7 @@
 const fs = require('fs-extra')
 const path = require('path')
 const chai = require('chai')
-const assert = require('./lib/assertion')
+const assert = require('../lib/assertion')
 const { parse } = require('./helper')
 const stdlib = require('../../src/gnomish/stdlib')
 const { SymbolTable } = require('../../src/gnomish/symboltable')
