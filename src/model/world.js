@@ -5,6 +5,7 @@ const { parse } = require('../gnomish')
 const { Game } = require('./game')
 const { Room } = require('./room')
 const { Noun } = require('./noun')
+const { NormalizingMap } = require('../normalizing-map')
 
 const stdlib = require('../gnomish/stdlib')
 
@@ -24,9 +25,9 @@ class World {
     this.prototypeSlots = []
 
     this.games = new Map()
-    this.rooms = new Map()
+    this.rooms = new NormalizingMap()
 
-    this.globalCommands = new Map()
+    this.globalCommands = new NormalizingMap()
     this.fallThroughCommand = this.execute(`
       { command: String | say("I don't know how to do that.") }
     `).result

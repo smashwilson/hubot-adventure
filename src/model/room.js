@@ -1,4 +1,5 @@
 const { Noun } = require('./noun')
+const { NormalizingMap, UPPERCASE } = require('../normalizing-map')
 
 class Room {
   constructor (world, id, name) {
@@ -8,9 +9,9 @@ class Room {
     this.description = ''
 
     this.fallThroughCommand = null
-    this.localCommands = new Map()
+    this.localCommands = new NormalizingMap()
 
-    this.nouns = new Map()
+    this.nouns = new NormalizingMap(UPPERCASE)
   }
 
   getID () {
@@ -52,8 +53,8 @@ class Room {
       const finalName = this.name.replace(/"/g, '\\"')
       if (this.description.length > 0) {
         const nounsRx = new RegExp(
-          Array.from(this.nouns.keys(), rxSafe).join('|'),
-          'g'
+          Array.from(this.nouns.keys(), rxSafe).map(n => `\\b${n}\\b`).join('|'),
+          'ig'
         )
         const finalDescription = this.description
           .replace(nounsRx, match => match.toUpperCase())
