@@ -40,11 +40,11 @@ module.exports = {
 
     methodRegistry.register(
       tListA, 'first', [], tOptionA,
-      ({ receiver }, arg) => receiver.length > 0 ? new Some(receiver[0]) : none)
+      ({ receiver }) => receiver.length > 0 ? new Some(receiver[0]) : none)
 
     methodRegistry.register(
       tListA, 'last', [], tOptionA,
-      ({ receiver }, arg) => receiver.length > 0 ? new Some(receiver[receiver.length - 1]) : none)
+      ({ receiver }) => receiver.length > 0 ? new Some(receiver[receiver.length - 1]) : none)
 
     // Comparison
 
