@@ -146,6 +146,16 @@ class World {
         }
       }
     )
+
+    methodRegistry.register(
+      t.World, 'defineRoom', [t.String, t.String], t.Room,
+      ({ receiver }, id, name) => receiver.defineRoom(id, name)
+    )
+
+    methodRegistry.register(
+      t.World, 'deleteRoom', [t.String], t.Bool,
+      ({ receiver }, id) => receiver.deleteRoom(id)
+    )
   }
 }
 

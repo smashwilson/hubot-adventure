@@ -1,0 +1,14 @@
+describe("World", {
+  afterEach({
+    deleteRoom("one")
+    deleteRoom("two")
+  })
+
+  describe("rooms", {
+    it("defines a new room", {
+      let room0 = defineRoom("one", "Room One")
+      let room1 = defineRoom("one", "Room One")
+      assert.same(room0, room1)
+    })
+  })
+})
