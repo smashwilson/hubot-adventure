@@ -41,6 +41,16 @@ describe('Interpreter', function () {
     })
   })
 
+  it('optionally has a provided external context', function () {
+    const context = Symbol('context')
+
+    const program = parse('3')
+    program.analyze(st, mr)
+    program.setContext(context)
+    const { interpreter } = program.interpret()
+    assert.strictEqual(interpreter.getContext(), context)
+  })
+
   it('interprets Ints as numbers', function () {
     const program = parse('3')
     program.analyze(st, mr)

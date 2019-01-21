@@ -6,6 +6,11 @@ const { Interpreter } = require('./interpreter')
 class Program {
   constructor (node) {
     this.node = node
+    this.context = null
+  }
+
+  setContext (context) {
+    this.context = context
   }
 
   analyze (symbolTable, methodRegistry) {
@@ -15,7 +20,7 @@ class Program {
   }
 
   interpret (frame, slots) {
-    const interpreter = new Interpreter()
+    const interpreter = new Interpreter(this.context)
     if (frame && slots) {
       interpreter.addFrame(frame, slots)
     }

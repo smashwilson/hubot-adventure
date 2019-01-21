@@ -3,10 +3,15 @@ const { Block } = require('./stdlib/block')
 const { Some, none } = require('./stdlib/option')
 
 class Interpreter extends Visitor {
-  constructor () {
+  constructor (context) {
     super()
     this.stack = new Map()
     this.currentBlock = null
+    this.context = context
+  }
+
+  getContext () {
+    return this.context
   }
 
   addFrame (frame, slots) {
