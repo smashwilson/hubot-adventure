@@ -16,7 +16,7 @@ describe('Noun', function () {
 
   beforeEach(function () {
     w = new World()
-    r = w.createRoom('id', 'Name')
+    r = w.defineRoom('id', 'Name')
     n = r.defineNoun('thingy')
   })
 

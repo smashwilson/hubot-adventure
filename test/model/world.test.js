@@ -189,7 +189,7 @@ describe('World', function () {
     it('creates a Room', function () {
       const w = new World()
 
-      const r = w.createRoom('id0', 'The First Room')
+      const r = w.defineRoom('id0', 'The First Room')
       assert.strictEqual(r.getID(), 'id0')
       assert.strictEqual(r.getName(), 'The First Room')
 
@@ -199,8 +199,8 @@ describe('World', function () {
     it('returns an existing Room if one already exists with a given ID', function () {
       const w = new World()
 
-      const r0 = w.createRoom('000', 'The Original Room')
-      const r1 = w.createRoom('000', 'The New Room')
+      const r0 = w.defineRoom('000', 'The Original Room')
+      const r1 = w.defineRoom('000', 'The New Room')
 
       assert.strictEqual(r0, r1)
 
@@ -211,8 +211,8 @@ describe('World', function () {
     it('deletes Rooms', function () {
       const w = new World()
 
-      const r0 = w.createRoom('000', 'Room Zero')
-      const r1 = w.createRoom('001', 'Room One')
+      const r0 = w.defineRoom('000', 'Room Zero')
+      const r1 = w.defineRoom('001', 'Room One')
 
       assert.deepEqual(w.getRooms(), [r0, r1])
 

@@ -62,7 +62,7 @@ class World {
     return this.games.delete(channel)
   }
 
-  createRoom (id, name) {
+  defineRoom (id, name) {
     const existing = this.rooms.get(id)
     if (existing) {
       existing.setName(name)

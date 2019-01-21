@@ -12,7 +12,7 @@ describe('Room', function () {
 
   beforeEach(function () {
     w = new World()
-    r = w.createRoom('id', 'Name')
+    r = w.defineRoom('id', 'Name')
   })
 
   function makeBlock (i) {
