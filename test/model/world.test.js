@@ -1,9 +1,17 @@
 /* eslint-env mocha */
 
 const { assert } = require('chai')
+
 const { World } = require('../../src/model/world')
+const { Block } = require('../../src/gnomish/stdlib/block')
+const { ExprListNode, StringNode } = require('../../src/gnomish/ast')
+const { Interpreter } = require('../../src/gnomish/interpreter')
 
 describe('World', function () {
+  function makeBlock (s) {
+    return new Block([], new ExprListNode([new StringNode({ chars: [s] })]))
+  }
+
   it('bootstraps a symbol table and method registry with the standard library and the model library', function () {
     const w = new World()
 
@@ -117,6 +125,63 @@ describe('World', function () {
       assert.isFalse(w.deleteGame('C000'))
 
       assert.deepEqual(w.getGames(), [g0])
+    })
+  })
+
+  describe('global commands', function () {
+    it('creates a new command', function () {
+      const w = new World()
+
+      w.defineCommand('jump', makeBlock('no'))
+
+      assert.deepEqual(w.getCommands(), ['jump'])
+    })
+
+    it('executes a command', function () {
+      const w = new World()
+      w.defineCommand('jump', makeBlock('no'))
+
+      const i = new Interpreter()
+      assert.strictEqual(w.executeCommand('jump', i), 'no')
+    })
+
+    it('overrides an existing command', function () {
+      const w = new World()
+      w.defineCommand('jump', makeBlock('no'))
+      w.defineCommand('jump', makeBlock('yes'))
+
+      const i = new Interpreter()
+      assert.strictEqual(w.executeCommand('jump', i), 'yes')
+    })
+
+    it('executes a default fall-through command', function () {
+      const w = new World()
+
+      let said = []
+      const i = new Interpreter({ say (line) { said.push(line) } })
+
+      w.executeCommand('jump', i)
+      assert.deepEqual(said, ["I don't know how to do that."])
+    })
+
+    it('executes a configured fall-through command', function () {
+      const w = new World()
+      w.setFallThroughCommand(makeBlock('caught it'))
+
+      const i = new Interpreter()
+      assert.strictEqual(w.executeCommand('unknown', i), 'caught it')
+    })
+
+    it('deletes a command', function () {
+      const w = new World()
+      w.setFallThroughCommand(makeBlock('deleted'))
+      w.defineCommand('jump', makeBlock('no'))
+
+      assert.isTrue(w.deleteCommand('jump'))
+      assert.isFalse(w.deleteCommand('what'))
+
+      const i = new Interpreter()
+      assert.strictEqual(w.executeCommand('jump', i), 'deleted')
     })
   })
 

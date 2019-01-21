@@ -25,6 +25,11 @@ class World {
 
     this.games = new Map()
     this.rooms = new Map()
+
+    this.globalCommands = new Map()
+    this.fallThroughCommand = this.execute(`
+      { command: String | say("I don't know how to do that.") }
+    `).result
   }
 
   getSymbolTable () { return this.symbolTable }
@@ -77,6 +82,35 @@ class World {
     return this.rooms.delete(id)
   }
 
+  defineCommand (command, block) {
+    return this.globalCommands.set(command, block)
+  }
+
+  deleteCommand (command) {
+    return this.globalCommands.delete(command)
+  }
+
+  getCommands () {
+    return Array.from(this.globalCommands.keys())
+  }
+
+  setFallThroughCommand (block) {
+    this.fallThroughCommand = block
+  }
+
+  getFallThroughCommand () {
+    return this.fallThroughCommand
+  }
+
+  executeCommand (command, interpreter) {
+    const globalCommand = this.globalCommands.get(command)
+    if (globalCommand) {
+      return globalCommand.evaluate(interpreter, [])
+    } else {
+      return this.fallThroughCommand.evaluate(interpreter, [command])
+    }
+  }
+
   execute (source) {
     const program = parse(source).analyze(this.symbolTable, this.methodRegistry)
     return program.interpret(this.symbolTable.getFrame(), this.prototypeSlots)
@@ -100,7 +134,17 @@ class World {
   }
 
   static registerMethods (t, symbolTable, methodRegistry) {
-    //
+    methodRegistry.register(
+      t.World, 'say', [t.String], t.Option,
+      ({ interpreter }, text) => {
+        const { say } = interpreter.getContext()
+        if (say) {
+          say(text)
+        } else {
+          console.log(text)
+        }
+      }
+    )
   }
 }
 
