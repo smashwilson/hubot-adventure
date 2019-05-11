@@ -33,7 +33,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "cross-env": "5.2.0",
-    "fs-extra": "7.0.1",
+    "fs-extra": "8.0.0",
     "hubot-test-helper": "1.9.0",
     "mocha": "6.1.4",
     "pegjs-backtrace": "0.1.2",
