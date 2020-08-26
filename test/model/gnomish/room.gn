@@ -1,4 +1,4 @@
-describeonly("Room", {
+describe("Room", {
   beforeEach({
     defineRoom("id", "Name")
   })

@@ -33,7 +33,7 @@ room1.command("look", {
 })
 
 let switch = room1.noun("switch")
-switch.command("look", {
+switch.verb("look", {
   say(if {switchOn} then {
     "It's your typical dual-state lightswitch. It is currently in the 'on' position."
   } else {
@@ -41,7 +41,7 @@ switch.command("look", {
   })
 })
 
-switch.command(list("toggle", "flip", "activate", "use"), {
+switch.verb(list("toggle", "flip", "activate", "use"), {
   switchOn = !switchOn
   say(if {switchOn} then {
     "You flip the switch 'on' and an overhead lamp illuminates."
@@ -71,7 +71,7 @@ room2.command("look", {
 })
 
 let pebblePile = room2.noun("pebble")
-pebblePile.command("take", {
+pebblePile.verb("take", {
   if {pebbleCount > 0} then {
     pebbleCount = pebbleCount - 1
     say("You pick up a pebble, place it in your pocket, and then immediately forget about it forever.")
