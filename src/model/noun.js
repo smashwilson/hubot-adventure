@@ -8,11 +8,12 @@ class Noun {
     return this.name
   }
 
-  defineCommand (verb, block) {
-    return this.room.defineCommand(`${verb} ${this.name}`, block)
+  defineVerb (verb, block) {
+    this.room.defineCommand(`${verb} ${this.name}`, block)
+    return this
   }
 
-  deleteCommand (verb) {
+  deleteVerb (verb) {
     return this.room.deleteCommand(`${verb} ${this.name}`)
   }
 

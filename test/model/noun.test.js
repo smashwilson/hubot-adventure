@@ -21,8 +21,8 @@ describe('Noun', function () {
   })
 
   describe('commands on its containing Room', function () {
-    it('defines a new command', function () {
-      n.defineCommand('push', makeBlock(10))
+    it('defines a new verb', function () {
+      n.defineVerb('push', makeBlock(10))
 
       assert.deepEqual(r.getCommands(), ['push thingy'])
 
@@ -30,18 +30,18 @@ describe('Noun', function () {
       assert.strictEqual(r.executeCommand('push thingy', i), 10)
     })
 
-    it('overwrites an existing command', function () {
-      n.defineCommand('pull', makeBlock(10))
-      n.defineCommand('pull', makeBlock(20))
+    it('overwrites an existing verb', function () {
+      n.defineVerb('pull', makeBlock(10))
+      n.defineVerb('pull', makeBlock(20))
 
       const i = new Interpreter()
       assert.strictEqual(r.executeCommand('pull thingy', i), 20)
     })
 
-    it('deletes a command', function () {
+    it('deletes a verb', function () {
       r.setFallThroughCommand(makeBlock(50))
-      n.defineCommand('lift', makeBlock(30))
-      n.deleteCommand('lift')
+      n.defineVerb('lift', makeBlock(30))
+      n.deleteVerb('lift')
 
       assert.lengthOf(r.getCommands(), 0)
 
