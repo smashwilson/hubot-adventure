@@ -32,6 +32,16 @@ describe("Room", {
       assert.isTrue(called)
     })
 
+    it("defines a command with aliases", {
+      let called = false
+
+      let room = defineRoom("id", "name")
+      room.command(list("one", "two", "three"), { called = true })
+
+      room.executeCommand("two")
+      assert.isTrue(called)
+    })
+
     it("sets a fallback command", {
       let caught = ""
       let room = defineRoom("id", "name")

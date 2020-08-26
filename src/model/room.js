@@ -130,6 +130,15 @@ class Room {
       t.Room, 'command', [t.String, tBlockR], t.Room,
       ({ receiver }, command, block) => receiver.defineCommand(command, block)
     )
+    methodRegistry.register(
+      t.Room, 'command', [tStringList, tBlockR], t.Room,
+      ({ receiver }, commands, block) => {
+        for (const command of commands) {
+          receiver.defineCommand(command, block)
+        }
+        return receiver
+      }
+    )
 
     methodRegistry.register(
       t.Room, 'deleteCommand', [t.String], t.Bool,

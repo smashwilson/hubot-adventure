@@ -189,6 +189,15 @@ class World {
       t.World, 'defineCommand', [t.String, tArglessBlock], t.World,
       ({ receiver }, command, block) => receiver.defineCommand(command, block)
     )
+    methodRegistry.register(
+      t.World, 'defineCommand', [tStringList, tArglessBlock], t.World,
+      ({ receiver }, commands, block) => {
+        for (const command of commands) {
+          receiver.defineCommand(command, block)
+        }
+        return receiver
+      }
+    )
 
     methodRegistry.register(
       t.World, 'deleteCommand', [t.String], t.Bool,

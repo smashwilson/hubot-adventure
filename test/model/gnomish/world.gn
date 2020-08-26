@@ -3,6 +3,9 @@ describe("World", {
     deleteRoom("one")
     deleteRoom("two")
     deleteCommand("doit")
+    deleteCommand("one")
+    deleteCommand("two")
+    deleteCommand("three")
   })
 
   describe("rooms", {
@@ -42,6 +45,14 @@ describe("World", {
 
       executeCommand("doit")
 
+      assert.isTrue(called)
+    })
+
+    it("defines a command with aliases", {
+      let called = false
+      defineCommand(list("one", "two", "three"), { called = true })
+
+      executeCommand("two")
       assert.isTrue(called)
     })
 
