@@ -210,7 +210,7 @@ describe('Interpreter', function () {
 
   describe('blocks', function () {
     it('creates a new Block with the appropriate AST nodes', function () {
-      const program = parse(`{x: Int, y: Int | x + y + 1}`).analyze(st, mr)
+      const program = parse('{x: Int, y: Int | x + y + 1}').analyze(st, mr)
       const { result } = program.interpret()
 
       const blockNode = program.node.getExprs()[0]

@@ -144,8 +144,8 @@ class Analyzer extends Visitor {
   visitArg (node) {
     super.visitArg(node)
 
-    let annotatedType = node.getTypeNode() && this.typeFromNode(node.getTypeNode())
-    let defType = node.getDefault() && node.getDefault().getType()
+    const annotatedType = node.getTypeNode() && this.typeFromNode(node.getTypeNode())
+    const defType = node.getDefault() && node.getDefault().getType()
 
     if (annotatedType && defType) {
       const u = this.unifyTypes(annotatedType, defType)

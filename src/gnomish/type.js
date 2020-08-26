@@ -286,7 +286,7 @@ class SplatType extends TypeWrapper {
 function makeType (name, params = []) {
   let base
   if (typeof name === 'string') {
-    let attr = null
+    const attr = null
 
     base = name.startsWith("'") ? new TypeParameter(name, attr) : new SimpleType(name, attr)
   } else {
