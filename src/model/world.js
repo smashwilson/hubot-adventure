@@ -119,11 +119,10 @@ class World {
   executeCommand (command, interpreter) {
     const globalCommand = this.globalCommands.get(command)
     if (globalCommand) {
-      globalCommand.evaluate(interpreter, [])
+      return globalCommand.evaluate(interpreter, [])
     } else {
-      this.fallThroughCommand.evaluate(interpreter, [command])
+      return this.fallThroughCommand.evaluate(interpreter, [command])
     }
-    return this
   }
 
   execute (source) {
@@ -198,7 +197,10 @@ class World {
 
     methodRegistry.register(
       t.World, 'executeCommand', [t.String], t.World,
-      ({ receiver, interpreter }, command) => receiver.executeCommand(command, interpreter)
+      ({ receiver, interpreter }, command) => {
+        receiver.executeCommand(command, interpreter)
+        return receiver
+      }
     )
 
     methodRegistry.register(
