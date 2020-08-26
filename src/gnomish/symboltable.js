@@ -70,7 +70,7 @@ class SymbolTable {
   }
 
   binding (name) {
-    let v = this.symbols.get(name)
+    const v = this.symbols.get(name)
     if (v === undefined) {
       if (this.parent) {
         const inherited = this.parent.binding(name)
