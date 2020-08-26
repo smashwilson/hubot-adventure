@@ -75,7 +75,7 @@ class Room {
     if (this.fallThroughCommand) {
       return this.fallThroughCommand.evaluate(interpreter, [command])
     }
-    return this.world.fallThroughCommand.evaluate(interpreter, [command])
+    return this.world.executeCommand(command, interpreter)
   }
 
   defineNoun (name) {

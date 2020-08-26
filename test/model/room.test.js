@@ -52,6 +52,15 @@ describe('Room', function () {
       assert.strictEqual(r.executeCommand('blarf', i), 12)
     })
 
+    it('executes a global command inherited from the World', function () {
+      w.defineCommand('global', makeBlock(13))
+
+      assert.lengthOf(r.getCommands(), [])
+
+      const i = new Interpreter()
+      assert.strictEqual(r.executeCommand('global', i), 13)
+    })
+
     it('executes a fall-through command inherited from the World', function () {
       w.setFallThroughCommand(makeBlock(15))
 
