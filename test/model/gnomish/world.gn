@@ -2,6 +2,7 @@ describe("World", {
   afterEach({
     deleteRoom("one")
     deleteRoom("two")
+    deleteCommand("doit")
   })
 
   describe("rooms", {
@@ -9,6 +10,62 @@ describe("World", {
       let room0 = defineRoom("one", "Room One")
       let room1 = defineRoom("one", "Room One")
       assert.same(room0, room1)
+
+      let names = getRooms().map({ room: Room | room.getID() })
+      assert.equal(names, list("one"))
+
+      assert.equal(getRoom("one"), some(room0))
+    })
+
+    it("deletes an existing room", {
+      defineRoom("one", "Room One")
+      defineRoom("two", "Room Two")
+
+      assert.equal(getRooms().map({ room: Room | room.getID() }), list("one", "two"))
+
+      deleteRoom("one")
+
+      assert.equal(getRooms().map({ room: Room | room.getID() }), list("two"))
+    })
+  })
+
+  describe("commands", {
+    it("defines a command", {
+      defineCommand("doit", { true })
+
+      assert.equal(getCommands(), list("doit"))
+    })
+
+    it("executes a command", {
+      let called = false
+      defineCommand("doit", { called = true })
+
+      executeCommand("doit")
+
+      assert.isTrue(called)
+    })
+
+    it("deletes a command", {
+      defineCommand("doit", { true })
+      deleteCommand("doit")
+
+      assert.isTrue(getCommands().empty())
+    })
+
+    it("sets a fallthrough command", {
+      let last = ""
+
+      defineCommand("doit", { true })
+      defineFallThroughCommand({ text: String | last = text })
+
+      executeCommand("fell through")
+      assert.equal(last, "fell through")
+
+      executeCommand("and this")
+      assert.equal(last, "and this")
+
+      executeCommand("doit")
+      assert.equal(last, "and this")
     })
   })
 })

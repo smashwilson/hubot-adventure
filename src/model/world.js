@@ -1,6 +1,8 @@
 const { SymbolTable } = require('../gnomish/symboltable')
 const { MethodRegistry } = require('../gnomish/methodregistry')
 const { TypeRegistry } = require('../gnomish/typeregistry')
+const { makeType } = require('../gnomish/type')
+const { Some, none } = require('../gnomish/stdlib/option')
 const { parse } = require('../gnomish')
 const { Game } = require('./game')
 const { Room } = require('./room')
@@ -79,12 +81,22 @@ class World {
     return Array.from(this.rooms.values())
   }
 
+  getRoom (id) {
+    const existing = this.rooms.get(id)
+    if (existing) {
+      return new Some(existing)
+    } else {
+      return none
+    }
+  }
+
   deleteRoom (id) {
     return this.rooms.delete(id)
   }
 
   defineCommand (command, block) {
-    return this.globalCommands.set(command, block)
+    this.globalCommands.set(command, block)
+    return this
   }
 
   deleteCommand (command) {
@@ -97,6 +109,7 @@ class World {
 
   setFallThroughCommand (block) {
     this.fallThroughCommand = block
+    return this
   }
 
   getFallThroughCommand () {
@@ -106,10 +119,11 @@ class World {
   executeCommand (command, interpreter) {
     const globalCommand = this.globalCommands.get(command)
     if (globalCommand) {
-      return globalCommand.evaluate(interpreter, [])
+      globalCommand.evaluate(interpreter, [])
     } else {
-      return this.fallThroughCommand.evaluate(interpreter, [command])
+      this.fallThroughCommand.evaluate(interpreter, [command])
     }
+    return this
   }
 
   execute (source) {
@@ -135,6 +149,11 @@ class World {
   }
 
   static registerMethods (t, symbolTable, methodRegistry) {
+    const tR = makeType("'R")
+    const tArglessBlock = makeType(t.Block, [tR])
+    const tStringBlock = makeType(t.Block, [tR, t.String])
+    const tStringList = makeType(t.List, [t.String])
+
     methodRegistry.register(
       t.World, 'say', [t.String], t.Option,
       ({ interpreter }, text) => {
@@ -155,6 +174,41 @@ class World {
     methodRegistry.register(
       t.World, 'deleteRoom', [t.String], t.Bool,
       ({ receiver }, id) => receiver.deleteRoom(id)
+    )
+
+    methodRegistry.register(
+      t.World, 'getRooms', [], makeType(t.List, [t.Room]),
+      ({ receiver }) => receiver.getRooms()
+    )
+
+    methodRegistry.register(
+      t.World, 'getRoom', [t.String], makeType(t.Option, [t.Room]),
+      ({ receiver }, id) => receiver.getRoom(id)
+    )
+
+    methodRegistry.register(
+      t.World, 'defineCommand', [t.String, tArglessBlock], t.World,
+      ({ receiver }, command, block) => receiver.defineCommand(command, block)
+    )
+
+    methodRegistry.register(
+      t.World, 'deleteCommand', [t.String], t.Bool,
+      ({ receiver }, command) => receiver.deleteCommand(command)
+    )
+
+    methodRegistry.register(
+      t.World, 'executeCommand', [t.String], t.World,
+      ({ receiver, interpreter }, command) => receiver.executeCommand(command, interpreter)
+    )
+
+    methodRegistry.register(
+      t.World, 'getCommands', [], tStringList,
+      ({ receiver }) => receiver.getCommands()
+    )
+
+    methodRegistry.register(
+      t.World, 'defineFallThroughCommand', [tStringBlock], t.World,
+      ({ receiver }, block) => receiver.setFallThroughCommand(block)
     )
   }
 }

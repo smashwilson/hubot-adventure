@@ -107,7 +107,15 @@ class Room {
   }
 
   static registerMethods (t, symbolTable, methodRegistry) {
-    //
+    methodRegistry.register(
+      t.Room, 'getID', [], t.String,
+      ({ receiver }) => receiver.getID()
+    )
+
+    methodRegistry.register(
+      t.Room, 'getName', [], t.String,
+      ({ receiver }) => receiver.getName()
+    )
   }
 }
 
