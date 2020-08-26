@@ -157,7 +157,7 @@ describe('World', function () {
     it('executes a default fall-through command', function () {
       const w = new World()
 
-      let said = []
+      const said = []
       const i = new Interpreter({ say (line) { said.push(line) } })
 
       w.executeCommand('jump', i)
