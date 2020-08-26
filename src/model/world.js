@@ -157,7 +157,7 @@ class World {
       t.World, 'say', [t.String], t.Option,
       ({ interpreter }, text) => {
         const context = interpreter.getContext()
-        if (context.say) {
+        if (context && context.say) {
           context.say(text)
         } else {
           console.log(text)

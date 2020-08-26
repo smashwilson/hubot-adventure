@@ -1,3 +1,4 @@
+const { makeType } = require('../gnomish/type')
 const { Noun } = require('./noun')
 const { NormalizingMap, UPPERCASE } = require('../normalizing-map')
 
@@ -32,6 +33,7 @@ class Room {
 
   defineCommand (command, block) {
     this.localCommands.set(command, block)
+    return this
   }
 
   deleteCommand (command) {
@@ -40,6 +42,7 @@ class Room {
 
   setFallThroughCommand (block) {
     this.fallThroughCommand = block
+    return this
   }
 
   getCommands () {
@@ -107,6 +110,12 @@ class Room {
   }
 
   static registerMethods (t, symbolTable, methodRegistry) {
+    const tR = makeType("'R")
+    const tBlockR = makeType(t.Block, [tR])
+    const tStringBlock = makeType(t.Block, [tR, t.String])
+    const tStringList = makeType(t.List, [t.String])
+    const tNounList = makeType(t.List, [t.Noun])
+
     methodRegistry.register(
       t.Room, 'getID', [], t.String,
       ({ receiver }) => receiver.getID()
@@ -115,6 +124,46 @@ class Room {
     methodRegistry.register(
       t.Room, 'getName', [], t.String,
       ({ receiver }) => receiver.getName()
+    )
+
+    methodRegistry.register(
+      t.Room, 'command', [t.String, tBlockR], t.Room,
+      ({ receiver }, command, block) => receiver.defineCommand(command, block)
+    )
+
+    methodRegistry.register(
+      t.Room, 'deleteCommand', [t.String], t.Bool,
+      ({ receiver }, command) => receiver.deleteCommand(command)
+    )
+
+    methodRegistry.register(
+      t.Room, 'fallThroughCommand', [tStringBlock], t.Room,
+      ({ receiver }, block) => receiver.setFallThroughCommand(block)
+    )
+
+    methodRegistry.register(
+      t.Room, 'executeCommand', [t.String], t.Room,
+      ({ receiver, interpreter }, command) => receiver.executeCommand(command, interpreter)
+    )
+
+    methodRegistry.register(
+      t.Room, 'getCommands', [], tStringList,
+      ({ receiver }) => receiver.getCommands()
+    )
+
+    methodRegistry.register(
+      t.Room, 'noun', [t.String], t.Noun,
+      ({ receiver }, name) => receiver.defineNoun(name)
+    )
+
+    methodRegistry.register(
+      t.Room, 'deleteNoun', [t.String], t.Bool,
+      ({ receiver }, name) => receiver.deleteNoun(name)
+    )
+
+    methodRegistry.register(
+      t.Room, 'getNouns', [], tNounList,
+      ({ receiver }) => receiver.getNouns()
     )
   }
 }

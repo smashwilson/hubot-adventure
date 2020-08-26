@@ -4,6 +4,10 @@ class Noun {
     this.name = name
   }
 
+  getName () {
+    return this.name
+  }
+
   defineCommand (verb, block) {
     return this.room.defineCommand(`${verb} ${this.name}`, block)
   }
@@ -17,7 +21,10 @@ class Noun {
   }
 
   static registerMethods (t, symbolTable, methodRegistry) {
-    //
+    methodRegistry.register(
+      t.Noun, 'getName', [], t.String,
+      ({ receiver }) => receiver.getName()
+    )
   }
 }
 

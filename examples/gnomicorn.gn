@@ -32,7 +32,7 @@ room1.command("look", {
   say(s)
 })
 
-let switch = room1.defineNoun("switch")
+let switch = room1.noun("switch")
 switch.command("look", {
   say(if {switchOn} then {
     "It's your typical dual-state lightswitch. It is currently in the 'on' position."
@@ -70,7 +70,7 @@ room2.command("look", {
   s << "There is a door to the west."
 })
 
-let pebblePile = room2.defineNoun("pebble")
+let pebblePile = room2.noun("pebble")
 pebblePile.command("take", {
   if {pebbleCount > 0} then {
     pebbleCount = pebbleCount - 1
