@@ -40,14 +40,14 @@ class Game {
   }
 
   createInterpreter (context) {
-    const interpreter = new Interpreter(context)
+    const interpreter = new Interpreter({ ...context, game: this })
     interpreter.addFrame(this.getSymbolTable().getFrame(), this.slots)
     return interpreter
   }
 
   execute (source, context) {
     return parse(source)
-      .setContext(context)
+      .setContext({ ...context, game: this })
       .analyze(this.getSymbolTable(), this.getMethodRegistry())
       .interpret(this.getSymbolTable().getFrame(), this.slots)
   }

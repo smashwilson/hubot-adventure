@@ -42,4 +42,18 @@ describe('Game', function () {
     game.executeCommand('aaa')
     assert.strictEqual(game.execute('x').result, 'ran in room0')
   })
+
+  it('allows commands to modify the current room', function () {
+    room0.defineCommand('east', world.execute('{ setCurrentRoomID("id1") }').result)
+
+    const game0 = world.createGame('0')
+    const game1 = world.createGame('1')
+
+    assert.strictEqual(game0.getCurrentRoom().getValue(), room0)
+
+    game0.executeCommand('east')
+    assert.strictEqual(game0.getCurrentRoom().getValue(), room1)
+    assert.strictEqual(game1.getCurrentRoom().getValue(), room0)
+    assert.strictEqual(world.getDefaultRoom().getValue(), room0)
+  })
 })

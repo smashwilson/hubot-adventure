@@ -236,6 +236,29 @@ class World {
     )
 
     methodRegistry.register(
+      t.World, 'getCurrentRoom', [], tOptionRoom,
+      ({ interpreter }) => {
+        const context = interpreter.getContext()
+        if (!context || !context.game) {
+          return none
+        }
+        return context.game.getCurrentRoom()
+      }
+    )
+
+    methodRegistry.register(
+      t.World, 'setCurrentRoomID', [t.String], t.Bool,
+      ({ receiver, interpreter }, id) => {
+        const context = interpreter.getContext()
+        if (!context || !context.game) {
+          return none
+        }
+        context.game.setCurrentRoomID(id)
+        return receiver.getRoom(id).hasValue()
+      }
+    )
+
+    methodRegistry.register(
       t.World, 'getRooms', [], makeType(t.List, [t.Room]),
       ({ receiver }) => receiver.getRooms()
     )
