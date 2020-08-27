@@ -22,10 +22,11 @@ class Game {
     return i
   }
 
-  execute (source) {
-    const program = parse(source).analyze(this.getSymbolTable(), this.getMethodRegistry())
-    const interpreter = this.createInterpreter()
-    return { result: interpreter.visit(program.node) }
+  execute (source, context) {
+    return parse(source)
+      .setContext(context)
+      .analyze(this.getSymbolTable(), this.getMethodRegistry())
+      .interpret(this.getSymbolTable().getFrame(), this.slots)
   }
 }
 
