@@ -19,7 +19,7 @@ class Game {
     return this.world.getMethodRegistry()
   }
 
-  setCurrentRoom (id) {
+  setCurrentRoomID (id) {
     const entry = this.getSymbolTable().at(CURRENT_ROOM_ID_SLOT)
     this.slots[entry.getSlot()] = new Some(id)
   }

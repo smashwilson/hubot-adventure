@@ -34,11 +34,11 @@ describe('Game', function () {
 
     const game = world.createGame('0')
 
-    game.setCurrentRoom('id1')
+    game.setCurrentRoomID('id1')
     game.executeCommand('aaa')
     assert.strictEqual(game.execute('x').result, 'ran in room1')
 
-    game.setCurrentRoom('id0')
+    game.setCurrentRoomID('id0')
     game.executeCommand('aaa')
     assert.strictEqual(game.execute('x').result, 'ran in room0')
   })
