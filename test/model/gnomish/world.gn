@@ -37,6 +37,24 @@ describe("World", {
 
       assert.equal(getRooms().map({ room: Room | room.getID() }), list("two"))
     })
+
+    it("designates a default room", {
+      assert.equal(getDefaultRoom(), none)
+
+      let room1 = defineRoom("one", "Room One")
+      let room2 = defineRoom("two", "Room Two")
+
+      assert.equal(getDefaultRoom(), some(room1))
+
+      setDefaultRoomID("two")
+      assert.equal(getDefaultRoom(), some(room2))
+
+      deleteRoom("two")
+      assert.equal(getDefaultRoom(), some(room1))
+
+      deleteRoom("one")
+      assert.equal(getDefaultRoom(), none)
+    })
   })
 
   describe("commands", {

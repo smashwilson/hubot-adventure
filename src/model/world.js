@@ -200,6 +200,7 @@ class World {
     const tArglessBlock = makeType(t.Block, [tR])
     const tStringBlock = makeType(t.Block, [tR, t.String])
     const tStringList = makeType(t.List, [t.String])
+    const tOptionRoom = makeType(t.Option, [t.Room])
 
     methodRegistry.register(
       t.World, 'say', [t.String], t.Option,
@@ -222,6 +223,16 @@ class World {
     methodRegistry.register(
       t.World, 'deleteRoom', [t.String], t.Bool,
       ({ receiver }, id) => receiver.deleteRoom(id)
+    )
+
+    methodRegistry.register(
+      t.World, 'getDefaultRoom', [], tOptionRoom,
+      ({ receiver }) => receiver.getDefaultRoom()
+    )
+
+    methodRegistry.register(
+      t.World, 'setDefaultRoomID', [t.String], t.Bool,
+      ({ receiver }, id) => receiver.setDefaultRoomID(id)
     )
 
     methodRegistry.register(
