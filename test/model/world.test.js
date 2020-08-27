@@ -113,6 +113,23 @@ describe('World', function () {
       assert.strictEqual(wResult, 10)
     })
 
+    it('deep-copies game slots for each game', function () {
+      const w = new World()
+      w.execute('letgame x = list("a")')
+
+      const g0 = w.createGame('C0')
+      const g1 = w.createGame('C1')
+
+      g0.execute('x << "in game g0"')
+      g1.execute('x << "in game g1"')
+
+      const { result: g0Result } = g0.execute('x')
+      assert.deepEqual(g0Result, ['a', 'in game g0'])
+
+      const { result: g1Result } = g1.execute('x')
+      assert.deepEqual(g1Result, ['a', 'in game g1'])
+    })
+
     it('deletes Games', function () {
       const w = new World()
 

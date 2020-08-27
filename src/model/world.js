@@ -40,7 +40,17 @@ class World {
   getMethodRegistry () { return this.methodRegistry }
 
   createGameSlots () {
-    return this.prototypeSlots.slice()
+    const copyMatches = new Map()
+    const replicated = []
+    this.symbolTable.withSlotTypes(this.prototypeSlots, (value, type) => {
+      let match = copyMatches.get(type)
+      if (!match) {
+        match = this.methodRegistry.lookup(this.symbolTable, type, 'copy', [])
+        copyMatches.set(type, match)
+      }
+      replicated.push(match.invoke({ receiver: value, selector: 'copy' }))
+    })
+    return replicated
   }
 
   createGame (channel) {
