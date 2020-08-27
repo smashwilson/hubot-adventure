@@ -19,7 +19,7 @@ describe("Bool", {
   })
 
   it("copies by identity", {
-    assert.equal(true.copy(), true)
-    assert.equal(false.copy(), false)
+    assert.same(true.copy(), true)
+    assert.same(false.copy(), false)
   })
 })

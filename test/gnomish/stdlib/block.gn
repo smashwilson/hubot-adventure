@@ -37,6 +37,6 @@ describe("Block", {
 
   it("copies by identity", {
     let b = { x: Int, y: String | y }
-    assert.equal(b.copy(), b)
+    assert.same(b.copy(), b)
   })
 })

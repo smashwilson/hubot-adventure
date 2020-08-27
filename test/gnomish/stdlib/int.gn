@@ -33,6 +33,6 @@ describe("Int", {
   })
 
   it("copies by identity", {
-    assert.equal(3.copy(), 3)
+    assert.same(3.copy(), 3)
   })
 })
