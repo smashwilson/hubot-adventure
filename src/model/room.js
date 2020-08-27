@@ -50,6 +50,11 @@ class Room {
   }
 
   executeCommand (command, interpreter) {
+    const localBlock = this.localCommands.get(command)
+    if (localBlock) {
+      return localBlock.evaluate(interpreter, [])
+    }
+
     if (command === 'look') {
       let lookCommand
 
@@ -71,10 +76,6 @@ class Room {
       return lookCommand.evaluate(interpreter, [])
     }
 
-    const localBlock = this.localCommands.get(command)
-    if (localBlock) {
-      return localBlock.evaluate(interpreter, [])
-    }
     if (this.fallThroughCommand) {
       return this.fallThroughCommand.evaluate(interpreter, [command])
     }
