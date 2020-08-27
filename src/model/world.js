@@ -125,8 +125,9 @@ class World {
     }
   }
 
-  execute (source) {
+  execute (source, context) {
     const program = parse(source).analyze(this.symbolTable, this.methodRegistry)
+    program.setContext(context)
     return program.interpret(this.symbolTable.getFrame(), this.prototypeSlots)
   }
 
