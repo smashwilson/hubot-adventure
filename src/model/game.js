@@ -1,5 +1,4 @@
 const { parse } = require('../gnomish')
-const { Interpreter } = require('../gnomish/interpreter')
 
 class Game {
   constructor (world, channel) {
@@ -20,12 +19,6 @@ class Game {
   getCurrentRoom () {
     const roomOpt = this.world.getRoom(this.currentRoomID)
     return roomOpt.hasValue() ? roomOpt.getValue() : this.world.getDefaultRoom()
-  }
-
-  createInterpreter () {
-    const i = new Interpreter()
-    i.addFrame(this.getSymbolTable().getFrame(), this.slots)
-    return i
   }
 
   execute (source, context) {
