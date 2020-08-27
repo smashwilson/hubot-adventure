@@ -57,6 +57,7 @@ class Room {
 
     if (command === 'look') {
       let lookCommand
+      const context = interpreter.getContext()
 
       const finalName = this.name.replace(/"/g, '\\"')
       if (this.description.length > 0) {
@@ -68,9 +69,9 @@ class Room {
           .replace(nounsRx, match => match.toUpperCase())
           .replace(/"/g, '\\"')
 
-        lookCommand = this.world.execute(`{ say("**${finalName}**\n\n${finalDescription}") }`).result
+        lookCommand = this.world.execute(`{ say("**${finalName}**\n\n${finalDescription}") }`, context).result
       } else {
-        lookCommand = this.world.execute(`{ say("**${finalName}**") }`).result
+        lookCommand = this.world.execute(`{ say("**${finalName}**") }`, context).result
       }
 
       return lookCommand.evaluate(interpreter, [])
