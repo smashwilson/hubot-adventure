@@ -238,5 +238,25 @@ describe('World', function () {
 
       assert.deepEqual(w.getRooms(), [r1])
     })
+
+    it('designates a default Room', function () {
+      const w = new World()
+
+      assert.throws(() => w.getDefaultRoom(), /no rooms defined/)
+
+      const r0 = w.defineRoom('id0', 'zero')
+      const r1 = w.defineRoom('id1', 'one')
+
+      assert.strictEqual(w.getDefaultRoom(), r0)
+
+      w.setDefaultRoom('id1')
+      assert.strictEqual(w.getDefaultRoom(), r1)
+
+      w.deleteRoom('id1')
+      assert.strictEqual(w.getDefaultRoom(), r0)
+
+      w.deleteRoom('id0')
+      assert.throws(() => w.getDefaultRoom(), /no rooms defined/)
+    })
   })
 })

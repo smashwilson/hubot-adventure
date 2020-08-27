@@ -28,6 +28,7 @@ class World {
 
     this.games = new Map()
     this.rooms = new NormalizingMap()
+    this.defaultRoom = null
 
     this.globalCommands = new NormalizingMap()
     this.fallThroughCommand = this.execute(`
@@ -83,6 +84,9 @@ class World {
     } else {
       const created = new Room(this, id, name)
       this.rooms.set(id, created)
+      if (!this.defaultRoom) {
+        this.defaultRoom = created
+      }
       return created
     }
   }
@@ -101,7 +105,25 @@ class World {
   }
 
   deleteRoom (id) {
-    return this.rooms.delete(id)
+    const result = this.rooms.delete(id)
+    if (this.defaultRoom && this.defaultRoom.getID() === id) {
+      this.defaultRoom = this.rooms.firstValue() || null
+    }
+    return result
+  }
+
+  getDefaultRoom () {
+    if (!this.defaultRoom) {
+      throw new Error('World has no rooms defined')
+    }
+    return this.defaultRoom
+  }
+
+  setDefaultRoom (id) {
+    const roomOpt = this.getRoom(id)
+    if (roomOpt.hasValue()) {
+      this.defaultRoom = roomOpt.getValue()
+    }
   }
 
   defineCommand (command, block) {
