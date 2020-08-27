@@ -6,6 +6,7 @@ const { World } = require('../../src/model/world')
 const { Block } = require('../../src/gnomish/stdlib/block')
 const { ExprListNode, StringNode } = require('../../src/gnomish/ast')
 const { Interpreter } = require('../../src/gnomish/interpreter')
+const { none } = require('../../src/gnomish/stdlib/option')
 
 describe('World', function () {
   function makeBlock (s) {
@@ -66,7 +67,7 @@ describe('World', function () {
     it('compiles and executes Gnomish code with a prototypical game slot frame', function () {
       const w = new World()
 
-      assert.lengthOf(w.prototypeSlots, 0)
+      assert.lengthOf(w.prototypeSlots, 1)
 
       const { result: result0 } = w.execute(`
         letgame x = 1
@@ -78,13 +79,14 @@ describe('World', function () {
 
       const st = w.getSymbolTable()
       assert.isFalse(st.at('x').isStatic())
-      assert.strictEqual(st.at('x').getSlot(), 0)
+      assert.strictEqual(st.at('x').getSlot(), 1)
       assert.isFalse(st.at('y').isStatic())
-      assert.strictEqual(st.at('y').getSlot(), 1)
+      assert.strictEqual(st.at('y').getSlot(), 2)
 
-      assert.lengthOf(w.prototypeSlots, 2)
-      assert.strictEqual(w.prototypeSlots[0], 1)
-      assert.strictEqual(w.prototypeSlots[1], 'yes')
+      assert.lengthOf(w.prototypeSlots, 3)
+      assert.strictEqual(w.prototypeSlots[0], none)
+      assert.strictEqual(w.prototypeSlots[1], 1)
+      assert.strictEqual(w.prototypeSlots[2], 'yes')
 
       const { result: result1 } = w.execute(`
         letgame z = x + 10
@@ -93,12 +95,13 @@ describe('World', function () {
       assert.strictEqual(result1, 55)
 
       assert.isFalse(st.at('z').isStatic())
-      assert.strictEqual(st.at('z').getSlot(), 2)
+      assert.strictEqual(st.at('z').getSlot(), 3)
 
-      assert.lengthOf(w.prototypeSlots, 3)
-      assert.strictEqual(w.prototypeSlots[0], 1)
-      assert.strictEqual(w.prototypeSlots[1], 'yes')
-      assert.strictEqual(w.prototypeSlots[2], 11)
+      assert.lengthOf(w.prototypeSlots, 4)
+      assert.strictEqual(w.prototypeSlots[0], none)
+      assert.strictEqual(w.prototypeSlots[1], 1)
+      assert.strictEqual(w.prototypeSlots[2], 'yes')
+      assert.strictEqual(w.prototypeSlots[3], 11)
     })
 
     it('constructs Games with a new game slot frame', function () {
@@ -139,14 +142,14 @@ describe('World', function () {
       const r1 = w.defineRoom('id1', 'one')
       const r2 = w.defineRoom('id2', 'two')
 
-      w.setDefaultRoom('id1')
+      w.setDefaultRoomID('id1')
       const g0 = w.createGame('C0')
-      assert.strictEqual(g0.getCurrentRoom(), r1)
+      assert.strictEqual(g0.getCurrentRoom().getValue(), r1)
 
-      w.setDefaultRoom('id2')
+      w.setDefaultRoomID('id2')
       const g1 = w.createGame('C1')
-      assert.strictEqual(g0.getCurrentRoom(), r1)
-      assert.strictEqual(g1.getCurrentRoom(), r2)
+      assert.strictEqual(g0.getCurrentRoom().getValue(), r1)
+      assert.strictEqual(g1.getCurrentRoom().getValue(), r2)
     })
 
     it('deletes Games', function () {
@@ -262,21 +265,21 @@ describe('World', function () {
     it('designates a default Room', function () {
       const w = new World()
 
-      assert.throws(() => w.getDefaultRoom(), /no rooms defined/)
+      assert.isFalse(w.getDefaultRoom().hasValue())
 
       const r0 = w.defineRoom('id0', 'zero')
       const r1 = w.defineRoom('id1', 'one')
 
-      assert.strictEqual(w.getDefaultRoom(), r0)
+      assert.strictEqual(w.getDefaultRoom().getValue(), r0)
 
-      w.setDefaultRoom('id1')
-      assert.strictEqual(w.getDefaultRoom(), r1)
+      w.setDefaultRoomID('id1')
+      assert.strictEqual(w.getDefaultRoom().getValue(), r1)
 
       w.deleteRoom('id1')
-      assert.strictEqual(w.getDefaultRoom(), r0)
+      assert.strictEqual(w.getDefaultRoom().getValue(), r0)
 
       w.deleteRoom('id0')
-      assert.throws(() => w.getDefaultRoom(), /no rooms defined/)
+      assert.isFalse(w.getDefaultRoom().hasValue())
     })
   })
 })

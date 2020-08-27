@@ -20,15 +20,18 @@ class World {
     this.methodRegistry = rootRegistry.push()
 
     const tWorld = this.symbolTable.at('World').getValue()
+    const tOption = this.symbolTable.at('Option').getValue()
+    const tString = this.symbolTable.at('String').getValue()
+    const tOptionString = makeType(tOption, [tString])
 
     this.symbolTable.setStatic('world', tWorld, this)
     this.symbolTable.setStatic('this', tWorld, this)
 
-    this.prototypeSlots = []
+    this.currentRoomSlot = this.symbolTable.allocateSlot(Game.prototype.CURRENT_ROOM_ID_SLOT, tOptionString)
+    this.prototypeSlots = [none]
 
     this.games = new Map()
     this.rooms = new NormalizingMap()
-    this.defaultRoom = null
 
     this.globalCommands = new NormalizingMap()
     this.fallThroughCommand = this.execute(`
@@ -84,8 +87,8 @@ class World {
     } else {
       const created = new Room(this, id, name)
       this.rooms.set(id, created)
-      if (!this.defaultRoom) {
-        this.defaultRoom = created
+      if (!this.getDefaultRoom().hasValue()) {
+        this.setDefaultRoomID(id)
       }
       return created
     }
@@ -105,25 +108,37 @@ class World {
   }
 
   deleteRoom (id) {
+    const defaultRoomID = this.getDefaultRoomID()
+    const wasDefaultRoom = defaultRoomID.hasValue() && defaultRoomID.getValue() === id
     const result = this.rooms.delete(id)
-    if (this.defaultRoom && this.defaultRoom.getID() === id) {
-      this.defaultRoom = this.rooms.firstValue() || null
+    if (wasDefaultRoom) {
+      const first = this.rooms.firstValue() || null
+      if (first) {
+        this.setDefaultRoomID(first.getID())
+      } else {
+        this.prototypeSlots[this.currentRoomSlot.getSlot()] = none
+      }
     }
     return result
   }
 
-  getDefaultRoom () {
-    if (!this.defaultRoom) {
-      throw new Error('World has no rooms defined')
-    }
-    return this.defaultRoom
+  getDefaultRoomID () {
+    return this.prototypeSlots[this.currentRoomSlot.getSlot()]
   }
 
-  setDefaultRoom (id) {
+  getDefaultRoom () {
+    const idOpt = this.getDefaultRoomID()
+    return idOpt.hasValue() ? this.getRoom(idOpt.getValue()) : none
+  }
+
+  setDefaultRoomID (id) {
     const roomOpt = this.getRoom(id)
-    if (roomOpt.hasValue()) {
-      this.defaultRoom = roomOpt.getValue()
+    if (!roomOpt.hasValue()) {
+      return false
     }
+
+    this.prototypeSlots[this.currentRoomSlot.getSlot()] = new Some(id)
+    return true
   }
 
   defineCommand (command, block) {

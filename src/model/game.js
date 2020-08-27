@@ -1,12 +1,14 @@
 const { parse } = require('../gnomish')
 const { Interpreter } = require('../gnomish/interpreter')
+const { Some, none } = require('../gnomish/stdlib/option')
+
+const CURRENT_ROOM_ID_SLOT = 'currentRoomID'
 
 class Game {
   constructor (world, channel) {
     this.world = world
     this.channel = channel
     this.slots = this.world.createGameSlots()
-    this.currentRoomID = this.world.getDefaultRoom().getID()
   }
 
   getSymbolTable () {
@@ -18,14 +20,23 @@ class Game {
   }
 
   setCurrentRoom (id) {
-    if (this.world.getRoom(id).hasValue()) {
-      this.currentRoomID = id
-    }
+    const entry = this.getSymbolTable().at(CURRENT_ROOM_ID_SLOT)
+    this.slots[entry.getSlot()] = new Some(id)
   }
 
   getCurrentRoom () {
-    const roomOpt = this.world.getRoom(this.currentRoomID)
-    return roomOpt.hasValue() ? roomOpt.getValue() : this.world.getDefaultRoom()
+    const entry = this.getSymbolTable().at(CURRENT_ROOM_ID_SLOT)
+    const idOpt = this.slots[entry.getSlot()]
+    if (!idOpt.hasValue()) {
+      return none
+    }
+
+    const roomOpt = this.world.getRoom(idOpt.getValue())
+    if (!roomOpt.hasValue()) {
+      return this.world.getDefaultRoom()
+    }
+
+    return roomOpt
   }
 
   createInterpreter (context) {
@@ -47,5 +58,7 @@ class Game {
     return room.executeCommand(command, interpreter)
   }
 }
+
+Game.prototype.CURRENT_ROOM_ID_SLOT = CURRENT_ROOM_ID_SLOT
 
 module.exports = { Game }
