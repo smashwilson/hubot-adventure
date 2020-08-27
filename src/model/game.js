@@ -6,6 +6,7 @@ class Game {
     this.world = world
     this.channel = channel
     this.slots = this.world.createGameSlots()
+    this.currentRoomID = this.world.getDefaultRoom().getID()
   }
 
   getSymbolTable () {
@@ -14,6 +15,11 @@ class Game {
 
   getMethodRegistry () {
     return this.world.getMethodRegistry()
+  }
+
+  getCurrentRoom () {
+    const roomOpt = this.world.getRoom(this.currentRoomID)
+    return roomOpt.hasValue() ? roomOpt.getValue() : this.world.getDefaultRoom()
   }
 
   createInterpreter () {

@@ -51,6 +51,7 @@ describe('World', function () {
   describe('Games', function () {
     it('creates a Game with its symbol table and method registry', function () {
       const w = new World()
+      w.defineRoom('id', 'room')
       const g = w.createGame('C1234')
 
       assert.deepEqual(w.getGames(), [g])
@@ -102,6 +103,7 @@ describe('World', function () {
 
     it('constructs Games with a new game slot frame', function () {
       const w = new World()
+      w.defineRoom('id', 'room')
 
       w.execute('letgame x = 10')
 
@@ -115,6 +117,7 @@ describe('World', function () {
 
     it('deep-copies game slots for each game', function () {
       const w = new World()
+      w.defineRoom('id', 'room')
       w.execute('letgame x = list("a")')
 
       const g0 = w.createGame('C0')
@@ -130,8 +133,25 @@ describe('World', function () {
       assert.deepEqual(g1Result, ['a', 'in game g1'])
     })
 
+    it('begins each new Game with a current room set to the World default', function () {
+      const w = new World()
+      w.defineRoom('id0', 'zero')
+      const r1 = w.defineRoom('id1', 'one')
+      const r2 = w.defineRoom('id2', 'two')
+
+      w.setDefaultRoom('id1')
+      const g0 = w.createGame('C0')
+      assert.strictEqual(g0.getCurrentRoom(), r1)
+
+      w.setDefaultRoom('id2')
+      const g1 = w.createGame('C1')
+      assert.strictEqual(g0.getCurrentRoom(), r1)
+      assert.strictEqual(g1.getCurrentRoom(), r2)
+    })
+
     it('deletes Games', function () {
       const w = new World()
+      w.defineRoom('id', 'room')
 
       const g0 = w.createGame('A123')
       const g1 = w.createGame('B456')
