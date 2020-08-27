@@ -163,6 +163,7 @@ class World {
         } else {
           console.log(text)
         }
+        return none
       }
     )
 
