@@ -11,6 +11,7 @@ class Program {
 
   setContext (context) {
     this.context = context
+    return this
   }
 
   analyze (symbolTable, methodRegistry) {
