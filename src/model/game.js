@@ -55,7 +55,11 @@ class Game {
   executeCommand (command, context) {
     const interpreter = this.createInterpreter(context)
     const room = this.getCurrentRoom()
-    return room.executeCommand(command, interpreter)
+    if (room.hasValue()) {
+      return room.getValue().executeCommand(command, interpreter)
+    } else {
+      return this.world.executeCommand(command, interpreter)
+    }
   }
 }
 
