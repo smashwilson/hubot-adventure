@@ -60,4 +60,14 @@ describe('NormalizingMap', function () {
 
     assert.deepEqual(Array.from(m.keys()), ['AAA BBB CCC', 'ZZ BBB'])
   })
+
+  it('accesses the first value if populated', function () {
+    const m = new NormalizingMap()
+    assert.isUndefined(m.firstValue())
+
+    m.set('z', 'zzz')
+    m.set('a', 'aaa')
+
+    assert.strictEqual(m.firstValue(), 'zzz')
+  })
 })

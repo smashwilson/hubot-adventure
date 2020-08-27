@@ -35,6 +35,13 @@ class NormalizingMap {
   clear () {
     return this.inner.clear()
   }
+
+  firstValue () {
+    for (const [, value] of this.inner) {
+      return value
+    }
+    return undefined
+  }
 }
 
 function normalize (input, targetCase) {
