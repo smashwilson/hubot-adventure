@@ -126,5 +126,18 @@ module.exports = {
         }
         return none
       })
+
+    methodRegistry.register(
+      t.Assert, 'said', [t.String], t.Option,
+      ({ interpreter }, needle) => {
+        const context = interpreter.getContext()
+        if (!context || !context.wasSaid) {
+          assert.fail(null, null, 'assert.said may not be used without {wasSaid} in interpreter context')
+        } else if (!context.wasSaid(needle)) {
+          assert.fail(null, null, `"${needle}" was not passed to say()`)
+        }
+        return none
+      }
+    )
   }
 }

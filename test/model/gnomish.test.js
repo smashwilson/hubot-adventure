@@ -15,7 +15,15 @@ describe('Gnomish domain model', function () {
     const testSource = fs.readFileSync(testPath, { encoding: 'utf8' })
     const normalized = testSource.replace(/\r\n/g, '\n')
     try {
-      world.execute(normalized)
+      world.execute(normalized, {
+        say: str => {
+          if (!this.said) {
+            this.said = []
+          }
+          this.said.push(str)
+        },
+        wasSaid: str => this.said && this.said.includes(str)
+      })
     } catch (e) {
       it(`cannot parse ${testPath}`, function () {
         chai.assert.fail(null, null, e.message)

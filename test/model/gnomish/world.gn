@@ -8,6 +8,13 @@ describe("World", {
     deleteCommand("three")
   })
 
+  describe("say", {
+    it("outputs its argument", {
+      say("something")
+      assert.said("something")
+    })
+  })
+
   describe("rooms", {
     it("defines a new room", {
       let room0 = defineRoom("one", "Room One")
