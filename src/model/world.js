@@ -7,6 +7,7 @@ const { parse } = require('../gnomish')
 const { Game } = require('./game')
 const { Room } = require('./room')
 const { Noun } = require('./noun')
+const { registerCommandMethods, registerFallthroughMethods } = require('./commands')
 const { NormalizingMap } = require('../normalizing-map')
 
 const stdlib = require('../gnomish/stdlib')
@@ -196,9 +197,6 @@ class World {
   }
 
   static registerMethods (t, symbolTable, methodRegistry) {
-    const tR = makeType("'R")
-    const tArglessBlock = makeType(t.Block, [tR])
-    const tStringBlock = makeType(t.Block, [tR, t.String])
     const tStringList = makeType(t.List, [t.String])
     const tOptionRoom = makeType(t.Option, [t.Room])
 
@@ -268,19 +266,13 @@ class World {
       ({ receiver }, id) => receiver.getRoom(id)
     )
 
-    methodRegistry.register(
-      t.World, 'defineCommand', [t.String, tArglessBlock], t.World,
-      ({ receiver }, command, block) => receiver.defineCommand(command, block)
-    )
-    methodRegistry.register(
-      t.World, 'defineCommand', [tStringList, tArglessBlock], t.World,
-      ({ receiver }, commands, block) => {
-        for (const command of commands) {
-          receiver.defineCommand(command, block)
-        }
-        return receiver
-      }
-    )
+    registerCommandMethods({
+      t,
+      methodRegistry,
+      methodName: 'defineCommand',
+      receiverType: t.World,
+      receiverMethod: 'defineCommand'
+    })
 
     methodRegistry.register(
       t.World, 'deleteCommand', [t.String], t.Bool,
@@ -300,10 +292,13 @@ class World {
       ({ receiver }) => receiver.getCommands()
     )
 
-    methodRegistry.register(
-      t.World, 'defineFallThroughCommand', [tStringBlock], t.World,
-      ({ receiver }, block) => receiver.setFallThroughCommand(block)
-    )
+    registerFallthroughMethods({
+      t,
+      methodRegistry,
+      methodName: 'defineFallThroughCommand',
+      receiverType: t.World,
+      receiverMethod: 'setFallThroughCommand'
+    })
   }
 }
 

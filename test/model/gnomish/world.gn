@@ -73,6 +73,20 @@ describe("World", {
       assert.isTrue(called)
     })
 
+    it("defines a command with a block that returns a String", {
+      defineCommand("doit", { "string" })
+      executeCommand("doit")
+
+      assert.said("string")
+    })
+
+    it("defines a command with a String", {
+      defineCommand("doit", "string")
+      executeCommand("doit")
+
+      assert.said("string")
+    })
+
     it("defines a command with aliases", {
       let called = false
       defineCommand(list("one", "two", "three"), { called = true })
@@ -102,6 +116,20 @@ describe("World", {
 
       executeCommand("doit")
       assert.equal(last, "and this")
+    })
+
+    it("sets a fallthrough command with a block that returns a String", {
+      defineFallThroughCommand({ text: String | "I got: " + text })
+      executeCommand("fell through")
+
+      assert.said("I got: fell through")
+    })
+
+    it("sets a fallthrough command with a String", {
+      defineFallThroughCommand("fallthrough triggered")
+      executeCommand("fell through")
+
+      assert.said("fallthrough triggered")
     })
   })
 })
