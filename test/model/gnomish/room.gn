@@ -42,6 +42,22 @@ describe("Room", {
       assert.isTrue(called)
     })
 
+    it("defines a command with a Block that returns a String", {
+      let room = defineRoom("id", "name")
+      room.command("do it", { "string" })
+
+      room.executeCommand("do it")
+      assert.said("string")
+    })
+
+    it("defines a command with a String", {
+      let room = defineRoom("id", "name")
+      room.command("do it", "something")
+
+      room.executeCommand("do it")
+      assert.said("something")
+    })
+
     it("sets a fallback command", {
       let caught = ""
       let room = defineRoom("id", "name")
@@ -53,6 +69,23 @@ describe("Room", {
 
       room.executeCommand("whatever")
       assert.equal("whatever", caught)
+    })
+
+    it("sets a fallback command with a Block that returns a String", {
+      let room = defineRoom("id", "name")
+      room.fallThroughCommand({ command: String | "I saw: " + command })
+
+      room.executeCommand("whatever")
+      assert.said("I saw: whatever")
+    })
+
+    it("sets a fallback command with a String", {
+      let caught = ""
+      let room = defineRoom("id", "name")
+      room.fallThroughCommand("no")
+
+      room.executeCommand("whatever")
+      assert.said("no")
     })
   })
 

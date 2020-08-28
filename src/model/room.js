@@ -1,5 +1,6 @@
 const { makeType } = require('../gnomish/type')
 const { Noun } = require('./noun')
+const { registerCommandMethods, registerFallthroughMethods } = require('./commands')
 const { NormalizingMap, UPPERCASE } = require('../normalizing-map')
 
 class Room {
@@ -112,9 +113,6 @@ class Room {
   }
 
   static registerMethods (t, symbolTable, methodRegistry) {
-    const tR = makeType("'R")
-    const tBlockR = makeType(t.Block, [tR])
-    const tStringBlock = makeType(t.Block, [tR, t.String])
     const tStringList = makeType(t.List, [t.String])
     const tNounList = makeType(t.List, [t.Noun])
 
@@ -128,29 +126,26 @@ class Room {
       ({ receiver }) => receiver.getName()
     )
 
-    methodRegistry.register(
-      t.Room, 'command', [t.String, tBlockR], t.Room,
-      ({ receiver }, command, block) => receiver.defineCommand(command, block)
-    )
-    methodRegistry.register(
-      t.Room, 'command', [tStringList, tBlockR], t.Room,
-      ({ receiver }, commands, block) => {
-        for (const command of commands) {
-          receiver.defineCommand(command, block)
-        }
-        return receiver
-      }
-    )
+    registerCommandMethods({
+      t,
+      methodRegistry,
+      methodName: 'command',
+      receiverType: t.Room,
+      receiverMethod: 'defineCommand'
+    })
 
     methodRegistry.register(
       t.Room, 'deleteCommand', [t.String], t.Bool,
       ({ receiver }, command) => receiver.deleteCommand(command)
     )
 
-    methodRegistry.register(
-      t.Room, 'fallThroughCommand', [tStringBlock], t.Room,
-      ({ receiver }, block) => receiver.setFallThroughCommand(block)
-    )
+    registerFallthroughMethods({
+      t,
+      methodRegistry,
+      methodName: 'fallThroughCommand',
+      receiverType: t.Room,
+      receiverMethod: 'setFallThroughCommand'
+    })
 
     methodRegistry.register(
       t.Room, 'executeCommand', [t.String], t.Room,
