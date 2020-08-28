@@ -1,4 +1,4 @@
-const { makeType } = require('../gnomish/type')
+const { registerCommandMethods } = require('./commands')
 
 class Noun {
   constructor (room, name) {
@@ -24,28 +24,18 @@ class Noun {
   }
 
   static registerMethods (t, symbolTable, methodRegistry) {
-    const tR = makeType("'R")
-    const tBlockR = makeType(t.Block, [tR])
-    const tStringList = makeType(t.List, [t.String])
-
     methodRegistry.register(
       t.Noun, 'getName', [], t.String,
       ({ receiver }) => receiver.getName()
     )
 
-    methodRegistry.register(
-      t.Noun, 'verb', [t.String, tBlockR], t.Noun,
-      ({ receiver }, verb, block) => receiver.defineVerb(verb, block)
-    )
-    methodRegistry.register(
-      t.Noun, 'verb', [tStringList, tBlockR], t.Noun,
-      ({ receiver }, verbs, block) => {
-        for (const verb of verbs) {
-          receiver.defineVerb(verb, block)
-        }
-        return receiver
-      }
-    )
+    registerCommandMethods({
+      t,
+      methodRegistry,
+      methodName: 'verb',
+      receiverType: t.Noun,
+      receiverMethod: 'defineVerb'
+    })
 
     methodRegistry.register(
       t.Noun, 'deleteVerb', [t.String], t.Bool,

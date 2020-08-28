@@ -28,6 +28,26 @@ describe("Noun", {
       assert.isTrue(called)
     })
 
+    it("registers a verb with a Block that returns a String", {
+      let room = defineRoom("noun-test", "Noun testing room")
+      let n = room.noun("thing")
+
+      n.verb("eat", { "yum" })
+
+      room.executeCommand("eat thing")
+      assert.said("yum")
+    })
+
+    it("registers a verb with a String", {
+      let room = defineRoom("noun-test", "Noun testing room")
+      let n = room.noun("thing")
+
+      n.verb("eat", "yum")
+
+      room.executeCommand("eat thing")
+      assert.said("yum")
+    })
+
     it("deletes a verb", {
       let room = defineRoom("noun-test", "Noun testing room")
       let n = room.noun("thing")
