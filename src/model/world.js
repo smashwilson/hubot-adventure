@@ -299,6 +299,39 @@ class World {
       receiverType: t.World,
       receiverMethod: 'setFallThroughCommand'
     })
+
+    methodRegistry.register(
+      t.World, 'linkRooms', [t.Room, t.String, t.Room], t.World,
+      ({ receiver }, from, direction, to) => {
+        const toID = to.getID()
+        from.defineCommand(direction, {
+          evaluate: (interpreter) => {
+            const context = interpreter.getContext()
+            if (context && context.game) {
+              context.game.setCurrentRoomID(toID)
+            }
+          }
+        })
+        return receiver
+      }
+    )
+    methodRegistry.register(
+      t.World, 'linkRooms', [t.String, t.String, t.String], t.World,
+      ({ receiver }, fromID, direction, toID) => {
+        const fromOpt = receiver.getRoom(fromID)
+        if (fromOpt.hasValue()) {
+          fromOpt.getValue().defineCommand(direction, {
+            evaluate: (interpreter) => {
+              const context = interpreter.getContext()
+              if (context && context.game) {
+                context.game.setCurrentRoomID(toID)
+              }
+            }
+          })
+        }
+        return receiver
+      }
+    )
   }
 }
 

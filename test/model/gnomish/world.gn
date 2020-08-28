@@ -55,6 +55,26 @@ describe("World", {
       deleteRoom("one")
       assert.equal(getDefaultRoom(), none)
     })
+
+    describe("linkRooms", {
+      it("links rooms with a movement direction", {
+        let room1 = defineRoom("one", "One")
+        let room2 = defineRoom("two", "Two")
+
+        linkRooms(room1, "east", room2)
+
+        assert.equal(room1.getCommands(), list("east"))
+      })
+
+      it("allows you to specify IDs instead of rooms", {
+        let room1 = defineRoom("one", "One")
+        let room2 = defineRoom("two", "Two")
+
+        linkRooms("one", "west", "two")
+
+        assert.equal(room1.getCommands(), list("west"))
+      })
+    })
   })
 
   describe("commands", {
