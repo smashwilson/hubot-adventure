@@ -7,9 +7,10 @@ class SayResultBlock {
 
   evaluate (interpreter, args) {
     const value = this.block.evaluate(interpreter, args)
+    const text = value.string ? value.string : value
     const context = interpreter.getContext()
     if (context && context.say) {
-      context.say(value)
+      context.say(text)
     }
   }
 }
@@ -32,11 +33,12 @@ module.exports = {
     const tR = makeType("'R")
     const tAnyBlock = makeType(t.Block, [tR])
     const tStringReturningBlock = makeType(t.Block, [t.String])
+    const tComposerReturningBlock = makeType(t.Block, [t.Composer])
     const tStringList = makeType(t.List, [t.String])
 
     const anyBlockHandler = ({ receiver }, command, block) => receiver[receiverMethod](command, block)
 
-    const stringReturningBlockHandler = ({ receiver }, command, block) => {
+    const blockReturnHandler = ({ receiver }, command, block) => {
       const sayBlock = new SayResultBlock(block)
       receiver[receiverMethod](command, sayBlock)
       return receiver
@@ -70,7 +72,13 @@ module.exports = {
     // String, Block(String) -> Receiver
     methodRegistry.register(
       receiverType, methodName, [t.String, tStringReturningBlock], receiverType,
-      stringReturningBlockHandler
+      blockReturnHandler
+    )
+
+    // String, Block(Composer) -> Receiver
+    methodRegistry.register(
+      receiverType, methodName, [t.String, tComposerReturningBlock], receiverType,
+      blockReturnHandler
     )
 
     // String, String -> Receiver
@@ -88,7 +96,13 @@ module.exports = {
     // List(String), Block(String) -> Receiver
     methodRegistry.register(
       receiverType, methodName, [tStringList, tStringReturningBlock], receiverType,
-      forStringList(stringReturningBlockHandler)
+      forStringList(blockReturnHandler)
+    )
+
+    // List(String), Block(Composer) -> Receiver
+    methodRegistry.register(
+      receiverType, methodName, [tStringList, tComposerReturningBlock], receiverType,
+      forStringList(blockReturnHandler)
     )
 
     // List(String), String -> Receiver
@@ -102,10 +116,11 @@ module.exports = {
     const tR = makeType("'R")
     const tAnyBlock = makeType(t.Block, [tR, t.String])
     const tStringReturningBlock = makeType(t.Block, [t.String, t.String])
+    const tComposerReturningBlock = makeType(t.Block, [t.Composer, t.String])
 
     const anyBlockHandler = ({ receiver }, block) => receiver[receiverMethod](block)
 
-    const stringReturningBlockHandler = ({ receiver }, block) => {
+    const blockReturnHandler = ({ receiver }, block) => {
       const sayBlock = new SayResultBlock(block)
       receiver[receiverMethod](sayBlock)
       return receiver
@@ -126,7 +141,13 @@ module.exports = {
     // Block(String, String) -> Receiver
     methodRegistry.register(
       receiverType, methodName, [tStringReturningBlock], receiverType,
-      stringReturningBlockHandler
+      blockReturnHandler
+    )
+
+    // Block(Composer, String) -> Receiver
+    methodRegistry.register(
+      receiverType, methodName, [tComposerReturningBlock], receiverType,
+      blockReturnHandler
     )
 
     // String -> Receiver

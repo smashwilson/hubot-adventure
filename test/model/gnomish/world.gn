@@ -106,6 +106,13 @@ describe("World", {
       assert.said("string")
     })
 
+    it("defines a command with a block that returns a Composer", {
+      defineCommand("doit", { "xyz".compose() })
+      executeCommand("doit")
+
+      assert.said("xyz")
+    })
+
     it("defines a command with a String", {
       defineCommand("doit", "string")
       executeCommand("doit")
