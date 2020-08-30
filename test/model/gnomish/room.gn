@@ -1,0 +1,119 @@
+describe("Room", {
+  beforeEach({
+    defineRoom("id", "Name")
+  })
+
+  afterEach({
+    deleteRoom("id")
+  })
+
+  describe("command", {
+    it("defines a new command", {
+      let room = defineRoom("id", "name")
+      room.command("do something", { true })
+
+      assert.equal(room.getCommands(), list("do something"))
+    })
+
+    it("deletes a command", {
+      let room = defineRoom("id", "name")
+      room.command("do something", { true })
+      room.deleteCommand("do something")
+
+      assert.isTrue(room.getCommands().empty())
+    })
+
+    it("executes a command", {
+      let called = false
+      let room = defineRoom("id", "name")
+      room.command("do something", { called = true })
+
+      room.executeCommand("do something")
+      assert.isTrue(called)
+    })
+
+    it("defines a command with aliases", {
+      let called = false
+
+      let room = defineRoom("id", "name")
+      room.command(list("one", "two", "three"), { called = true })
+
+      room.executeCommand("two")
+      assert.isTrue(called)
+    })
+
+    it("defines a command with a Block that returns a String", {
+      let room = defineRoom("id", "name")
+      room.command("do it", { "string" })
+
+      room.executeCommand("do it")
+      assert.said("string")
+    })
+
+    it("defines a command with a String", {
+      let room = defineRoom("id", "name")
+      room.command("do it", "something")
+
+      room.executeCommand("do it")
+      assert.said("something")
+    })
+
+    it("sets a fallback command", {
+      let caught = ""
+      let room = defineRoom("id", "name")
+      room.command("do something", { true })
+      room.fallThroughCommand({ command: String | caught = command })
+
+      room.executeCommand("do something")
+      assert.equal("", caught)
+
+      room.executeCommand("whatever")
+      assert.equal("whatever", caught)
+    })
+
+    it("sets a fallback command with a Block that returns a String", {
+      let room = defineRoom("id", "name")
+      room.fallThroughCommand({ command: String | "I saw: " + command })
+
+      room.executeCommand("whatever")
+      assert.said("I saw: whatever")
+    })
+
+    it("sets a fallback command with a String", {
+      let caught = ""
+      let room = defineRoom("id", "name")
+      room.fallThroughCommand("no")
+
+      room.executeCommand("whatever")
+      assert.said("no")
+    })
+  })
+
+  describe("nouns", {
+    let nounNames = { room: Room | room.getNouns().map({ noun: Noun | noun.getName() }) }
+
+    it("defines a new noun", {
+      let room = defineRoom("id", "name")
+      let bucket0 = room.noun("bucket")
+      let bucket1 = room.noun("bucket")
+
+      assert.same(bucket0, bucket1)
+      assert.equal(bucket0.getName(), "bucket")
+      assert.equal(nounNames.evaluate(room), list("bucket"))
+    })
+
+    it("deletes a noun", {
+      let room = defineRoom("id", "name")
+
+      room.noun("one")
+      room.noun("two")
+      assert.equal(nounNames.evaluate(room), list("one", "two"))
+
+      room.deleteNoun("two")
+      assert.equal(nounNames.evaluate(room), list("one"))
+
+      room.deleteNoun("nope")
+      assert.equal(nounNames.evaluate(room), list("one"))
+    })
+  })
+})

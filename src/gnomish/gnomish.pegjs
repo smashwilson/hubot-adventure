@@ -30,6 +30,7 @@ exprlist
 expr "expression"
   = if
   / while
+  / letgame
   / let
   / assignment
 
@@ -105,6 +106,10 @@ while
 let
   = 'let' _ name:identifier type:( _ ':' _  t:typeexpr { return t } )? _ '=' _ value:expr
     { return new LetNode({name, type, value}) }
+
+letgame
+  = 'letgame' _ name:identifier type:( _ ':' _  t:typeexpr { return t } )? _ '=' _ value:expr
+    { return new LetNode({name, type, value, game: true}) }
 
 methodargs "method arguments"
   = '(' args:( first:expr rest:( _ ',' _ arg:expr { return arg } )* { return [first, ...rest] } )? ')'

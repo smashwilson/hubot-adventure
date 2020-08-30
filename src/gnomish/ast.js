@@ -130,11 +130,12 @@ class AssignNode extends SlotNode {
 }
 
 class LetNode extends SlotNode {
-  constructor ({ name, type, value }) {
+  constructor ({ name, type, value, game = false }) {
     super()
     this.name = name
     this.typeNode = type
     this.value = value
+    this.game = game
   }
 
   getName () { return this.name }
@@ -142,6 +143,8 @@ class LetNode extends SlotNode {
   getTypeNode () { return this.typeNode }
 
   getValue () { return this.value }
+
+  isGame () { return this.game }
 
   visitBy (visitor) {
     return visitor.visitLet(this)
@@ -154,7 +157,7 @@ class CallNode extends Node {
     this.name = name
     this.receiver = receiver
     this.args = args || []
-    this.callback = null
+    this.match = null
   }
 
   getName () { return this.name }
@@ -163,15 +166,15 @@ class CallNode extends Node {
 
   getArgs () { return this.args }
 
-  setCallback (cb) {
-    this.callback = cb
+  setMatch (match) {
+    this.match = match
   }
 
-  getCallback () {
-    if (this.callback === null) {
+  getMatch () {
+    if (this.match === null) {
       throw new Error(`${this.constructor.name} has not been resolved yet`)
     }
-    return this.callback
+    return this.match
   }
 
   visitBy (visitor) {

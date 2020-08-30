@@ -54,4 +54,17 @@ describe("Option('A)", {
     assert.equal(some(10).toList(), list(10))
     assert.equal(none.toList(), list())
   })
+
+  it("copy", {
+    assert.equal(none, none)
+
+    let original: Option(List(Int)) = some(list())
+    let dup = original.copy()
+
+    original.map({ l: List(Int) | l << 1 })
+    dup.map({ l: List(Int) | l << 2 })
+
+    assert.equal(original, some(list(1)))
+    assert.equal(dup, some(list(2)))
+  })
 })

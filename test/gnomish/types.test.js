@@ -198,6 +198,9 @@ describe('Type', function () {
       unifyBothWays(t0s, t0s, u => {
         assert.isTrue(u.wasSuccessful())
         assert.deepEqual(u.getTypes(), t0s)
+        assert.strictEqual(u.countExactMatches(), 1)
+        assert.strictEqual(u.countMultiMatches(), 0)
+        assert.strictEqual(u.countBindings(), 0)
       })
     })
 
@@ -218,6 +221,9 @@ describe('Type', function () {
         assert.isTrue(u.wasSuccessful())
         assert.deepEqual(u.getTypes(), t0s)
         assert.lengthOf(u.leftBindings, 0)
+        assert.strictEqual(u.countExactMatches(), 0)
+        assert.strictEqual(u.countMultiMatches(), 0)
+        assert.strictEqual(u.countBindings(), 0)
       })
     })
 
@@ -237,6 +243,9 @@ describe('Type', function () {
       const u = unify(st, t0s, t1s)
       assert.isTrue(u.wasSuccessful())
       assert.deepEqual(u.getTypes(), t1s)
+      assert.strictEqual(u.countExactMatches(), 0)
+      assert.strictEqual(u.countMultiMatches(), 0)
+      assert.strictEqual(u.countBindings(), 1)
 
       assert.isFalse(st.has("'A"))
       assert.strictEqual(u.applyLeft(st), u)
@@ -255,6 +264,9 @@ describe('Type', function () {
       assert.isTrue(u.wasSuccessful())
       assert.deepEqual(u.getTypes(), t0s)
       assert.lengthOf(u.leftBindings, 0)
+      assert.strictEqual(u.countExactMatches(), 0)
+      assert.strictEqual(u.countMultiMatches(), 0)
+      assert.strictEqual(u.countBindings(), 0)
     })
 
     it('binds a lhs symbol to an unbound rhs one', function () {
@@ -264,6 +276,9 @@ describe('Type', function () {
       const u = unify(st, t0s, t1s)
       assert.isTrue(u.wasSuccessful())
       assert.deepEqual(u.getTypes(), t1s)
+      assert.strictEqual(u.countExactMatches(), 0)
+      assert.strictEqual(u.countMultiMatches(), 0)
+      assert.strictEqual(u.countBindings(), 1)
 
       assert.isFalse(st.has("'A"))
       u.applyLeft(st)
@@ -275,6 +290,9 @@ describe('Type', function () {
       unifyBothWays(t0s, t0s, u => {
         assert.isTrue(u.wasSuccessful())
         assert.deepEqual(u.getTypes(), t0s)
+        assert.strictEqual(u.countExactMatches(), 3)
+        assert.strictEqual(u.countMultiMatches(), 0)
+        assert.strictEqual(u.countBindings(), 0)
       })
     })
 
@@ -300,6 +318,9 @@ describe('Type', function () {
 
       const u = unify(st, t0s, t1s)
       assert.isTrue(u.wasSuccessful())
+      assert.strictEqual(u.countExactMatches(), 1)
+      assert.strictEqual(u.countMultiMatches(), 0)
+      assert.strictEqual(u.countBindings(), 1)
 
       const ut = u.getTypes()[0]
       assert.strictEqual(ut.getBase(), t0s[0].getBase())
@@ -311,12 +332,37 @@ describe('Type', function () {
       assert.strictEqual(st.at("'A").getValue(), tReal)
     })
 
+    it('binds compound types to type parameters', function () {
+      const t0s = [makeType("'A"), makeType("'A")]
+      const t1s = [makeType(tBlock, [tInt, tReal]), makeType(tBlock, [tInt, tReal])]
+
+      const u = unify(st, t0s, t1s)
+      assert.isTrue(u.wasSuccessful())
+      assert.strictEqual(u.countExactMatches(), 0)
+      assert.strictEqual(u.countMultiMatches(), 0)
+      assert.strictEqual(u.countBindings(), 1)
+
+      const ut = u.getTypes()[0]
+      assert.strictEqual(ut.getBase(), tBlock)
+      assert.lengthOf(ut.getParams(), 2)
+      assert.strictEqual(ut.getParams()[0], tInt)
+      assert.strictEqual(ut.getParams()[1], tReal)
+
+      assert.isFalse(st.has("'A"))
+      u.applyLeft(st)
+      assert.strictEqual(st.at("'A").getValue(), ut)
+    })
+
     it('uses earlier bindings to match later type parameters', function () {
       const t0s = [makeType('Block', [makeType("'A"), tBool, makeType("'A")])]
       const t1s = [makeType(t0s[0].getBase(), [tInt, tBool, tInt])]
 
       const u0 = unify(st, t0s, t1s)
       assert.isTrue(u0.wasSuccessful())
+      assert.strictEqual(u0.countExactMatches(), 2)
+      assert.strictEqual(u0.countMultiMatches(), 0)
+      assert.strictEqual(u0.countBindings(), 1)
+
       const ut0 = u0.getTypes()[0]
       assert.strictEqual(ut0.getBase(), t0s[0].getBase())
       assert.lengthOf(ut0.getParams(), 3)
@@ -333,6 +379,10 @@ describe('Type', function () {
 
       const u1 = unify(st, t0s, t2s)
       assert.isTrue(u1.wasSuccessful())
+      assert.strictEqual(u1.countExactMatches(), 2)
+      assert.strictEqual(u1.countMultiMatches(), 0)
+      assert.strictEqual(u1.countBindings(), 1)
+
       const ut1 = u1.getTypes()[0]
       assert.strictEqual(ut1.getBase(), t0s[0].getBase())
       assert.lengthOf(ut1.getParams(), 3)
@@ -356,6 +406,10 @@ describe('Type', function () {
 
       const u = unify(st, t0s, t1s)
       assert.isTrue(u.wasSuccessful())
+      assert.strictEqual(u.countExactMatches(), 0)
+      assert.strictEqual(u.countMultiMatches(), 0)
+      assert.strictEqual(u.countBindings(), 1)
+
       assert.deepEqual(u.getTypes(), [tString, tInt, tInt, tString])
 
       assert.isFalse(st.has("'A"))

@@ -3,25 +3,27 @@
 const fs = require('fs')
 const path = require('path')
 const chai = require('chai')
+
+const { World } = require('../../src/model/world')
 const assert = require('../lib/assertion')
-const { parse } = require('./helper')
-const stdlib = require('../../src/gnomish/stdlib')
-const { SymbolTable } = require('../../src/gnomish/symboltable')
-const { MethodRegistry } = require('../../src/gnomish/methodregistry')
 
-const rootTable = SymbolTable.root()
-const methodRegistry = new MethodRegistry()
-stdlib.register(rootTable, methodRegistry)
-assert.register(rootTable, methodRegistry)
+const world = new World()
+assert.register(world.getSymbolTable(), world.getMethodRegistry())
 
-describe('Gnomish standard library', function () {
+describe('Gnomish domain model', function () {
   function executeTestFile (testPath) {
     const testSource = fs.readFileSync(testPath, { encoding: 'utf8' })
     const normalized = testSource.replace(/\r\n/g, '\n')
-
-    const gameTable = SymbolTable.game(rootTable)
     try {
-      parse(normalized).analyze(gameTable, methodRegistry).interpret()
+      world.execute(normalized, {
+        say: str => {
+          if (!this.said) {
+            this.said = []
+          }
+          this.said.push(str)
+        },
+        wasSaid: str => this.said && this.said.includes(str)
+      })
     } catch (e) {
       it(`cannot parse ${testPath}`, function () {
         chai.assert.fail(null, null, e.message)
@@ -29,7 +31,7 @@ describe('Gnomish standard library', function () {
     }
   }
 
-  const testDir = path.join(__dirname, 'stdlib')
+  const testDir = path.join(__dirname, 'gnomish')
   const testFiles = fs.readdirSync(testDir).filter(each => each.endsWith('.gn'))
 
   for (const testFile of testFiles) {

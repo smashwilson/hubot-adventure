@@ -3,10 +3,19 @@ const { Block } = require('./stdlib/block')
 const { Some, none } = require('./stdlib/option')
 
 class Interpreter extends Visitor {
-  constructor () {
+  constructor (context) {
     super()
     this.stack = new Map()
     this.currentBlock = null
+    this.context = context
+  }
+
+  getContext () {
+    return this.context
+  }
+
+  addFrame (frame, slots) {
+    this.stack.set(frame, slots)
   }
 
   visit (node) {
@@ -92,7 +101,7 @@ class Interpreter extends Visitor {
     const receiver = this.visit(node.getReceiver())
     const args = node.getArgs().map(arg => this.visit(arg))
 
-    return node.getCallback()({
+    return node.getMatch().invoke({
       receiver,
       selector: node.getName(),
       interpreter: this,

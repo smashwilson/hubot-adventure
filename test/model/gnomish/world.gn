@@ -1,0 +1,168 @@
+describe("World", {
+  afterEach({
+    deleteRoom("one")
+    deleteRoom("two")
+    deleteCommand("doit")
+    deleteCommand("one")
+    deleteCommand("two")
+    deleteCommand("three")
+  })
+
+  describe("say", {
+    it("outputs its argument", {
+      say("something")
+      assert.said("something")
+    })
+
+    it("accepts composed text", {
+      let comp = "composed".compose()
+      say(comp)
+      assert.said("composed")
+    })
+  })
+
+  describe("rooms", {
+    it("defines a new room", {
+      let room0 = defineRoom("one", "Room One")
+      let room1 = defineRoom("one", "Room One")
+      assert.same(room0, room1)
+
+      let names = getRooms().map({ room: Room | room.getID() })
+      assert.equal(names, list("one"))
+
+      assert.equal(getRoom("one"), some(room0))
+    })
+
+    it("deletes an existing room", {
+      defineRoom("one", "Room One")
+      defineRoom("two", "Room Two")
+
+      assert.equal(getRooms().map({ room: Room | room.getID() }), list("one", "two"))
+
+      deleteRoom("one")
+
+      assert.equal(getRooms().map({ room: Room | room.getID() }), list("two"))
+    })
+
+    it("designates a default room", {
+      assert.equal(getDefaultRoom(), none)
+
+      let room1 = defineRoom("one", "Room One")
+      let room2 = defineRoom("two", "Room Two")
+
+      assert.equal(getDefaultRoom(), some(room1))
+
+      setDefaultRoomID("two")
+      assert.equal(getDefaultRoom(), some(room2))
+
+      deleteRoom("two")
+      assert.equal(getDefaultRoom(), some(room1))
+
+      deleteRoom("one")
+      assert.equal(getDefaultRoom(), none)
+    })
+
+    describe("linkRooms", {
+      it("links rooms with a movement direction", {
+        let room1 = defineRoom("one", "One")
+        let room2 = defineRoom("two", "Two")
+
+        linkRooms(room1, "east", room2)
+
+        assert.equal(room1.getCommands(), list("east"))
+      })
+
+      it("allows you to specify IDs instead of rooms", {
+        let room1 = defineRoom("one", "One")
+        let room2 = defineRoom("two", "Two")
+
+        linkRooms("one", "west", "two")
+
+        assert.equal(room1.getCommands(), list("west"))
+      })
+    })
+  })
+
+  describe("commands", {
+    it("defines a command", {
+      defineCommand("doit", { true })
+
+      assert.equal(getCommands(), list("doit"))
+    })
+
+    it("executes a command", {
+      let called = false
+      defineCommand("doit", { called = true })
+
+      executeCommand("doit")
+
+      assert.isTrue(called)
+    })
+
+    it("defines a command with a block that returns a String", {
+      defineCommand("doit", { "string" })
+      executeCommand("doit")
+
+      assert.said("string")
+    })
+
+    it("defines a command with a block that returns a Composer", {
+      defineCommand("doit", { "xyz".compose() })
+      executeCommand("doit")
+
+      assert.said("xyz")
+    })
+
+    it("defines a command with a String", {
+      defineCommand("doit", "string")
+      executeCommand("doit")
+
+      assert.said("string")
+    })
+
+    it("defines a command with aliases", {
+      let called = false
+      defineCommand(list("one", "two", "three"), { called = true })
+
+      executeCommand("two")
+      assert.isTrue(called)
+    })
+
+    it("deletes a command", {
+      defineCommand("doit", { true })
+      deleteCommand("doit")
+
+      assert.isTrue(getCommands().empty())
+    })
+
+    it("sets a fallthrough command", {
+      let last = ""
+
+      defineCommand("doit", { true })
+      defineFallThroughCommand({ text: String | last = text })
+
+      executeCommand("fell through")
+      assert.equal(last, "fell through")
+
+      executeCommand("and this")
+      assert.equal(last, "and this")
+
+      executeCommand("doit")
+      assert.equal(last, "and this")
+    })
+
+    it("sets a fallthrough command with a block that returns a String", {
+      defineFallThroughCommand({ text: String | "I got: " + text })
+      executeCommand("fell through")
+
+      assert.said("I got: fell through")
+    })
+
+    it("sets a fallthrough command with a String", {
+      defineFallThroughCommand("fallthrough triggered")
+      executeCommand("fell through")
+
+      assert.said("fallthrough triggered")
+    })
+  })
+})

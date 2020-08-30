@@ -120,6 +120,14 @@ class SymbolTable {
     return this.parent
   }
 
+  withSlotTypes (slots, block) {
+    for (const [, entry] of this.symbols) {
+      if (!entry.isStatic()) {
+        block(slots[entry.getSlot()], entry.getType())
+      }
+    }
+  }
+
   getGame () {
     if (this.frame === GAME) {
       return this

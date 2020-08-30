@@ -9,12 +9,13 @@ describe('SymbolTable', function () {
   const CHILD = Symbol('child')
 
   const tInt = makeType('Int')
+  const tString = makeType('String')
 
   describe('variable names', function () {
     it('stores and retrieves identifier information', function () {
       const st = new SymbolTable(ROOT)
 
-      const e = st.allocateSlot('foo', makeType('Int'))
+      const e = st.allocateSlot('foo', tInt)
       assert.strictEqual(e.getSlot(), 0)
       assert.strictEqual(st.at('foo'), e)
       assert.strictEqual(st.binding('foo').entry, e)
@@ -112,5 +113,20 @@ describe('SymbolTable', function () {
         assert.isTrue(child3.getCaptures().has(CHILD1))
       })
     })
+  })
+
+  it('iterates slot contents and types in tandem', function () {
+    const root = SymbolTable.root()
+    root.allocateSlot('inherited', tInt)
+
+    const st = root.push(Symbol('child'))
+    st.allocateSlot('aaa', tInt)
+    st.setStatic('static', tInt, 20)
+    st.allocateSlot('bbb', tString)
+
+    const results = []
+    st.withSlotTypes([10, 'value'], (value, type) => results.push({ value, type }))
+
+    assert.deepEqual(results, [{ value: 10, type: tInt }, { value: 'value', type: tString }])
   })
 })

@@ -40,17 +40,29 @@ module.exports = {
 
     methodRegistry.register(
       tListA, 'first', [], tOptionA,
-      ({ receiver }, arg) => receiver.length > 0 ? new Some(receiver[0]) : none)
+      ({ receiver }) => receiver.length > 0 ? new Some(receiver[0]) : none)
 
     methodRegistry.register(
       tListA, 'last', [], tOptionA,
-      ({ receiver }, arg) => receiver.length > 0 ? new Some(receiver[receiver.length - 1]) : none)
+      ({ receiver }) => receiver.length > 0 ? new Some(receiver[receiver.length - 1]) : none)
 
     // Comparison
 
     methodRegistry.register(
       tListA, '==', [tListA], t.Bool,
-      ({ receiver }, arg) => receiver.length === arg.length && receiver.every((l, i) => l === arg[i]))
+      ({ receiver, receiverType, interpreter }, arg) => {
+        if (receiver.length !== arg.length) {
+          return false
+        }
+
+        if (receiver.length === 0 && arg.length === 0) {
+          return true
+        }
+
+        const memberType = receiverType.getParams()[0]
+        const m = methodRegistry.lookup(symbolTable, memberType, '==', [memberType])
+        return receiver.every((l, i) => m.invoke({ receiver: l, selector: '==', interpreter }, arg[i]))
+      })
 
     // Mutation
 
@@ -172,5 +184,26 @@ module.exports = {
     methodRegistry.register(
       tListA, 'filter', [makeType(t.Block, [t.Bool, tA, t.Int])], tListA,
       filterBody)
+
+    methodRegistry.register(
+      tListA, 'copy', [], tListA,
+      ({ receiver, receiverType, interpreter }) => {
+        if (receiver.length === 0) {
+          return []
+        }
+
+        const recArgType = receiverType.getParams()[0]
+        const m = methodRegistry.lookup(symbolTable, recArgType, 'copy', [])
+
+        return receiver.map((each, i) => {
+          return m.invoke({
+            receiver: each,
+            selector: 'copy',
+            interpreter,
+            astNode: null
+          })
+        })
+      }
+    )
   }
 }

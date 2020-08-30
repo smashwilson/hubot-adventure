@@ -1,4 +1,4 @@
-# A full example World for hubot-adventure.
+# A small example World for hubot-adventure.
 #
 # To load:
 #
@@ -7,77 +7,80 @@
 # hubot adventure load https://github.com/smashwilson/hubot-adventure/examples/gnomicorn.gn
 # ```
 
-defineEnum("Keys", "amethyst", "ruby", "sapphire")
+letgame switchOn = false
+letgame pebbleCount = 5
 
-# -- Courtyard --
+# -- Room 1 --
 
-letgame fountainFlowing = false
-letgame keysPlaced = map(amethyst => false, ruby => false, sapphire => false)
-letgame doorOpen = false
+let room1 = defineRoom("Room 1", "The first room")
 
-let courtyard = defineRoom("courtyard", "Dilapidated Courtyard")
-
-courtyard.command("look", {
+room1.command("look", {
   let s = "
-    You stand in an overgrown courtyard. Ivy curls up the walls and across the broken flagstones underfoot. A cracked
-    stone fountain stands {if {!fountainFlowing} then {"dry"}} in the center of the space.
+    This is the first room. There is a switch on the wall.
   ".compose()
 
-  if {fountainFlowing} then {
-    s << "Water flows from the fountain and runs through shallow stone channels across the ground, gurgling to unseen
-     depths beneath cracks in the north wall."
+  if {switchOn} then {
+    s << "The switch is currently turned on."
+  } else {
+    s << "At the moment, the switch is turned off."
   }
+
   s.sep()
 
-  s << "An imposing, solid door of solid metal stands in the north wall."
-  if {doorOpen} then {
-    s << "It stands open. Pitch blackness beckons within."
-  }
-  s << "Clear, grassy paths lead through breaks in the crumbling walls to the east and west."
+  s << "There is a door to the east."
 
   say(s)
 })
 
-let door = courtyard.defineNoun("door")
-door.command("look", {
-  say(if {doorOpen} then {
-    "The keys are now locked firmly in place within the door's sockets. The doors stand open."
+let switch = room1.noun("switch")
+switch.verb("look", {
+  say(if {switchOn} then {
+    "It's your typical dual-state lightswitch. It is currently in the 'on' position."
   } else {
-    let s = "
-      The door is two meters of tarnished but solid metal. Three sockets are inset in the door's threshold: one
-      square, one hexagonal, and one octagonal.
-    ".compose()
-
-    if {keysPlaced.get(amethyst)} then {s << " The amethyst key sits in the square socket."}
-    if {keysPlaced.get(ruby)} then {s << " The ruby key sits in the hexagonal socket."}
-    if {keysPlaced.get(sapphire)} then {s << " The sapphire key sits in the octagonal socket."}
-
-    s
-  })
-})
-door.command("kick", "Congratulations! You now have a stubbed toe.")
-door.command("break", "Nothing you're holding lets you accomplish that.")
-
-let fountain = courtyard.defineNoun("fountain")
-fountain.command("look", {
-  say(if {fountainFlowing} then {
-    "Water gurgles from unseen depths through ancient channels to spill from the fountain's spout. The water pools in
-    the cracked basin, then tumbles in lazy rivulets to the north."
-  } else {
-    "A statue once stood at the fountain's peak, but time has long since worn it to unrecognizability. The fountain
-    stands dry and empty, its basin cracked and crumbling."
+    "The lightswitch is currently in the 'off' position."
   })
 })
 
-# -- Cliffside --
+switch.verb(list("toggle", "flip", "activate", "use"), {
+  switchOn = !switchOn
+  say(if {switchOn} then {
+    "You flip the switch 'on' and an overhead lamp illuminates."
+  } else {
+    "You flip the switch 'off'. The lamp turns off. It isn't actually that dark, though."
+  })
+})
 
-let cliff = defineRoom("cliff", "Cliffside")
+# -- Room 2 --
 
-link(courtyard, "east", "west", cliff)
+let room2 = defineRoom("Room 2", "The second room")
 
-ravine.command("look", "
-  A worn and dusty footpath from the east ends abruptly at a steep cliff face. Over the edge, the tops of evergreen
-  trees are just visible poking above the mist far below.
+linkRooms(room1, "east", room2)
 
-  A narrow band of ground that extends to the north and south along the cliff's edge is free from dense vegetation.
-")
+room2.command("look", {
+  let s = "
+    This is the second room.
+  ".compose()
+
+  if {pebbleCount == 1} then {
+    s << "There is a single pebble here."
+  }
+  if {pebbleCount > 1} then {
+    s << "There is a pile of "
+    s << pebbleCount.string()
+    s << " pebbles here."
+  }
+
+  s.sep()
+
+  s << "There is a door to the west."
+})
+
+let pebblePile = room2.noun("pebble")
+pebblePile.verb("take", {
+  if {pebbleCount > 0} then {
+    pebbleCount = pebbleCount - 1
+    say("You pick up a pebble, place it in your pocket, and then immediately forget about it forever.")
+  } else {
+    say("There are no more pebbles to take.")
+  }
+})

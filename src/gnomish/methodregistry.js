@@ -44,6 +44,8 @@ class Signature {
 
       const args = astNode.getArgs().map(argNode => argNode.getStaticValue())
       const value = this.getCallback()({
+        receiverType: astNode.getReceiver().getType(),
+        argumentTypes: astNode.getArgs().map(arg => arg.getType),
         receiver: astNode.getReceiver().getStaticValue(),
         selector: astNode.getName(),
         interpreter: Symbol('static'),
@@ -71,8 +73,10 @@ class Match {
     this.retType = retType
   }
 
-  getCallback () {
-    return this.signature.getCallback()
+  invoke (meta = {}, ...args) {
+    meta.receiverType = this.unification.getTypes()[0]
+    meta.argumentTypes = this.unification.getTypes().slice(1)
+    return this.signature.getCallback()(meta, ...args)
   }
 
   getStaticCallback () {
@@ -204,11 +208,23 @@ class MethodRegistry {
     return new MethodRegistry(this)
   }
 
+  toString () {
+    let r = 'MethodRegistry(x' + this.bySelector.size
+    let current = this.parent
+    while (current) {
+      r += ' -> x' + current.bySelector.size
+      current = current.parent
+    }
+    return r + ')'
+  }
+
   inspect () {
+    const prefix = this.toString()
+
     const ks = [...this.bySelector.keys()]
     ks.sort()
 
-    return ks.map(k => {
+    return prefix + '\n' + ks.map(k => {
       const signatures = this.bySelector.get(k)
       return signatures.map(s => `${k}: ${s}`).join('\n')
     }).join('\n')

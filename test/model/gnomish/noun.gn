@@ -1,0 +1,65 @@
+describe("Noun", {
+  afterEach({
+    deleteRoom("noun-test")
+  })
+
+  describe("verbs", {
+    it("registers a verb", {
+      let called = false
+
+      let room = defineRoom("noun-test", "Noun testing room")
+      let n = room.noun("thing")
+
+      n.verb("eat", { called = true })
+
+      room.executeCommand("eat thing")
+      assert.isTrue(called)
+    })
+
+    it("registers a verb with aliases", {
+      let called = false
+
+      let room = defineRoom("noun-test", "Noun testing room")
+      let n = room.noun("thing")
+
+      n.verb(list("one", "two", "three"), { called = true })
+
+      room.executeCommand("two thing")
+      assert.isTrue(called)
+    })
+
+    it("registers a verb with a Block that returns a String", {
+      let room = defineRoom("noun-test", "Noun testing room")
+      let n = room.noun("thing")
+
+      n.verb("eat", { "yum" })
+
+      room.executeCommand("eat thing")
+      assert.said("yum")
+    })
+
+    it("registers a verb with a String", {
+      let room = defineRoom("noun-test", "Noun testing room")
+      let n = room.noun("thing")
+
+      n.verb("eat", "yum")
+
+      room.executeCommand("eat thing")
+      assert.said("yum")
+    })
+
+    it("deletes a verb", {
+      let room = defineRoom("noun-test", "Noun testing room")
+      let n = room.noun("thing")
+
+      n.verb("one", { true })
+      n.verb("two", { true })
+
+      assert.equal(room.getCommands(), list("one thing", "two thing"))
+
+      n.deleteVerb("two")
+
+      assert.equal(room.getCommands(), list("one thing"))
+    })
+  })
+})

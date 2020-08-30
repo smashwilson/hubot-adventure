@@ -355,7 +355,7 @@ function unify (symbolTable, lTypes, rTypes) {
       const uBase = unifySingle(lType.getBase(), rType.getBase(), replaced, multi)
       if (!uBase.wasSuccessful()) return Unification.unsuccessful()
 
-      const uParams = unifyMulti(lType.getParams(), rType.getParams())
+      const uParams = unifyMulti(lType.getParams(), rType.getParams(), replaced)
       if (!uParams.wasSuccessful()) return Unification.unsuccessful()
 
       return Unification.successful(
@@ -372,7 +372,7 @@ function unify (symbolTable, lTypes, rTypes) {
     return Unification.unsuccessful()
   }
 
-  function unifyMulti (lTypesOriginal, rTypesOriginal) {
+  function unifyMulti (lTypesOriginal, rTypesOriginal, replaced) {
     const lTypes = lTypesOriginal.slice()
     const rTypes = rTypesOriginal.slice()
 
@@ -409,9 +409,9 @@ function unify (symbolTable, lTypes, rTypes) {
       const lInner = lType.isWrapped() ? lType.getInner() : lType
       const rInner = rType.isWrapped() ? rType.getInner() : rType
 
-      const replaced = lReplaced || rReplaced
+      const anyReplaced = lReplaced || rReplaced || replaced
       const multi = lType.isRepeatable() || rType.isRepeatable()
-      const u = unifySingle(lInner, rInner, replaced, multi)
+      const u = unifySingle(lInner, rInner, anyReplaced, multi)
       if (!u.wasSuccessful()) {
         if (lType.isRepeatable()) {
           li++
@@ -462,7 +462,7 @@ function unify (symbolTable, lTypes, rTypes) {
     return result
   }
 
-  return unifyMulti(lTypes, rTypes)
+  return unifyMulti(lTypes, rTypes, false)
 }
 
 module.exports = { makeType, unify }

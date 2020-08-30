@@ -11,7 +11,7 @@ module.exports = {
 
     methodRegistry.register(
       tA, 'getType', [], t.Type,
-      ({ receiver, astNode }) => astNode.getReceiver().getType()
+      ({ receiverType }) => receiverType
     ).markPure()
 
     methodRegistry.register(
@@ -21,12 +21,9 @@ module.exports = {
 
     methodRegistry.register(
       tA, '!=', [tA], t.Bool,
-      ({ receiver, interpreter, astNode }, arg) => {
-        const rType = astNode.getReceiver().getType()
-        const aTypes = astNode.getArgs().map(argNode => argNode.getType())
-
-        const equals = methodRegistry.lookup(symbolTable, rType, '==', aTypes)
-        return !equals.getCallback()({
+      ({ receiver, interpreter, receiverType, argumentTypes }, arg) => {
+        const equals = methodRegistry.lookup(symbolTable, receiverType, '==', argumentTypes)
+        return !equals.invoke({
           receiver,
           selector: '==',
           interpreter,
@@ -37,9 +34,8 @@ module.exports = {
 
     methodRegistry.register(
       tA, 'debug', [], tA,
-      ({ receiver, astNode }) => {
-        const type = astNode ? astNode.getReceiver().getType() : '<unknown>'
-        console.log(`${util.inspect(receiver, { breakLength: 100 })}: ${type}`)
+      ({ receiver, receiverType }) => {
+        console.log(`${util.inspect(receiver, { breakLength: 100 })}: ${receiverType}`)
         return receiver
       }
     ).markPure()

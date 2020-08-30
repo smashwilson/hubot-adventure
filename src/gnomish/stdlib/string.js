@@ -29,5 +29,17 @@ module.exports = {
       t.String, '+', [t.String], t.String,
       ({ receiver }, operand) => receiver + operand
     ).markPure()
+
+    methodRegistry.register(
+      t.String, 'copy', [], t.String,
+      ({ receiver }) => receiver
+    )
+
+    methodRegistry.register(
+      t.String, 'compose', [], t.Composer,
+      ({ receiver }) => {
+        return { string: receiver.split(/[ \t\r\n]+/).filter(s => s.length > 0).join(' ') }
+      }
+    )
   }
 }
