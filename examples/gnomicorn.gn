@@ -61,8 +61,13 @@ room2.command("look", {
     This is the second room.
   ".compose()
 
-  if {pebbleCount > 0} then {
-    s << "There is a pile of " << plural("pebble", pebbleCount) << " here."
+  if {pebbleCount == 1} then {
+    s << "There is a single pebble here."
+  }
+  if {pebbleCount > 1} then {
+    s << "There is a pile of "
+    s << pebbleCount.string()
+    s << " pebbles here."
   }
 
   s.sep()
