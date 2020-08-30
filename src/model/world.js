@@ -206,8 +206,16 @@ class World {
         const context = interpreter.getContext()
         if (context && context.say) {
           context.say(text)
-        } else {
-          console.log(text)
+        }
+        return none
+      }
+    )
+    methodRegistry.register(
+      t.World, 'say', [t.Composer], t.Option,
+      ({ interpreter }, composer) => {
+        const context = interpreter.getContext()
+        if (context && context.say) {
+          context.say(composer.string)
         }
         return none
       }

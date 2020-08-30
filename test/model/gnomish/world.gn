@@ -13,6 +13,12 @@ describe("World", {
       say("something")
       assert.said("something")
     })
+
+    it("accepts composed text", {
+      let comp = "composed".compose()
+      say(comp)
+      assert.said("composed")
+    })
   })
 
   describe("rooms", {
