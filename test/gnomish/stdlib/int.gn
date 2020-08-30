@@ -35,4 +35,8 @@ describe("Int", {
   it("copies by identity", {
     assert.same(3.copy(), 3)
   })
+
+  it("converts itself to a String", {
+    assert.equal(3.string(), "3")
+  })
 })

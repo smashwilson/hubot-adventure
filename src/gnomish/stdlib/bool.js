@@ -26,5 +26,10 @@ module.exports = {
       t.Bool, 'copy', [], t.Bool,
       ({ receiver }) => receiver
     )
+
+    methodRegistry.register(
+      t.Bool, 'string', [], t.String,
+      ({ receiver }) => receiver.toString()
+    )
   }
 }
