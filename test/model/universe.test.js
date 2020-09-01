@@ -3,7 +3,7 @@
 const { assert } = require('chai')
 const { Universe } = require('../../src/model/universe')
 
-describe.only('Universe', function () {
+describe('Universe', function () {
   let universe
 
   beforeEach(function () {
