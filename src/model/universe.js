@@ -28,7 +28,8 @@ class Universe {
     const entry = {
       world: new World(),
       name: name,
-      channel: channel
+      channel: channel,
+      gameEntries: new Set()
     }
 
     this.worldsByName.set(name, entry)
@@ -41,9 +42,25 @@ class Universe {
     return Array.from(this.worldsByName.values())
   }
 
-  deleteWorld (name) {
+  deleteWorld (name, force) {
     const entry = this.worldsByName.get(name)
     if (entry) {
+      if (entry.gameEntries.size !== 0) {
+        if (!force) {
+          error(`World ${name} has active games`)
+            .withUserMessage(
+              `World ${name} has active games and may not be deleted. ` +
+              'Stop those games and try again or use --force to stop them all at once.'
+            )
+            .withData('game channels', Array.from(entry.gameEntries, gameEntry => gameEntry.channel).join(', '))
+            .raise()
+        }
+
+        for (const gameEntry of Array.from(entry.gameEntries)) {
+          this.deleteGame(gameEntry.channel)
+        }
+      }
+
       this.worldsByName.delete(entry.name)
       this.worldsByChannel.delete(entry.channel)
     } else {
@@ -87,6 +104,7 @@ class Universe {
       channel
     }
 
+    worldEntry.gameEntries.add(entry)
     this.gamesByChannel.set(channel, entry)
 
     return entry.game

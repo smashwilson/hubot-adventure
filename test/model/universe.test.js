@@ -47,13 +47,13 @@ describe.only('Universe', function () {
       universe.createWorld('existing1', 'channel1')
       const w2 = universe.createWorld('existing2', 'channel2')
 
-      universe.deleteWorld('existing1')
+      universe.deleteWorld('existing1', false)
 
       assert.deepEqual(universe.listWorlds().map(e => e.world), [w0, w2])
     })
 
     it('fails to delete a world that does not exist', function () {
-      assert.throws(() => universe.deleteWorld('no'), /No world named/)
+      assert.throws(() => universe.deleteWorld('no', false), /No world named/)
     })
   })
 
@@ -93,13 +93,36 @@ describe.only('Universe', function () {
     it('deletes an existing game', function () {
       universe.createGame('the-world', 'play-channel')
 
-      universe.deleteGame('play-channel')
+      universe.deleteGame('play-channel', false)
 
       assert.isNull(universe.gameForChannel('play-channel'))
     })
 
     it('fails to delete a game when none is playing', function () {
-      assert.throws(() => universe.deleteGame('nothing-here'), /No active game/)
+      assert.throws(() => universe.deleteGame('nothing-here', false), /No active game/)
+    })
+
+    it('fails to delete a world with active games', function () {
+      universe.createWorld('new-world', 'new-world-control-channel')
+      universe.createGame('new-world', 'new-world-play-channel')
+
+      assert.throws(() => universe.deleteWorld('new-world', false), /active games/)
+    })
+
+    it('deletes a world and its active games if forced', function () {
+      universe.createWorld('new-world', 'new-world-control-channel')
+
+      const g0 = universe.createGame('the-world', 'play-channel-0')
+      const g = universe.createGame('new-world', 'new-world-play-channel')
+      const g1 = universe.createGame('other-world', 'play-channel-1')
+
+      assert.deepEqual(universe.listWorlds().map(e => e.name), ['the-world', 'other-world', 'new-world'])
+      assert.deepEqual(universe.listGames().map(e => e.game), [g0, g, g1])
+
+      universe.deleteWorld('new-world', true)
+
+      assert.deepEqual(universe.listWorlds().map(e => e.name), ['the-world', 'other-world'])
+      assert.deepEqual(universe.listGames().map(e => e.game), [g0, g1])
     })
   })
 })
