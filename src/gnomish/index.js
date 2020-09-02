@@ -1,7 +1,9 @@
 const parser = require('./gnomish')
 const { SexpVisitor } = require('./sexpr')
+const { SerializingVisitor } = require('./serializer')
 const { Analyzer } = require('./analyzer')
 const { Interpreter } = require('./interpreter')
+const { deserializer } = require('./deserializer')
 
 class Program {
   constructor (node) {
@@ -34,10 +36,20 @@ class Program {
     visitor.visit(this.node)
     return visitor.result
   }
+
+  serialize () {
+    const visitor = new SerializingVisitor()
+    visitor.visit(this.node)
+    return visitor.result
+  }
 }
 
 module.exports = {
   parse (...args) {
     return new Program(parser.parse(...args))
+  },
+
+  deserialize (payload) {
+    return new Program(deserializer(payload).deserialize())
   }
 }
