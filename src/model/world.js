@@ -179,6 +179,10 @@ class World {
     return program.interpret(this.symbolTable.getFrame(), this.prototypeSlots)
   }
 
+  toString () {
+    return '[world]'
+  }
+
   static register (symbolTable, methodRegistry) {
     const t = new TypeRegistry(symbolTable)
     const classes = [this, Room, Noun]

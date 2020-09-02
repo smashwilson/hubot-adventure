@@ -9,6 +9,10 @@ class Pair {
   getLeft () { return this.left }
 
   getRight () { return this.right }
+
+  toString () {
+    return `pair(${this.left}, ${this.right})`
+  }
 }
 
 module.exports = {

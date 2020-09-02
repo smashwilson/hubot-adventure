@@ -19,6 +19,10 @@ class Noun {
     return this.room.deleteCommand(`${verb} ${this.name}`)
   }
 
+  toString () {
+    return `Noun("${this.name}")`
+  }
+
   static registerTypes (t, symbolTable, methodRegistry) {
     t.registerType('Noun')
   }

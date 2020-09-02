@@ -12,6 +12,10 @@ class Some {
   getValue () {
     return this.value
   }
+
+  toString () {
+    return `Some(${this.value})`
+  }
 }
 
 const none = {
@@ -21,6 +25,10 @@ const none = {
 
   getValue () {
     throw new Error('Attempt to unwrap value from None')
+  },
+
+  toString () {
+    return '[none]'
   }
 }
 

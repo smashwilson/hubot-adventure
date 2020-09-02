@@ -102,6 +102,10 @@ class Room {
     return Array.from(this.nouns.values())
   }
 
+  toString () {
+    return `Room("${this.id}", "${this.name}")`
+  }
+
   clear () {
     this.localCommands.clear()
     this.nouns.clear()
