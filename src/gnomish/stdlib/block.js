@@ -26,6 +26,10 @@ class Block {
   evaluate (interpreter, args) {
     return interpreter.evaluateBlock(this, args)
   }
+
+  toString () {
+    return '[block]'
+  }
 }
 
 module.exports = {

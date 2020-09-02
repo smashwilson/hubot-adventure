@@ -11,6 +11,10 @@ class Game {
     this.slots = this.world.createGameSlots()
   }
 
+  getWorld () {
+    return this.world
+  }
+
   getSymbolTable () {
     return this.world.getSymbolTable()
   }
@@ -60,6 +64,10 @@ class Game {
     } else {
       return this.world.executeCommand(command, interpreter)
     }
+  }
+
+  toString () {
+    return `Game(${this.channel})`
   }
 }
 

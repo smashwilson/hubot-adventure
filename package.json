@@ -2,7 +2,7 @@
   "name": "hubot-adventure",
   "version": "0.0.1",
   "description": "Chat-programmed, chat-driven interactive fiction engine for your Hubot",
-  "main": "index.js",
+  "main": "src/index.js",
   "directories": {
     "doc": "docs"
   },
@@ -34,6 +34,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "cross-env": "7.0.2",
+    "hubot-harness": "1.0.0",
     "hubot-test-helper": "1.9.0",
     "mocha": "8.1.3",
     "pegjs-backtrace": "0.2.0",
