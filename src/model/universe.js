@@ -15,7 +15,7 @@ class Universe {
         .raise()
     }
 
-    const existing = this.worldForChannel(channel)
+    const existing = this.worldsByChannel.get(channel)
     if (existing) {
       error(`Duplicate channel name: ${channel}`)
         .withUserMessage(
