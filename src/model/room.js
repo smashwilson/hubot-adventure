@@ -70,9 +70,9 @@ class Room {
           .replace(nounsRx, match => match.toUpperCase())
           .replace(/"/g, '\\"')
 
-        lookCommand = this.world.execute(`{ say("**${finalName}**\n\n${finalDescription}") }`, context).result
+        lookCommand = this.world.execute(`{ say("*${finalName}*\n\n${finalDescription}") }`, context).result
       } else {
-        lookCommand = this.world.execute(`{ say("**${finalName}**") }`, context).result
+        lookCommand = this.world.execute(`{ say("*${finalName}*") }`, context).result
       }
 
       return lookCommand.evaluate(interpreter, [])

@@ -83,7 +83,7 @@ module.exports = function (robot) {
     const name = worldName(msg.match[1])
     universe.createGame(name, msg.envelope.room)
     msg.send(
-      `**Welcome to ${name}**\n` +
+      `*Welcome to ${name}*\n` +
       `This is now the play channel for a game in the ${name} world. Any message here beginning with a blockquote ` +
       'character (`>`) will be interpreted as a command.'
     )

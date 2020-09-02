@@ -122,7 +122,7 @@ describe('Room', function () {
       const i = new Interpreter({ say (line) { said.push(line) } })
 
       r.executeCommand('look', i)
-      assert.deepEqual(said, ['**Name**'])
+      assert.deepEqual(said, ['*Name*'])
     })
 
     it('is used in the output of the generated "look" command', function () {
@@ -132,7 +132,7 @@ describe('Room', function () {
       const i = new Interpreter({ say (line) { said.push(line) } })
 
       r.executeCommand('look', i)
-      assert.deepEqual(said, ['**Name**\n\nContains some stuff.'])
+      assert.deepEqual(said, ['*Name*\n\nContains some stuff.'])
     })
 
     it('automatically puts nouns in all caps', function () {
@@ -143,7 +143,7 @@ describe('Room', function () {
       const i = new Interpreter({ say (line) { said.push(line) } })
 
       r.executeCommand('look', i)
-      assert.deepEqual(said, ['**Name**\n\nContains some STUFF.'])
+      assert.deepEqual(said, ['*Name*\n\nContains some STUFF.'])
     })
   })
 })
