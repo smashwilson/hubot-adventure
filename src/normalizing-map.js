@@ -36,6 +36,10 @@ class NormalizingMap {
     return this.inner.clear()
   }
 
+  [Symbol.iterator] () {
+    return this.inner[Symbol.iterator]()
+  }
+
   firstValue () {
     for (const [, value] of this.inner) {
       return value
