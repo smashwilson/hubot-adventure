@@ -65,7 +65,7 @@ module.exports = function (robot) {
     msg.send(`World '${name}' has been deleted and all of its active games have been stopped.`)
   }))
 
-  robot.hear(/```\n((?:[^`]|`[^`]|``[^`]|)+)\n```\n/, wrap(msg => {
+  robot.hear(/```\n?((?:[^`]|`[^`]|``[^`]|)+)\n?```/, wrap(msg => {
     const currentWorld = universe.worldForChannel(msg.envelope.room)
     if (!currentWorld) {
       return
@@ -76,7 +76,7 @@ module.exports = function (robot) {
         msg.send(output)
       }
     })
-    msg.send('```\n' + result.toString() + '\n```\n')
+    msg.send('```\n' + result.toString() + '\n```')
   }))
 
   robot.respond(/adventure create game\s+(.+)/i, wrap(msg => {

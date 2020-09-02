@@ -79,8 +79,8 @@ describe('Hubot commands', function () {
     })
 
     it('executes gnomish code in control rooms', async function () {
-      avalon.say('```\n3 + 4\n```\n')
-      await avalon.waitForResponse('```\n7\n```\n')
+      avalon.say('```3 + 4```')
+      await avalon.waitForResponse('```\n7\n```')
     })
   })
 
@@ -170,11 +170,11 @@ describe('Hubot commands', function () {
       await control.waitForResponse(/has been created/)
 
       control.say(
-        '```\n' +
+        '```' +
         'let room = defineRoom("home", "Home")\n' +
         'room.command("call", "and answer")\n' +
-        'room\n' +
-        '```\n'
+        'room' +
+        '```'
       )
       await control.waitForResponse(/Room\("home", "Home"\)/)
 
