@@ -2,7 +2,7 @@
   "name": "hubot-adventure",
   "version": "0.0.1",
   "description": "Chat-programmed, chat-driven interactive fiction engine for your Hubot",
-  "main": "index.js",
+  "main": "src/index.js",
   "directories": {
     "doc": "docs"
   },
