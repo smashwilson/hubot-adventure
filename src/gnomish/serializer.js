@@ -137,4 +137,10 @@ class SerializingVisitor extends Visitor {
   }
 }
 
-module.exports = { SerializingVisitor }
+function serializeAST (node) {
+  const visitor = new SerializingVisitor()
+  visitor.visit(node)
+  return visitor.result
+}
+
+module.exports = { SerializingVisitor, serializeAST }

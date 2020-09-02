@@ -147,4 +147,8 @@ function deserializer (payload) {
   }
 }
 
-module.exports = { deserializer }
+function deserializeAST (payload) {
+  return deserializer(payload).deserialize()
+}
+
+module.exports = { deserializer, deserializeAST }
