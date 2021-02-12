@@ -437,8 +437,9 @@ function unify (symbolTable, lTypes, rTypes) {
       } else if (lTypes[li].isSplat()) {
         result.assimilate(assignLeftParameterList(lTypes[li].getInner(), []))
         li++
+      } else {
+        break
       }
-      break
     }
     while (ri < rTypes.length) {
       if (rTypes[ri].isRepeatable()) {
@@ -446,8 +447,9 @@ function unify (symbolTable, lTypes, rTypes) {
       } else if (rTypes[ri].isSplat()) {
         result.assimilate(assignRightParameterList(rTypes[ri].getInner(), []))
         ri++
+      } else {
+        break
       }
-      break
     }
 
     if (li < lTypes.length || ri < rTypes.length) return Unification.unsuccessful()
