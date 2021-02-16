@@ -19,8 +19,16 @@ class Noun {
     return this.room.deleteCommand(`${verb} ${this.name}`)
   }
 
+  serialize () {
+    return { name: this.name }
+  }
+
   toString () {
     return `Noun("${this.name}")`
+  }
+
+  static deserialize (payload, room) {
+    return new this(room, payload.name)
   }
 
   static registerTypes (t, symbolTable, methodRegistry) {

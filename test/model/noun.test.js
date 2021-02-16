@@ -3,6 +3,7 @@
 const { assert } = require('chai')
 
 const { World } = require('../../src/model/world')
+const { Noun } = require('../../src/model/noun')
 const { Block } = require('../../src/gnomish/stdlib/block')
 const { ExprListNode, IntNode } = require('../../src/gnomish/ast')
 const { Interpreter } = require('../../src/gnomish/interpreter')
@@ -48,5 +49,12 @@ describe('Noun', function () {
       const i = new Interpreter()
       assert.strictEqual(r.executeCommand('push thingy', i), 50)
     })
+  })
+
+  it('serializes and deserializes itself', function () {
+    const payload = n.serialize()
+    const back = Noun.deserialize(payload, r)
+    assert.strictEqual(n.getName(), back.getName())
+    assert.strictEqual(n.room, back.room)
   })
 })

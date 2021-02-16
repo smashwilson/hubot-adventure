@@ -125,4 +125,8 @@ describe('Universe', function () {
       assert.deepEqual(universe.listGames().map(e => e.game), [g0, g1])
     })
   })
+
+  describe('serialization', function () {
+    it('serializes and deserializes itself')
+  })
 })

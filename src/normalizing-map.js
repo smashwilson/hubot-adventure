@@ -36,6 +36,10 @@ class NormalizingMap {
     return this.inner.clear()
   }
 
+  [Symbol.iterator] () {
+    return this.inner[Symbol.iterator]()
+  }
+
   firstValue () {
     if (this.inner.size > 0) {
       const [[, value]] = this.inner

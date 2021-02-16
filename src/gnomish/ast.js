@@ -246,8 +246,8 @@ class IntNode extends Node {
 }
 
 class RealNode extends Node {
-  constructor ({ minus, whole, fraction }) {
-    super(parseFloat((minus || '') + whole.join('') + '.' + fraction.join('')))
+  constructor ({ value, minus, whole, fraction }) {
+    super(value || parseFloat((minus || '') + whole.join('') + '.' + fraction.join('')))
   }
 
   visitBy (visitor) {
