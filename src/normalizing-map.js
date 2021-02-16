@@ -41,10 +41,12 @@ class NormalizingMap {
   }
 
   firstValue () {
-    for (const [, value] of this.inner) {
+    if (this.inner.size > 0) {
+      const [[, value]] = this.inner
       return value
+    } else {
+      return undefined
     }
-    return undefined
   }
 }
 
