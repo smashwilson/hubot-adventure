@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/smashwilson/hubot-adventure#readme",
   "devDependencies": {
-    "chai": "4.3.1",
+    "chai": "4.3.3",
     "chai-as-promised": "7.1.1",
     "cross-env": "7.0.3",
     "hubot-harness": "1.0.1",
