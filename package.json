@@ -37,7 +37,7 @@
     "hubot-harness": "1.0.1",
     "hubot-test-helper": "1.9.0",
     "mocha": "8.3.2",
-    "pegjs-backtrace": "0.2.0",
+    "pegjs-backtrace": "0.2.1",
     "standard": "16.0.3"
   },
   "dependencies": {
