@@ -1,4 +1,5 @@
 const { makeType } = require('../gnomish/type')
+const { Block } = require('../gnomish/stdlib/block')
 const { Noun } = require('./noun')
 const { registerCommandMethods, registerFallthroughMethods } = require('./commands')
 const { NormalizingMap, UPPERCASE } = require('../normalizing-map')
@@ -110,6 +111,31 @@ class Room {
     this.localCommands.clear()
     this.nouns.clear()
     return this
+  }
+
+  serialize () {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      fallThroughCommand: this.fallThroughCommand && this.fallThroughCommand.serialize(),
+      localCommands: Array.from(this.localCommands, pair => [pair[0], pair[1].serialize()]),
+      nouns: Array.from(this.nouns.values(), noun => noun.serialize())
+    }
+  }
+
+  static deserialize (payload, world) {
+    const room = new this(world, payload.id, payload.name)
+    room.setDescription(payload.description)
+    room.setFallThroughCommand(payload.fallThroughCommand && Block.deserialize(payload.fallThroughCommand))
+    for (const [command, blockPayload] of payload.localCommands) {
+      room.defineCommand(command, Block.deserialize(blockPayload))
+    }
+    for (const nounPayload of payload.nouns) {
+      const noun = Noun.deserialize(nounPayload, room)
+      room.nouns.set(noun.getName(), noun)
+    }
+    return room
   }
 
   static registerTypes (t, symbolTable, methodRegistry) {

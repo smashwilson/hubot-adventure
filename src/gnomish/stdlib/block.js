@@ -1,3 +1,5 @@
+const { serializeAST } = require('../serializer')
+const { deserializeAST } = require('../deserializer')
 const { makeType } = require('../type')
 
 class Block {
@@ -29,6 +31,22 @@ class Block {
 
   toString () {
     return '[block]'
+  }
+
+  serialize () {
+    // TODO serialize captures somehow
+    return {
+      argNodes: this.argNodes.map(serializeAST),
+      bodyNode: serializeAST(this.bodyNode)
+    }
+  }
+
+  static deserialize (payload) {
+    // TODO re-analyze, restore captures
+    return new this(
+      payload.argNodes.map(deserializeAST),
+      deserializeAST(payload.bodyNode)
+    )
   }
 }
 

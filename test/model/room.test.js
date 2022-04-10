@@ -3,6 +3,7 @@
 const { assert } = require('chai')
 
 const { World } = require('../../src/model/world')
+const { Room } = require('../../src/model/room')
 const { Block } = require('../../src/gnomish/stdlib/block')
 const { ExprListNode, IntNode } = require('../../src/gnomish/ast')
 const { Interpreter } = require('../../src/gnomish/interpreter')
@@ -145,5 +146,23 @@ describe('Room', function () {
       r.executeCommand('look', i)
       assert.deepEqual(said, ['*Name*\n\nContains some STUFF.'])
     })
+  })
+
+  it('serializes and deserializes itself', function () {
+    r.setDescription('description here')
+    r.defineCommand('one', makeBlock(1))
+    r.defineCommand('two', makeBlock(2))
+    r.setFallThroughCommand(makeBlock(3))
+    r.defineNoun('thing one')
+    r.defineNoun('thing two')
+
+    const payload = r.serialize()
+    const after = Room.deserialize(payload, w)
+
+    assert.strictEqual(r.world, after.world)
+    r.world = null
+    after.world = null
+
+    assert.deepEqual(after, r)
   })
 })
